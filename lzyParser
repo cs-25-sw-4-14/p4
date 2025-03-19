@@ -8,20 +8,62 @@ program:
     (stmt)+ EOF;
 
 
+expr:
+    eqExpr ('||' eqExpr)*;
+
+eqExpr:
+    relBigExpr (('==' | '!=') relBigExpr)*;
+
+relBigExpr:
+    relSmallExpr ('>' relSmallExpr)*;
+
+relSmallExpr:
+    plusExpr ('<' plusExpr)*;
+
+plusExpr:
+    minExpr ('+' minExpr)*;
+
+minExpr:
+    mulExpr ('-' mulExpr)*;
+
+mulExpr:
+    divExpr ('*' divExpr)*;
+divExpr:
+    modExpr ('/' modExpr)*;
+modExpr:
+;
+
+
+
+
+notExpr:
+    ('!') boolTerm;
+
+
 boolTerm:
+    '(' boolExpr ')' |
     'true' |
     'false'|
-    '(' boolExpr ')'|
     ID;
 
+aritExpr:
+    aritTerm |
+    aritTerm '+' aritTerm |
+    aritTerm '-' aritTerm |
+    aritTerm '*' aritTerm |
+    aritTerm '/' aritTerm |
+    aritTerm '%' aritTerm |
+    aritTerm '^' aritTerm |
+    aritTerm '<<' aritTerm |
+    aritTerm '>>' aritTerm |
+    aritTerm '&' aritTerm |
+    aritTerm '|' aritTerm |
+    aritTerm '~' aritTerm;
+
 aritTerm:
+    '(' aritExpr ')' |
     type |
-
-
-    
-
-
-expr: 
+    ID;
 
 type:
     'u8' |
