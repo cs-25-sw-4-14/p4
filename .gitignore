@@ -1,0 +1,6 @@
+build/
+src/
+.antlr/
+lossy
+*.dylib
+.env
