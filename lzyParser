@@ -4,8 +4,12 @@ options {
 }
 
 program:
-    (def)+ EOF |
-    (stmt)+ EOF;
+ //   (def)+ EOF |
+ //   (stmt)+ EOF;
+;
+
+
+
 
 
 expr:
@@ -20,28 +24,32 @@ relBigExpr:
 relSmallExpr:
     plusExpr ('<' plusExpr)*;
 
+
+
+arithExpr:
+    minusExpr;
+
+minusExpr:
+    plusExpr ('-' plusExpr)*;
+
 plusExpr:
-    minExpr ('+' minExpr)*;
+    divExpr ('+' divExpr)*;
 
-minExpr:
-    mulExpr ('-' mulExpr)*;
-
-mulExpr:
-    divExpr ('*' divExpr)*;
 divExpr:
-    modExpr ('/' modExpr)*;
+    multExpr ('/' multExpr)*;
+
+multExpr:
+    modExpr ('*' modExpr)*;
+
 modExpr:
-;
+    type ('%' type)*;
 
 
 
-
-notExpr:
-    ('!') boolTerm;
 
 
 boolTerm:
-    '(' boolExpr ')' |
+    //'(' boolExpr ')' |
     'true' |
     'false'|
     ID;
@@ -66,19 +74,19 @@ aritTerm:
     ID;
 
 type:
-    'u8' |
-    'u16' |
-    'u32' |
-    'u64' |
-    'i8' |
-    'i16' |
-    'i32' |
-    'i64' |
-    'f8' |
-    'f16' |
-    'f32' |
-    'f64' |
-    'bool' |
+    'u8'    |
+    'u16'   |
+    'u32'   |
+    'u64'   |
+    'i8'    |
+    'i16'   |
+    'i32'   |
+    'i64'   |
+    'f8'    |
+    'f16'   |
+    'f32'   |
+    'f64'   |
+    'bool'  |
     'string';
 
 mutability:
