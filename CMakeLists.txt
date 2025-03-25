@@ -12,7 +12,7 @@ if(APPLE)
 elseif(UNIX)
     set(ANTLR_LIB ${ANTLR_RUNTIME_DIR}/linux/libantlr4-runtime.a)
 else()
-    message(FATAL_ERROR "Unsupported OS")
+    message(FATAL_ERROR "Unsupported OS. OS must be either APPLE or UNIX")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
