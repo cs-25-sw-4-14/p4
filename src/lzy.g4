@@ -19,9 +19,9 @@ expr
 
 // Assignment expression
 assignExpr
-    : 'mutable'? 'trivial'? TYPE ID '=' additiveExpr
-    | 'mutable'? 'trivial'? TYPE ID '=' textExpr
-    | 'mutable'? 'trivial'? TYPE ID '=' boolExpr
+    : 'mutable'? 'trivial'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
+    | 'mutable'? 'trivial'? STRINGTYPE '=' textExpr
+    | 'mutable'? 'trivial'? BOOLTYPE ID '=' boolExpr
     | additiveExpr
     | textExpr
     | boolExpr
@@ -55,13 +55,20 @@ boolExpr
     ;
 
 
-
-// Type system
-TYPE
+STRINGTYPE
+    : 'string'
+    ;
+UINTTYPE
     : 'u8'    | 'u16'   | 'u32'   | 'u64'
-    | 'i8'    | 'i16'   | 'i32'   | 'i64'
-    | 'f8'    | 'f16'   | 'f32'   | 'f64'
-    | 'bool'  | 'string'
+    ;
+INTTYPE
+    : 'i8'    | 'i16'   | 'i32'   | 'i64'
+    ;
+FLOATTYPE
+    : 'f8'    | 'f16'   | 'f32'   | 'f64'
+    ;
+BOOLTYPE
+    : 'bool'
     ;
 
 ID: [a-zA-Z][a-zA-Z0-9]*;
