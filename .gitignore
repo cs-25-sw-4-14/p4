@@ -3,7 +3,7 @@ src/lzy*
 !src/lzy.g4
 .antlr/
 lossy
-*.dylib
-*.so
-*.dll
+/*.dylib
+/*.so
+/*.dll
 .env
