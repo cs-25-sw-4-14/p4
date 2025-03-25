@@ -12,8 +12,8 @@ stmt
 
 // Variable declaration with optional initialization
 varDecl
-    : type ID ('=' expr)? |
-    type ID
+    : TYPE ID ('=' expr)? |
+    TYPE ID
     ;
 
 // Expressions with proper precedence
@@ -24,7 +24,11 @@ expr
 // Assignment expression
 assignExpr
     : ID '=' additiveExpr
+    | ID '=' textExpr
+    | ID '=' boolExpr
     | additiveExpr
+    | textExpr
+    | boolExpr
     ;
 
 // Additive expressions (addition and subtraction)
@@ -34,27 +38,42 @@ additiveExpr
 
 // Multiplicative expressions (multiplication, division, modulo)
 multExpr
-    : primaryExpr (('*' | '/' | '%') primaryExpr)*
+    : numExpr (('*' | '/' | '%') numExpr)*
     ;
 
 // Primary expressions (identifiers, literals, parenthesized expressions)
-primaryExpr
-    : ID
-    | INT
+numExpr
+    : INT
+    | FLOAT
     | '(' expr ')'
+    | ID
+    ;
+textExpr
+    : STRING
+    | CHAR
+    | ID
+    ;
+boolExpr
+    : BOOL
+    | ID
     ;
 
+
+
 // Type system
-type
+TYPE
     : 'u8'    | 'u16'   | 'u32'   | 'u64'
     | 'i8'    | 'i16'   | 'i32'   | 'i64'
     | 'f8'    | 'f16'   | 'f32'   | 'f64'
     | 'bool'  | 'string'
     ;
 
-// Lexer rules
 ID: [a-zA-Z][a-zA-Z0-9]*;
 INT: '0' | [1-9][0-9]*;
+FLOAT: [0-9]* '.' [0-9]+;
+STRING: '"' (~["\r\n])* '"';
+CHAR: '\'' ~['\r\n] '\'';
 WS: [ \t\r\n]+ -> skip;
+BOOL : 'true' | 'false';
 
 // Removed unused rules and simplified the grammar
