@@ -7,8 +7,7 @@ program
 
 // Statements can be variable declarations or expressions
 stmt
-    : varDecl
-    | expr
+    : (varDecl| expr) ';'
     ;
 
 // Variable declaration with optional initialization
