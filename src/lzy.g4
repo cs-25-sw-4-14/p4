@@ -7,14 +7,10 @@ program
 
 // Statements can be variable declarations or expressions
 stmt
-    : (varDecl| expr) ';'
+    : (expr) ';'
     ;
 
-// Variable declaration with optional initialization
-varDecl
-    : TYPE ID ('=' expr)? |
-    TYPE ID
-    ;
+
 
 // Expressions with proper precedence
 expr
@@ -23,9 +19,9 @@ expr
 
 // Assignment expression
 assignExpr
-    : ID '=' additiveExpr
-    | ID '=' textExpr
-    | ID '=' boolExpr
+    : 'mutable'? 'trivial'? TYPE ID '=' additiveExpr
+    | 'mutable'? 'trivial'? TYPE ID '=' textExpr
+    | 'mutable'? 'trivial'? TYPE ID '=' boolExpr
     | additiveExpr
     | textExpr
     | boolExpr
