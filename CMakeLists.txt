@@ -16,21 +16,7 @@ else()
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-
 include_directories(${ANTLR_INCLUDE_DIR})
-link_directories(${ANTLR_LIB_DIR})
-
 add_executable(lossy src/main.cpp src/lzyLexer.cpp src/lzyParser.cpp)
-
 target_link_libraries(lossy ${ANTLR_LIB})
 
-set_target_properties(lossy PROPERTIES
-    BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH ${ANTLR_LIB_DIR}
-)
-
-add_custom_command(TARGET lossy POST_BUILD
-   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-   ${ANTLR_LIB}
-   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
