@@ -2,30 +2,50 @@ grammar lzy;
 
 // Top-level program structure
 program
-    : (stmt)+ EOF
+    : definition+ EOF
     ;
 
 // Statements can be variable declarations or expressions
-stmt
-    : (expr) ';'
-    ;
 
+definition
+    : procedure
+    | function
+    ;
+procedure:;
+function:;
+
+
+functionCall:;
+procedureCall:;
+
+stmt 
+    : loop
+    | definition
+    | procedureCall
+    | conditional;
+    
+
+conditional:;
+
+loop
+    :;
 
 
 // Expressions with proper precedence
 expr
-    : assignExpr
+    : functionCall
+    | textExpr
+    | boolExpr
+    | additiveExpr
     ;
 
 // Assignment expression
-assignExpr
+assignment
     : 'triv'? 'mut'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
     | 'triv'? 'mut'? STRINGTYPE ID '=' textExpr
     | 'triv'? 'mut'? BOOLTYPE ID '=' boolExpr
-    | additiveExpr
-    | textExpr
-    | boolExpr
     ;
+
 
 // Additive expressions (addition and subtraction)
 additiveExpr
@@ -79,5 +99,6 @@ STRING: '"' (~["\r\n])* '"';
 CHAR: '\'' ~['\r\n] '\'';
 WS: [ \t\r\n]+ -> skip;
 BOOL : 'true' | 'false';
+RETURNVOID: 'void';
 
 // Removed unused rules and simplified the grammar
