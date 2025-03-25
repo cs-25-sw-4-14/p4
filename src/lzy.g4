@@ -12,7 +12,8 @@ stmt
 
 // Variable declaration with optional initialization
 varDecl
-    : type ID ('=' expr)?
+    : type ID ('=' expr)? |
+    type ID
     ;
 
 // Expressions with proper precedence
