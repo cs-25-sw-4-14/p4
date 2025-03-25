@@ -1,6 +1,9 @@
 build/
-src/
+src/lzy*
+!src/lzy.g4
 .antlr/
 lossy
 *.dylib
+*.so
+*.dll
 .env
