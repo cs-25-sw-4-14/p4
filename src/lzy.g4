@@ -1,98 +1,60 @@
 grammar lzy;
 
-program:
- //   (def)+ EOF |
- //   (stmt)+ EOF;
-;
+// Top-level program structure
+program
+    : (stmt)+ EOF
+    ;
 
-expr:
-    eqExpr ('||' eqExpr)*;
+// Statements can be variable declarations or expressions
+stmt
+    : varDecl
+    | expr
+    ;
 
-eqExpr:
-    relBigExpr (('==' | '!=') relBigExpr)*;
+// Variable declaration with optional initialization
+varDecl
+    : type ID ('=' expr)?
+    ;
 
-relBigExpr:
-    relSmallExpr ('>' relSmallExpr)*;
+// Expressions with proper precedence
+expr
+    : assignExpr
+    ;
 
-relSmallExpr:
-    plusExpr ('<' plusExpr)*;
+// Assignment expression
+assignExpr
+    : ID '=' additiveExpr
+    | additiveExpr
+    ;
 
+// Additive expressions (addition and subtraction)
+additiveExpr
+    : multExpr ('+' multExpr | '-' multExpr)*
+    ;
 
+// Multiplicative expressions (multiplication, division, modulo)
+multExpr
+    : primaryExpr (('*' | '/' | '%') primaryExpr)*
+    ;
 
-arithExpr:
-    minusExpr;
+// Primary expressions (identifiers, literals, parenthesized expressions)
+primaryExpr
+    : ID
+    | INT
+    | '(' expr ')'
+    ;
 
-minusExpr:
-    plusExpr ('-' plusExpr)*;
+// Type system
+type
+    : 'u8'    | 'u16'   | 'u32'   | 'u64'
+    | 'i8'    | 'i16'   | 'i32'   | 'i64'
+    | 'f8'    | 'f16'   | 'f32'   | 'f64'
+    | 'bool'  | 'string'
+    ;
 
-plusExpr:
-    divExpr ('+' divExpr)*;
-
-divExpr:
-    multExpr ('/' multExpr)*;
-
-multExpr:
-    modExpr ('*' modExpr)*;
-
-modExpr:
-    type ('%' type)*;
-
-
-
-
-
-boolTerm:
-    //'(' boolExpr ')' |
-    'true' |
-    'false'|
-    ID;
-
-aritExpr:
-    aritTerm |
-    aritTerm '+' aritTerm |
-    aritTerm '-' aritTerm |
-    aritTerm '*' aritTerm |
-    aritTerm '/' aritTerm |
-    aritTerm '%' aritTerm |
-    aritTerm '^' aritTerm |
-    aritTerm '<<' aritTerm |
-    aritTerm '>>' aritTerm |
-    aritTerm '&' aritTerm |
-    aritTerm '|' aritTerm |
-    aritTerm '~' aritTerm;
-
-aritTerm:
-    '(' aritExpr ')' |
-    type |
-    ID;
-
-type:
-    'u8'    |
-    'u16'   |
-    'u32'   |
-    'u64'   |
-    'i8'    |
-    'i16'   |
-    'i32'   |
-    'i64'   |
-    'f8'    |
-    'f16'   |
-    'f32'   |
-    'f64'   |
-    'bool'  |
-    'string';
-
-mutability:
-    'mut';
-
-importance:
-    'triv';
-
-
-
+// Lexer rules
 ID: [a-zA-Z][a-zA-Z0-9]*;
-STRING: '"' .*? '"';
-FLOAT: [0-9]* '.' [0-9]+;
-INT: '0' | [1-9] [0-9]*;
+INT: '0' | [1-9][0-9]*;
 WS: [ \t\r\n]+ -> skip;
 
+// Removed unused rules and simplified the grammar
