@@ -19,9 +19,9 @@ expr
 
 // Assignment expression
 assignExpr
-    : 'mutable'? 'trivial'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
-    | 'mutable'? 'trivial'? STRINGTYPE '=' textExpr
-    | 'mutable'? 'trivial'? BOOLTYPE ID '=' boolExpr
+    : 'triv'? 'mut'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
+    | 'triv'? 'mut'? STRINGTYPE '=' textExpr
+    | 'triv'? 'mut'? BOOLTYPE ID '=' boolExpr
     | additiveExpr
     | textExpr
     | boolExpr
@@ -56,7 +56,7 @@ boolExpr
 
 
 STRINGTYPE
-    : 'string'
+    : 'String'
     ;
 UINTTYPE
     : 'u8'    | 'u16'   | 'u32'   | 'u64'
