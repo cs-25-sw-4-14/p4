@@ -20,7 +20,7 @@ expr
 // Assignment expression
 assignExpr
     : 'triv'? 'mut'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
-    | 'triv'? 'mut'? STRINGTYPE '=' textExpr
+    | 'triv'? 'mut'? STRINGTYPE ID '=' textExpr
     | 'triv'? 'mut'? BOOLTYPE ID '=' boolExpr
     | additiveExpr
     | textExpr
@@ -41,7 +41,7 @@ multExpr
 numExpr
     : INT
     | FLOAT
-    | '(' expr ')'
+    | '(' additiveExpr ')'
     | ID
     ;
 textExpr
@@ -52,6 +52,7 @@ textExpr
 boolExpr
     : BOOL
     | ID
+    | '(' boolExpr ')'
     ;
 
 
