@@ -8,60 +8,57 @@ program
 // Statements can be variable declarations or expressions
 
 definition
-    : procedure
-    | function
+    : function
     ;
-procedure:;
-function:;
 
-
-functionCall:;
-procedureCall:;
+function
+    : (VOID|type) ID LEFTPARENTESIS ((type ID) (COMMA type ID )*)?  RIGHTPARENTESIS LEFTCURLY
+    stmt*
+    RIGHTCURLY
+    ;
+functionCall:
+    ID LEFTPARENTESIS type ID (COMMA type ID )*  RIGHTPARENTESIS SEMICOLON
+    stmt* 
+    ;
 
 stmt 
-    : loop
+    : (loop
     | definition
-    | procedureCall
-    | conditional;
-    
+    | functionCall
+    | conditional
+    | assignment) SEMICOLON;
 
-conditional:;
+conditional:
+;
 
-loop
-    :;
+loop:
+;
 
-
-// Expressions with proper precedence
-expr
-    : functionCall
-    | textExpr
-    | boolExpr
-    | additiveExpr
-    ;
 
 // Assignment expression
 assignment
-    : 'triv'? 'mut'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
-    | 'triv'? 'mut'? STRINGTYPE ID '=' textExpr
-    | 'triv'? 'mut'? BOOLTYPE ID '=' boolExpr
+    : TRIVIAL? MUTABLE? (INTTYPE | UINTTYPE | FLOAT) ID EQUAL additiveExpr
+    | TRIVIAL? MUTABLE? STRINGTYPE ID EQUAL textExpr
+    | TRIVIAL? MUTABLE? BOOLTYPE ID EQUAL  boolExpr
+    | TRIVIAL? MUTABLE? type(ID | UNDERSCORE) EQUAL  functionCall
     ;
 
 
 // Additive expressions (addition and subtraction)
 additiveExpr
-    : multExpr ('+' multExpr | '-' multExpr)*
+    : multExpr (PLUS multExpr | MINUS multExpr)*
     ;
 
 // Multiplicative expressions (multiplication, division, modulo)
 multExpr
-    : numExpr (('*' | '/' | '%') numExpr)*
+    : numExpr ((MULTIPLICATION | DIVISION | MODULOS) numExpr)*
     ;
 
 // Primary expressions (identifiers, literals, parenthesized expressions)
 numExpr
     : INT
     | FLOAT
-    | '(' additiveExpr ')'
+    | RIGHTPARENTESIS additiveExpr LEFTPARENTESIS
     | ID
     ;
 textExpr
@@ -72,9 +69,16 @@ textExpr
 boolExpr
     : BOOL
     | ID
-    | '(' boolExpr ')'
+    | RIGHTPARENTESIS boolExpr LEFTPARENTESIS
     ;
 
+type
+    : STRINGTYPE
+    | UINTTYPE
+    | INTTYPE
+    | FLOATTYPE
+    | BOOLTYPE
+    ;
 
 STRINGTYPE
     : 'String'
@@ -92,13 +96,49 @@ BOOLTYPE
     : 'bool'
     ;
 
+//id
 ID: [a-zA-Z][a-zA-Z0-9]*;
+//int
 INT: '0' | [1-9][0-9]*;
+//float
 FLOAT: [0-9]* '.' [0-9]+;
+//String
 STRING: '"' (~["\r\n])* '"';
+//char
 CHAR: '\'' ~['\r\n] '\'';
-WS: [ \t\r\n]+ -> skip;
+//boolean
 BOOL : 'true' | 'false';
-RETURNVOID: 'void';
+//white space
+WS: [ \t\r\n]+ -> skip;
+
+
+TRIVIAL
+    : 'triv';
+MUTABLE
+    : 'mut'; 
+VOID
+    : 'void';
+
+EQUAL
+    : '=';
+MULTIPLICATION
+    : '*';
+MODULOS: '%';
+DIVISION
+: '/';
+UNDERSCORE: '_';
+LEFTPARENTESIS: '(';
+RIGHTPARENTESIS: ')';
+LEFTCURLY: '{';
+RIGHTCURLY: '}';
+LEFTBRACKET: '[';
+ RIGHTBRACKET: ']'; 
+
+PLUS: '+';
+MINUS: '-';
+COMMA:
+','
+;
+SEMICOLON: ';' ; 
 
 // Removed unused rules and simplified the grammar
