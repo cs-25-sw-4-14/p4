@@ -1,6 +1,7 @@
 build/
 src/lzy*
 !src/lzy.g4
+!src/lzyLexer.g4
 .antlr/
 lossy
 /*.dylib
