@@ -1,7 +1,9 @@
 build/
 src/lzy*
+src/parserExpressions*
 !src/lzy.g4
 !src/lzyLexer.g4
+!src/parserExpressions.g4
 .antlr/
 lossy
 /*.dylib
