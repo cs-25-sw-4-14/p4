@@ -160,44 +160,6 @@ void main() {
         }
     }
     
-    <!-- SWITCH STATEMENTS -->
-    
-    <!-- Basic switch -->
-    switch (counter % 3) {
-        case 0:
-            value = 0;
-            break;
-        case 1:
-            value = 10;
-            break;
-        case 2:
-            value = 20;
-            break;
-        default:
-            value = -1;
-            break;
-    }
-    
-    <!-- Switch with fall-through (no breaks) -->
-    switch (i) {
-        case 0:
-            value = 100;
-        case 1:
-            value = 200;
-        case 2:
-            value = 300;
-        default:
-            value = 400;
-    }
-    
-    <!-- TERNARY OPERATORS -->
-    
-    <!-- Basic ternary -->
-    i32 max = value > counter ? value : counter;
-    
-    <!-- Nested ternary -->
-    i32 category = value > 0 ? (value > 50 ? 2 : 1) : 0;
-    
     <!-- ------------- STRUCTS AND MEMBER ACCESS ---------------- -->
     
     <!-- Creating struct instances -->

@@ -57,11 +57,10 @@ statement
     | assignment SEMICOLON        // [1] Assignment operations
     | whileLoop                   // [2] While loops
     | ifStatement                 // [3] If-else statements
-    | switchStatement             // [4] Switch statements
-    | breakStmt SEMICOLON         // [5] Break statements
-    | continueStmt SEMICOLON      // [6] Continue statements
-    | returnStmt SEMICOLON        // [7] Return statements
-    | expr SEMICOLON              // [8] Expression statements
+    | breakStmt SEMICOLON         // [4] Break statements
+    | continueStmt SEMICOLON      // [5] Continue statements
+    | returnStmt SEMICOLON        // [6] Return statements
+    | expr SEMICOLON              // [7] Expression statements
     ;
 
 // Variable declaration - defines a new variable with optional initialization --------------------- [0]
@@ -165,42 +164,19 @@ comparisonOp                                                                    
                                                                                                                       // |
 // ======================================================= END ========================================================= |
 
-// Switch statement - selects execution path based on expression value ---------------------------- [4]
-// Example --- switch (day) { case 1: dayName = "Monday"; break; case 2: dayName = "Tuesday"; break; default: dayName = "Unknown"; }
-switchStatement
-    : SWITCH LEFTPAREN expr RIGHTPAREN LEFTBRACE
-      caseStatement*
-      defaultStatement?
-      RIGHTBRACE
-    ;
-
-// Case statement - executed if switch expression matches case expression ------------------------- [4]
-// Example --- case "admin": isAdmin = true; showAdminPanel();
-caseStatement
-    : CASE expr COLON
-      statement*
-    ;
-
-// Default statement - executed if no cases match the switch expression --------------------------- [4]
-// Example --- default: status = "unknown"; logError();
-defaultStatement
-    : DEFAULT COLON
-      statement*
-    ;
-
-// Break statement - exits the nearest enclosing loop or switch ----------------------------------- [5]
+// Break statement - exits the nearest enclosing loop --------------------------------------------- [4]
 // Example --- break;
 breakStmt
     : BREAK
     ;
 
-// Continue statement - skips to the next iteration of the nearest enclosing loop ----------------- [6]
+// Continue statement - skips to the next iteration of the nearest enclosing loop ----------------- [5]
 // Example --- continue;
 continueStmt
     : CONTINUE
     ;
 
-// Return statement - exits a function with optional return value --------------------------------- [7]
+// Return statement - exits a function with optional return value --------------------------------- [6]
 // Example --- return;
 // Example --- return result * 2;
 returnStmt
@@ -209,53 +185,46 @@ returnStmt
 
 // ============================== EXPRESSIONS =================================
 
-// Expression - the building block for conditions and values -------------------------------------- [8]
+// Expression - the building block for conditions and values -------------------------------------- [7]
 // Example --- a + b * c
-// Example --- isValid ? "yes" : "no"
 expr
-    : conditionalExpr
+    : logicalOrExpr
     ;
 
-// Conditional expression - ternary operator (condition ? true_expr : false_expr) ----------------- [8]
-// Example --- isAdult ? "allowed" : "denied"
-conditionalExpr
-    : logicalOrExpr (QUESTION expr COLON expr)?
-    ;
-
-// Logical OR expression - combines AND expressions with OR --------------------------------------- [8]
+// Logical OR expression - combines AND expressions with OR --------------------------------------- [7]
 // Example --- isAdmin || hasSpecialPermission
 logicalOrExpr
     : logicalAndExpr (OR logicalAndExpr)*
     ;
 
-// Logical AND expression - combines equality expressions with AND -------------------------------- [8]
+// Logical AND expression - combines equality expressions with AND -------------------------------- [7]
 // Example --- isLoggedIn && hasPermission
 logicalAndExpr
     : equalityExpr (AND equalityExpr)*
     ;
 
-// Equality expression - compares expressions for equality/inequality ----------------------------- [8]
+// Equality expression - compares expressions for equality/inequality ----------------------------- [7]
 // Example --- username == "admin"
 // Example --- status != "error"
 equalityExpr
     : relationalExpr ((EQUAL_EQUAL | NOT_EQUAL) relationalExpr)*
     ;
 
-// Relational expression - compares expressions with ordering operators --------------------------- [8]
+// Relational expression - compares expressions with ordering operators --------------------------- [7]
 // Example --- age > 18
 // Example --- score <= 100
 relationalExpr
     : additiveExpr ((LESS | LESS_EQUAL | GREATER | GREATER_EQUAL) additiveExpr)*
     ;
 
-// Additive expression - performs addition and subtraction ---------------------------------------- [8]
+// Additive expression - performs addition and subtraction ---------------------------------------- [7]
 // Example --- x + y
 // Example --- total - discount
 additiveExpr
     : multiplicativeExpr ((PLUS | MINUS) multiplicativeExpr)*
     ;
 
-// Multiplicative expression - performs multiplication, division, and modulo ---------------------- [8]
+// Multiplicative expression - performs multiplication, division, and modulo ---------------------- [7]
 // Example --- width * height
 // Example --- total / count
 // Example --- value % 10
@@ -263,7 +232,7 @@ multiplicativeExpr
     : unaryExpr ((MUL | DIV | MOD) unaryExpr)*
     ;
 
-// Unary expression - applies unary operators to expressions -------------------------------------- [8]
+// Unary expression - applies unary operators to expressions -------------------------------------- [7]
 // Example --- -x
 // Example --- !isValid
 unaryExpr
@@ -271,7 +240,7 @@ unaryExpr
     | primaryExpr              // Base expressions
     ;
 
-// Primary expression - the most basic expression types ------------------------------------------- [8]
+// Primary expression - the most basic expression types ------------------------------------------- [7]
 // Example --- x (variable)
 // Example --- 69420 (integer literal)
 // Example --- "hello" (string literal)
@@ -284,26 +253,26 @@ primaryExpr
     | FLOAT                      // Floating-point literal
     | STRING_LITERAL             // String literal
     | BOOL_LITERAL               // Boolean literal
-    | structInit                 // [9] Struct initialization
-    | memberAccess               // [10] Struct field access
+    | structInit                 // [8] Struct initialization
+    | memberAccess               // [9] Struct field access
     | LEFTPAREN expr RIGHTPAREN  // Parenthesized expression
     ;
 
-// Struct initialization - creates a new struct instance ------------------------------------------ [9]
+// Struct initialization - creates a new struct instance ------------------------------------------ [8]
 // Example --- Person {name: "Marc", age: 24, is_dork: true}
 structInit
     : ID LEFTBRACE structInitField (COMMA structInitField)* RIGHTBRACE
     ;
 
 
-// Struct initialization field - sets an initial value for a struct field ------------------------- [9]
+// Struct initialization field - sets an initial value for a struct field ------------------------- [8]
 // Example --- name: "Marc"
 // Example --- age: 24
 structInitField
     : ID COLON expr
     ;
 
-// Member access - retrieves a field from a struct ------------------------------------------------ [10]
+// Member access - retrieves a field from a struct ------------------------------------------------ [9]
 // Example --- person.name
 // Example --- company.address.zipCode
 memberAccess
@@ -336,9 +305,6 @@ MUT     : 'mut'  ;
 WHILE   : 'while' ;
 IF      : 'if' ;
 ELSE    : 'else' ;
-SWITCH  : 'switch' ;
-CASE    : 'case' ;
-DEFAULT : 'default' ;
 BREAK   : 'break' ;
 CONTINUE: 'continue' ;
 RETURN  : 'return' ;
@@ -377,8 +343,7 @@ DIV            : '/' ;   // Division
 MOD            : '%' ;   // Modulo (remainder)
 
 // Other operators
-QUESTION       : '?' ;   // Ternary operator (question part)
-COLON          : ':' ;   // Ternary operator (colon part) or case label
+COLON          : ':' ;   // Struct members
 DOT            : '.' ;   // Member access
 
 // -------------------- PUNCTUATION --------------------
