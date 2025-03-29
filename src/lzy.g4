@@ -98,7 +98,7 @@ lvalue
 // While loop - executes statements as long as condition is true ---------------------------------- [2]
 // Example --- while (i < 10) { i = i + 1; sum = sum + i; }
 whileLoop
-    : WHILE LEFTPAREN condition RIGHTPAREN LEFTBRACE
+    : WHILE LEFTPAREN expr RIGHTPAREN LEFTBRACE
       statement*
       RIGHTBRACE
     ;
@@ -106,7 +106,7 @@ whileLoop
 // If statement - conditional execution with optional else-if and else blocks --------------------- [3]
 // Example --- if (x > 10) { return "high"; } else if (x > 5) { return "medium"; } else { return "low"; }
 ifStatement
-    : IF LEFTPAREN condition RIGHTPAREN LEFTBRACE
+    : IF LEFTPAREN expr RIGHTPAREN LEFTBRACE
       statement*
       RIGHTBRACE
       elseIfStatement*
@@ -116,7 +116,7 @@ ifStatement
 // Else-if statement - additional conditions checked if previous conditions are false ------------- [3]
 // Example --- else if (x > 5) { return "medium"; }
 elseIfStatement
-    : ELSE IF LEFTPAREN condition RIGHTPAREN LEFTBRACE
+    : ELSE IF LEFTPAREN expr RIGHTPAREN LEFTBRACE
       statement*
       RIGHTBRACE
     ;
@@ -128,43 +128,6 @@ elseStatement
       statement*
       RIGHTBRACE
     ;
-
-// ============================== CONDITIONALS (FOR IF STATEMENTS AND WHILE LOOP [2 & 3]) ================================
-                                                                                                                      // |
-// Condition - used in if statements and loops                                                                        // |
-// Example --- x > 0 && y < 10                                                                                        // |
-condition                                                                                                             // |
-    : logicalExpr                                                                                                     // |
-    ;                                                                                                                 // |
-                                                                                                                      // |
-// Logical expression - combines comparison expressions with AND/OR                                                   // |
-// Example --- isValid && count > 3                                                                                   // |
-// Example --- isEmpty || hasError                                                                                    // |
-logicalExpr                                                                                                           // |
-    : comparisonExpr ((AND | OR) comparisonExpr)*                                                                     // |
-    ;                                                                                                                 // |
-                                                                                                                      // |
-// Comparison expression - compares expressions using operators                                                       // |
-// Example --- age >= 18                                                                                              // |
-// Example --- name == "Admin"                                                                                        // |
-comparisonExpr                                                                                                        // |
-    : expr (comparisonOp expr)?                                                                                       // |
-    ;                                                                                                                 // |
-                                                                                                                      // |
-// Comparison operators                                                                                               // |
-// Example --- == (equal to)                                                                                          // |
-// Example --- != (not equal to)                                                                                      // |
-// Example --- < (less than)                                                                                          // |
-comparisonOp                                                                                                          // |
-    : EQUAL_EQUAL    // Equal to (==)                                                                                 // |
-    | NOT_EQUAL      // Not equal to (!=)                                                                             // |
-    | LESS           // Less than (<)                                                                                 // |
-    | LESS_EQUAL     // Less than or equal to (<=)                                                                    // |
-    | GREATER        // Greater than (>)                                                                              // |
-    | GREATER_EQUAL  // Greater than or equal to (>=)                                                                 // |
-    ;                                                                                                                 // |
-                                                                                                                      // |
-// ======================================================= END ========================================================= |
 
 // Break statement - exits the nearest enclosing loop --------------------------------------------- [4]
 // Example --- break;
