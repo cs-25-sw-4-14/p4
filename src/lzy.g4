@@ -21,6 +21,10 @@ function
       statement*
       RIGHTBRACE
     ;
+functionCall
+    : functionType ID EQUAL ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
+    ;
+
 
 // Function return type - either void or a data type
 // Example --- void (for a function that doesn't return a value)
@@ -78,6 +82,7 @@ statement
     | continueStmt SEMICOLON      // [5] Continue statements
     | returnStmt SEMICOLON        // [6] Return statements
     | expr SEMICOLON              // [7] Expression statements
+    | functionCall SEMICOLON      // TODO FUNCTIONCALL COMMENT
     ;
 
 // Variable declaration - defines a new variable with optional initialization --------------------- [0]

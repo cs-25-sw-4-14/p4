@@ -272,3 +272,11 @@ i32 process_numbers(i32 start, i32 end) {
     
     return sum;
 }
+
+void main(){
+    u8 a = funktion(ad,bc); 
+    u8 _ = funktionen(ad, bc);
+   
+   
+
+}

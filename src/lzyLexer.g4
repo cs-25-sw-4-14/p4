@@ -67,7 +67,7 @@ SEMICOLON      : ';' ;   // Semicolon for ending statements
 // -------------------- LITERALS --------------------
 
 // Identifiers (variable and function names)
-ID    : [a-zA-Z][a-zA-Z0-9_]* ;  // Starts with a letter, followed by letters, digits, or underscores
+ID    : [a-zA-Z_][a-zA-Z0-9_]* ;  // Starts with a letter, followed by letters, digits, or underscores
 
 // Number literals
 INT   : '0' | [1-9][0-9]* ;     // Integer (0 or non-zero followed by digits)
