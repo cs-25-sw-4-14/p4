@@ -280,5 +280,8 @@ void main(){
     bool _ = write(asd); 
     read(); 
    
+    u8 a = (u32) a;
+    
+
 
 }

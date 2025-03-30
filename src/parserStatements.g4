@@ -40,7 +40,7 @@ assignment
     ;
 
 typeCasting
-    :  type ID EQUAL type ID;
+    :  type ID EQUAL LEFTPAREN type RIGHTPAREN ID;
 
 // While loop - executes statements as long as condition is true ---------------------------------- [2]
 // Example --- while (i < 10) { i = i + 1; sum = sum + i; }
