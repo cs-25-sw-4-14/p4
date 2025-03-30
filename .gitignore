@@ -6,6 +6,7 @@ src/parserStatements*
 !src/lzyLexer.g4
 !src/parserStatements.g4
 !src/parserExpressions.g4
+src/combined.g4
 .antlr/
 lossy
 /*.dylib
