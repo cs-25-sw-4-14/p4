@@ -1,8 +1,6 @@
 grammar parserExpressions;
 options  {tokenVocab=lzyLexer;}
 
-
-
 // ============================== EXPRESSIONS =================================
 
 // Expression - the building block for conditions and values -------------------------------------- [7]

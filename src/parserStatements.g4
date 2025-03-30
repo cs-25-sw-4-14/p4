@@ -14,6 +14,7 @@ statement
     | returnStmt SEMICOLON        // [6] Return statements
     | expr SEMICOLON              // [7] Expression statements
     | functionCall SEMICOLON      // TODO FUNCTIONCALL COMMENT
+    | typeCasting SEMICOLON       // TODO TYPECASTING comment
     ;
 
 // Variable declaration - defines a new variable with optional initialization --------------------- [0]
@@ -37,6 +38,9 @@ modifier
 assignment
     : (ID | memberAccess) EQUAL expr
     ;
+
+typeCasting
+    :  type ID EQUAL type ID;
 
 // While loop - executes statements as long as condition is true ---------------------------------- [2]
 // Example --- while (i < 10) { i = i + 1; sum = sum + i; }
