@@ -1,104 +1,92 @@
+// =============================================================================
+// lzy Language Grammar Definition
+// =============================================================================
+
 grammar lzy;
 
-// Top-level program structure
+options {tokenVocab=lzyLexer;}
+import parserStatements, parserExpressions;
+
+// =========================== TOP-LEVEL STRUCTURE =============================
+
+// Root rule - a program consists of one or more functions or struct definitions
+// Example --- struct Person { String name; u32 age; } void main() { ... }
 program
-    : definition+ EOF
+    : (function | structDefinition)+ EOF
     ;
 
-// Statements can be variable declarations or expressions
-
-definition
-    : procedure
-    | function
-    ;
-procedure:;
-function:;
-
-
-functionCall:;
-procedureCall:;
-
-stmt 
-    : loop
-    | definition
-    | procedureCall
-    | conditional;
-    
-
-conditional:;
-
-loop
-    :;
-
-
-// Expressions with proper precedence
-expr
-    : functionCall
-    | textExpr
-    | boolExpr
-    | additiveExpr
-    ;
-
-// Assignment expression
-assignment
-    : 'triv'? 'mut'? (INTTYPE | UINTTYPE | FLOAT) ID '=' additiveExpr
-    | 'triv'? 'mut'? STRINGTYPE ID '=' textExpr
-    | 'triv'? 'mut'? BOOLTYPE ID '=' boolExpr
+// Function definition - includes return type, name, parameters, and body
+// Example --- i32 add(i32 a, i32 b) { return a + b; }
+function
+    : (VOID | type) ID LEFTPAREN paramList? RIGHTPAREN LEFTBRACE
+      statement*
+      RIGHTBRACE
     ;
 
 
-// Additive expressions (addition and subtraction)
-additiveExpr
-    : multExpr ('+' multExpr | '-' multExpr)*
-    ;
-
-// Multiplicative expressions (multiplication, division, modulo)
-multExpr
-    : numExpr (('*' | '/' | '%') numExpr)*
-    ;
-
-// Primary expressions (identifiers, literals, parenthesized expressions)
-numExpr
-    : INT
-    | FLOAT
-    | '(' additiveExpr ')'
-    | ID
-    ;
-textExpr
-    : STRING
-    | CHAR
-    | ID
-    ;
-boolExpr
-    : BOOL
-    | ID
-    | '(' boolExpr ')'
+functionCall
+    : type ID EQUAL ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
+    | ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
     ;
 
 
-STRINGTYPE
-    : 'String'
-    ;
-UINTTYPE
-    : 'u8'    | 'u16'   | 'u32'   | 'u64'
-    ;
-INTTYPE
-    : 'i8'    | 'i16'   | 'i32'   | 'i64'
-    ;
-FLOATTYPE
-    : 'f8'    | 'f16'   | 'f32'   | 'f64'
-    ;
-BOOLTYPE
-    : 'bool'
+
+
+// Function parameters - list of type-name pairs
+// Example --- u32 age, String name, bool is_dork
+paramList
+    : type ID (COMMA type ID)*
     ;
 
-ID: [a-zA-Z][a-zA-Z0-9]*;
-INT: '0' | [1-9][0-9]*;
-FLOAT: [0-9]* '.' [0-9]+;
-STRING: '"' (~["\r\n])* '"';
-CHAR: '\'' ~['\r\n] '\'';
-WS: [ \t\r\n]+ -> skip;
-BOOL : 'true' | 'false';
-RETURNVOID: 'void';
+// Struct definition - a named collection of fields
+// Example --- struct Person { String name; u32 age; bool is_dork; }
+structDefinition
+    : STRUCT ID LEFTBRACE
+      structField*
+      RIGHTBRACE
+    ;
 
-// Removed unused rules and simplified the grammar
+// Fields within a struct - each has a type and name
+// Example --- String name;
+// Example --- u32 count;
+structField
+    : type ID SEMICOLON
+    ;
+
+// Struct initialization - creates a new struct instance ------------------------------------------ [8]
+// Example --- Person {name: "Marc", age: 24, is_dork: true}
+structInit
+    : ID LEFTBRACE structInitField (COMMA structInitField)* RIGHTBRACE
+    ;
+
+
+// Struct initialization field - sets an initial value for a struct field ------------------------- [8]
+// Example --- name: "Marc"
+// Example --- age: 24
+structInitField
+    : ID COLON expr
+    ;
+
+
+// Member access - retrieves a field from a struct ------------------------------------------------ [9]
+// Example --- person.name
+// Example --- company.address.zipCode
+memberAccess
+    : ID DOT ID (DOT ID)*  // Supports nested access (a.b.c)
+    ;
+
+// ============================== TYPE SYSTEM ================================
+
+// Type - all possible data types in the language
+// Example --- String
+// Example --- u32
+// Example --- Person (user-defined struct)
+type
+    : STRING      // String type
+    | UINT        // Unsigned integer types (u8, u16, etc.)
+    | INT_TYPE    // Signed integer types (i8, i16, etc.)
+    | FLOAT_TYPE  // Floating-point types (f8, f16, etc.)
+    | BOOL        // Boolean type
+    | ID          // User-defined struct types
+    ;
+
