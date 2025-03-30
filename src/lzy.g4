@@ -18,22 +18,19 @@ program
 // Function definition - includes return type, name, parameters, and body
 // Example --- i32 add(i32 a, i32 b) { return a + b; }
 function
-    : functionType ID LEFTPAREN paramList? RIGHTPAREN LEFTBRACE
+    : (VOID | type) ID LEFTPAREN paramList? RIGHTPAREN LEFTBRACE
       statement*
       RIGHTBRACE
     ;
+
+
 functionCall
-    : functionType ID EQUAL ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
+    : type ID EQUAL ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
+    | ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
     ;
 
 
-// Function return type - either void or a data type
-// Example --- void (for a function that doesn't return a value)
-// Example --- i32 (for a function that returns an integer)
-functionType
-    : VOID
-    | type
-    ;
+
 
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork

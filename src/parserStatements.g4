@@ -1,8 +1,4 @@
 grammar parserStatements;
-import parserExpressions, lzy;
-
-
-
 options {tokenVocab=lzyLexer;}
 
 // ============================== STATEMENTS ==================================

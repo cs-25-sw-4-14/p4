@@ -1,5 +1,4 @@
 grammar parserExpressions;
-import lzy;
 options  {tokenVocab=lzyLexer;}
 
 
