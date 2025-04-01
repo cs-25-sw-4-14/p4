@@ -85,5 +85,5 @@ BOOL_LITERAL : 'true' | 'false' ;
 WS      : [ \t\r\n]+ -> skip ;
 
 // Comments
-// COMMENT : '//' ~[\r\n]* -> skip ;
-COMMENT : '<!--' .*? '-->' -> skip ; // Obviously the superior comment style - Marc the dork 💪😎
+COMMENT : '//' ~[\r\n]* -> skip ;
+
