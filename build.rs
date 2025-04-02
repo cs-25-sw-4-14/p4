@@ -1,29 +1,30 @@
-use std::env;
+use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 use std::str;
-use build_print::{error, info};
+use build_print::{info, warn};
 
 fn main() {
+    let crate_root: PathBuf = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
 
-    let grammar_dir = env::current_dir().unwrap().join("grammar");
+    let grammar_dir = crate_root.join("grammar");
 
-    let lzy = grammar_dir.join("lzy.g4");
-    let lzy_lexer = grammar_dir.join("lzyLexer.g4");
+    let lzy = grammar_dir.join("Lzy.g4");
+    let lzy_lexer = grammar_dir.join("LzyLexer.g4");
 
-    generate_antlr(lzy.to_str().unwrap());
-    generate_antlr(lzy_lexer.to_str().unwrap());
+    generate_antlr(&lzy, &crate_root);
+    generate_antlr(&lzy_lexer, &crate_root);
 
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=grammar/*");
     println!("cargo:rerun-if-changed=antlr-complete.jar");
 }
 
-fn generate_antlr(grammar_path: &str) {
-    let cwd = env::current_dir().unwrap().join("gen");
-    let antlr_jar = env::current_dir().unwrap().join("antlr-complete.jar");
-    let output_dir = env::current_dir().unwrap().join("gen");
+fn generate_antlr(grammar_path: &Path, root_dir: &Path) {
+    let antlr_jar = root_dir.join("antlr-complete.jar");
+    let output_dir = root_dir.join("src").join("antlr_gen");
     let output = Command::new("java")
-        .current_dir(cwd.clone())
+        .current_dir(output_dir.clone())
         .arg("-cp")
         .arg(antlr_jar)
         .arg("org.antlr.v4.Tool")
@@ -35,9 +36,9 @@ fn generate_antlr(grammar_path: &str) {
         .expect("antlr tool failed to start");
 
     if output.status.success() {
-        info!("ANTLR generated files successfully for {}", grammar_path);
+        info!("ANTLR generated files successfully for {}", grammar_path.display());
     } else {
         let error_message = str::from_utf8(&output.stderr).unwrap();
-        error!("ANTLR failed to generate files with error: {}", error_message);
+        warn!("ANTLR: {}", error_message);
     }
 }
