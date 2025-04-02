@@ -288,6 +288,7 @@ void main(){
 
 // ------------- ARRAY AND VECTOR TESTING ---------------- 
 
+
 // Helper function for array testing
 i32 sum_array(i32[] arr, u8 size) {
     i32 total = 0;
@@ -300,7 +301,6 @@ i32 sum_array(i32[] arr, u8 size) {
     
     return total;
 }
-
 void test_arrays_and_vectors() {
     // Basic array declaration and initialization
     u8[] empty_array;

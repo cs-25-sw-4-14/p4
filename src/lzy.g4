@@ -40,7 +40,7 @@ methodAccess
     : (ID | arrayAccess) DOT ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN 
       (DOT ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN)*
     ;
-
+    
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork
 paramList
@@ -88,6 +88,7 @@ memberAccess
 // Array access - accesses an element in an array
 // Example --- a[0]
 // Example --- points[i + 1]
+
 arrayAccess
     : ID (LEFTBRACKET expr RIGHTBRACKET)+
     ;
