@@ -2,57 +2,57 @@
 // lzy Language Grammar Definition
 // =============================================================================
 
-grammar lzy;
+grammar Lzy;
 
 options {tokenVocab=lzyLexer;}
-import parserStatements, parserExpressions;
+import ParserStatements, ParserExpressions;
 
 // =========================== TOP-LEVEL STRUCTURE =============================
 
 // Root rule - a program consists of one or more functions or struct definitions
 // Example --- struct Person { String name; u32 age; } void main() { ... }
 program
-    : (function | structDefinition)+ EOF
+    : (function | structDefinition)+ EOF # ProgramStructure
     ;
 
 // Function definition - includes return type, name, parameters, and body
 // Example --- i32 add(i32 a, i32 b) { return a + b; }
 function
-    : (VOID | type_t) ID LEFTPAREN paramList? RIGHTPAREN LEFTBRACE
-      statement*
-      RIGHTBRACE
+    : returnType=(VOID | type_t) name=ID LEFTPAREN params=paramList? RIGHTPAREN LEFTBRACE
+      body=statement*
+      RIGHTBRACE # FunctionDef
     ;
 
 functionCall
-    : type_t ID EQUAL ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
-    | ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
+    : type=type_t var=ID EQUAL func=ID LEFTPAREN (args+=expr (COMMA args+=expr)*)? RIGHTPAREN  # AssignFunctionCall
+    | func=ID LEFTPAREN (args+=expr (COMMA args+=expr)*)? RIGHTPAREN                          # SimpleFunctionCall
     ;
 
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork
 paramList
-    : type_t ID (COMMA type_t ID)*
+    : paramTypes+=type_t paramNames+=ID (COMMA paramTypes+=type_t paramNames+=ID)*  # ParameterList
     ;
 
 // Struct definition - a named collection of fields
 // Example --- struct Person { String name; u32 age; bool is_dork; }
 structDefinition
-    : STRUCT ID LEFTBRACE
-      structField*
-      RIGHTBRACE
+    : STRUCT name=ID LEFTBRACE
+      fields+=structField*
+      RIGHTBRACE  # StructDef
     ;
 
 // Fields within a struct - each has a type and name
 // Example --- String name;
 // Example --- u32 count;
 structField
-    : type_t ID SEMICOLON
+    : fieldType=type_t fieldName=ID SEMICOLON  # StructFieldDef
     ;
 
 // Struct initialization - creates a new struct instance ------------------------------------------ [8]
 // Example --- Person {name: "Marc", age: 24, is_dork: true}
 structInit
-    : ID LEFTBRACE structInitField (COMMA structInitField)* RIGHTBRACE
+    : structType=ID LEFTBRACE fields+=structInitField (COMMA fields+=structInitField)* RIGHTBRACE  # StructInitialization
     ;
 
 
@@ -60,7 +60,7 @@ structInit
 // Example --- name: "Marc"
 // Example --- age: 24
 structInitField
-    : ID COLON expr
+    : fieldName=ID COLON fieldValue=expr  # StructInitField
     ;
 
 
@@ -68,8 +68,8 @@ structInitField
 // Example --- person.name
 // Example --- company.address.zipCode
 memberAccess
-    : ID DOT ID (DOT ID)*  // Supports nested access (a.b.c)
-    | arrayAccess DOT ID (DOT ID)*  // Array element member access (arr[0].field)
+    : object=ID DOT fields+=ID (DOT fields+=ID)*                   # VariableMemberAccess
+    | array=arrayAccess DOT fields+=ID (DOT fields+=ID)*           # ArrayMemberAccess
     ;
 
 // Array/Vector access - accesses an element in an array or vector by index
@@ -77,21 +77,21 @@ memberAccess
 // Example --- points[i + 1]
 // Example --- vector_name[3]
 arrayAccess
-    : ID (LEFTBRACKET expr RIGHTBRACKET)+
+    : array=ID (LEFTBRACKET indices+=expr RIGHTBRACKET)+  # ArrayIndexAccess
     ;
 
 // Array initialization - creates a new array with values
 // Example --- {1, 2, 3, 8}
 arrayInit
-    : LEFTBRACE (expr | arrayInit) (COMMA (expr | arrayInit))* RIGHTBRACE
-    | LEFTBRACE RIGHTBRACE
+    : LEFTBRACE (elements+=(expr | arrayInit)) (COMMA elements+=(expr | arrayInit))* RIGHTBRACE  # NonEmptyArrayInit
+    | LEFTBRACE RIGHTBRACE  # EmptyArrayInit
     ;
 
 // Vector initialization - creates a new vector with values (same syntax as array init)
 // Example --- {3, 5, 2}
 vectorInit
-    : LEFTBRACE (expr | vectorInit) (COMMA (expr | vectorInit))* RIGHTBRACE
-    | LEFTBRACE RIGHTBRACE
+    : LEFTBRACE (elements+=(expr | vectorInit)) (COMMA elements+=(expr | vectorInit))* RIGHTBRACE  # NonEmptyVectorInit
+    | LEFTBRACE RIGHTBRACE  # EmptyVectorInit
     ;
 
 // ============================== TYPE SYSTEM ================================
@@ -103,12 +103,12 @@ vectorInit
 // Example --- u8[]
 // Example --- Vec<u8>
 type_t
-    : STRING                                 // String type
-    | UINT                                   // Unsigned integer types (u8, u16, etc.)
-    | INT_TYPE                               // Signed integer types (i8, i16, etc.)
-    | FLOAT_TYPE                             // Floating-point types (f8, f16, etc.)
-    | BOOL                                   // Boolean type
-    | ID                                     // User-defined struct types
-    | type_t LEFTBRACKET RIGHTBRACKET          // Array type (e.g., u8[])
-    | VEC LESS type_t GREATER                  // Vector type (e.g., Vec<u8>)
+    : STRING                                 # StringType
+    | UINT                                   # UintType
+    | INT_TYPE                               # IntType
+    | FLOAT_TYPE                             # FloatType
+    | BOOL                                   # BoolType
+    | ID                                     # UserDefinedType
+    | elemType=type_t LEFTBRACKET RIGHTBRACKET  # ArrayType
+    | VEC LESS elemType=type_t GREATER      # VectorType
     ;

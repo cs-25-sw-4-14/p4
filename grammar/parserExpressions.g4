@@ -1,45 +1,50 @@
-grammar parserExpressions;
-options  {tokenVocab=lzyLexer;}
+grammar ParserExpressions;
+options  {tokenVocab=LzyLexer;}
 
 // ============================== EXPRESSIONS =================================
 
 // Expression - the building block for conditions and values -------------------------------------- [7]
 // Example --- a + b * c
 expr
-    : logicalOrExpr
+    : logicalOrExpr # Expression
     ;
 
 // Logical OR expression - combines AND expressions with OR --------------------------------------- [7]
 // Example --- isAdmin || hasSpecialPermission
 logicalOrExpr
-    : logicalAndExpr (OR logicalAndExpr)*
+    : left=logicalAndExpr                             # LogicalOrSingle
+    | left=logicalOrExpr op=OR right=logicalAndExpr   # LogicalOrExpr
     ;
 
 // Logical AND expression - combines equality expressions with AND -------------------------------- [7]
 // Example --- isLoggedIn && hasPermission
 logicalAndExpr
-    : equalityExpr (AND equalityExpr)*
+    : left=equalityExpr                              # LogicalAndSingle
+    | left=logicalAndExpr op=AND right=equalityExpr  # LogicalAndExpr
     ;
 
 // Equality expression - compares expressions for equality/inequality ----------------------------- [7]
 // Example --- username == "admin"
 // Example --- status != "error"
 equalityExpr
-    : relationalExpr ((EQUAL_EQUAL | NOT_EQUAL) relationalExpr)*
+    : left=relationalExpr                                        # EqualitySingle
+    | left=equalityExpr op=(EQUAL_EQUAL | NOT_EQUAL) right=relationalExpr  # EqualityExpr
     ;
 
 // Relational expression - compares expressions with ordering operators --------------------------- [7]
 // Example --- age > 18
 // Example --- score <= 100
 relationalExpr
-    : additiveExpr ((LESS | LESS_EQUAL | GREATER | GREATER_EQUAL) additiveExpr)*
+    : left=additiveExpr                                                      # RelationalSingle
+    | left=relationalExpr op=(LESS | LESS_EQUAL | GREATER | GREATER_EQUAL) right=additiveExpr  # RelationalExpr
     ;
 
 // Additive expression - performs addition and subtraction ---------------------------------------- [7]
 // Example --- x + y
 // Example --- total - discount
 additiveExpr
-    : multiplicativeExpr ((PLUS | MINUS) multiplicativeExpr)*
+    : left=multiplicativeExpr                               # AdditiveSingle
+    | left=additiveExpr op=(PLUS | MINUS) right=multiplicativeExpr  # AdditiveExpr
     ;
 
 // Multiplicative expression - performs multiplication, division, and modulo ---------------------- [7]
@@ -47,15 +52,16 @@ additiveExpr
 // Example --- total / count
 // Example --- value % 10
 multiplicativeExpr
-    : unaryExpr ((MUL | DIV | MOD) unaryExpr)*
+    : left=unaryExpr                                   # MultiplicativeSingle
+    | left=multiplicativeExpr op=(MUL | DIV | MOD) right=unaryExpr  # MultiplicativeExpr
     ;
 
 // Unary expression - applies unary operators to expressions -------------------------------------- [7]
 // Example --- -x
 // Example --- !isValid
 unaryExpr
-    : (MINUS | NOT) unaryExpr  // Negation or logical NOT
-    | primaryExpr              // Base expressions
+    : op=(MINUS | NOT) operand=unaryExpr  # UnaryOp
+    | primaryExpr                         # UnaryPrimary
     ;
 
 // Primary expression - the most basic expression types ------------------------------------------- [7]
@@ -67,16 +73,16 @@ unaryExpr
 // Example --- a[0] (array access)
 // Example --- (x + y) (parenthesized expression)
 primaryExpr
-    : ID                         // Variable reference
-    | INT                        // Integer literal
-    | FLOAT                      // Floating-point literal
-    | STRING_LITERAL             // String literal
-    | BOOL_LITERAL               // Boolean literal
-    | structInit                 // [8] Struct initialization
-    | arrayInit                  // Array initialization
-    | vectorInit                 // Vector initialization
-    | memberAccess               // [9] Struct field access
-    | arrayAccess                // Array/Vector element access
-    | functionCall               // Function call
-    | LEFTPAREN expr RIGHTPAREN  // Parenthesized expression
+    : ID                                # VariableRef
+    | INT                               # IntLiteral
+    | FLOAT                             # FloatLiteral
+    | STRING_LITERAL                    # StringLiteral
+    | BOOL_LITERAL                      # BoolLiteral
+    | structInit                        # StructInitExpr
+    | arrayInit                         # ArrayInitExpr
+    | vectorInit                        # VectorInitExpr
+    | memberAccess                      # MemberAccessExpr
+    | arrayAccess                       # ArrayAccessExpr
+    | functionCall                      # FunctionCallExpr
+    | LEFTPAREN inner=expr RIGHTPAREN   # ParenExpr
     ;

@@ -1,4 +1,4 @@
-lexer grammar lzyLexer;
+lexer grammar LzyLexer;
 
 // ============================== LEXER RULES ================================
 

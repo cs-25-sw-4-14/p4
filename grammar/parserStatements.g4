@@ -1,20 +1,20 @@
-grammar parserStatements;
-options {tokenVocab=lzyLexer;}
+grammar ParserStatements;
+options {tokenVocab=LzyLexer;}
 
 // ============================== STATEMENTS ==================================
 
 // Statements - the basic units of execution in the language
 statement
-    : declaration SEMICOLON       // [0] Variable declarations
-    | assignment SEMICOLON        // [1] Assignment operations
-    | whileLoop                   // [2] While loops
-    | ifStatement                 // [3] If-else statements
-    | breakStmt SEMICOLON         // [4] Break statements
-    | continueStmt SEMICOLON      // [5] Continue statements
-    | returnStmt SEMICOLON        // [6] Return statements
-    | expr SEMICOLON              // [7] Expression statements
-    | functionCall SEMICOLON      // Function call statement
-    | typeCasting SEMICOLON       // Type casting statement
+    : declaration SEMICOLON       # DeclarationStmt
+    | assignment SEMICOLON        # AssignmentStmt
+    | whileLoop                   # WhileLoopStmt
+    | ifStatement                 # IfStmt
+    | breakStmt SEMICOLON         # BreakStmt
+    | continueStmt SEMICOLON      # ContinueStmt
+    | returnStmt SEMICOLON        # ReturnStmt
+    | expr SEMICOLON              # ExpressionStmt
+    | functionCall SEMICOLON      # FunctionCallStmt
+    | typeCasting SEMICOLON       # TypeCastingStmt
     ;
 
 // Variable declaration - defines a new variable with optional initialization --------------------- [0]
@@ -23,15 +23,15 @@ statement
 // Example --- u8[] a;
 // Example --- Vec<u8> a;
 declaration
-    : modifier* type_t ID (EQUAL (expr | arrayInit | vectorInit))?
+    : mods+=modifier* varType=type_t varName=ID (EQUAL initialValue=(expr | arrayInit | vectorInit))? # VariableDeclaration
     ;
 
 // Variable modifiers - affects variable behavior (e.g., mutability) ------------------------------ [0]
 // Example --- mut (for mutable variables)
 // Example --- triv (for constants/immutable variables)
 modifier
-    : TRIV    // Trivial/constant
-    | MUT     // Mutable
+    : TRIV    # TrivModifier
+    | MUT     # MutModifier
     ;
 
 // Assignment - sets a value to an existing variable, struct field, or array/vector element ------------- [1] 
@@ -40,61 +40,61 @@ modifier
 // Example --- a[0] = 42;
 // Example --- vec[1] = 5;
 assignment
-    : (ID | memberAccess | arrayAccess) EQUAL expr
+    : target=(ID | memberAccess | arrayAccess) EQUAL value=expr # VariableAssignment
     ;
 
 typeCasting
-    :  type_t ID EQUAL LEFTPAREN type_t RIGHTPAREN ID;
+    : targetType=type_t targetVar=ID EQUAL LEFTPAREN sourceType=type_t RIGHTPAREN sourceVar=ID # TypeCast;
 
 // While loop - executes statements as long as condition is true ---------------------------------- [2]
 // Example --- while (i < 10) { i = i + 1; sum = sum + i; }
 whileLoop
-    : WHILE LEFTPAREN expr RIGHTPAREN LEFTBRACE
-      statement*
-      RIGHTBRACE
+    : WHILE LEFTPAREN condition=expr RIGHTPAREN LEFTBRACE
+      body=statement*
+      RIGHTBRACE # WhileLoop
     ;
 
 // If statement - conditional execution with optional else-if and else blocks --------------------- [3]
 // Example --- if (x > 10) { return "high"; } else if (x > 5) { return "medium"; } else { return "low"; }
 ifStatement
-    : IF LEFTPAREN expr RIGHTPAREN LEFTBRACE
-      statement*
+    : IF LEFTPAREN condition=expr RIGHTPAREN LEFTBRACE
+      thenBranch=statement*
       RIGHTBRACE
-      elseIfStatement*
-      elseStatement?
+      elseIfBranches=elseIfStatement*
+      elseBranch=elseStatement? # IfStatement
     ;
 
 // Else-if statement - additional conditions checked if previous conditions are false ------------- [3]
 // Example --- else if (x > 5) { return "medium"; }
 elseIfStatement
-    : ELSE IF LEFTPAREN expr RIGHTPAREN LEFTBRACE
-      statement*
-      RIGHTBRACE
+    : ELSE IF LEFTPAREN condition=expr RIGHTPAREN LEFTBRACE
+      body=statement*
+      RIGHTBRACE # ElseIfStatement
     ;
 
 // Else statement - executed if all previous conditions are false --------------------------------- [3]
 // Example --- else { return "low"; }
 elseStatement
     : ELSE LEFTBRACE
-      statement*
-      RIGHTBRACE
+      body=statement*
+      RIGHTBRACE # ElseStatement
     ;
 
 // Break statement - exits the nearest enclosing loop --------------------------------------------- [4]
 // Example --- break;
 breakStmt
-    : BREAK
+    : BREAK # BreakStatement
     ;
 
 // Continue statement - skips to the next iteration of the nearest enclosing loop ----------------- [5]
 // Example --- continue;
 continueStmt
-    : CONTINUE
+    : CONTINUE # ContinueStatement
     ;
 
 // Return statement - exits a function with optional return value --------------------------------- [6]
 // Example --- return;
 // Example --- return result * 2;
 returnStmt
-    : RETURN expr?
+    : RETURN value=expr? # ReturnStatement
     ;
