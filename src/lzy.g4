@@ -28,6 +28,19 @@ functionCall
     | ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
     ;
 
+// Method call - calls a method on a vector or string
+// Example --- my_vector.push(5)
+// Example --- my_string.length()
+methodCall
+    : (ID | arrayAccess) DOT ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
+    ;
+
+// Supports chaining: object.method1().method2()
+methodAccess
+    : (ID | arrayAccess) DOT ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN 
+      (DOT ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN)*
+    ;
+
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork
 paramList
@@ -72,10 +85,9 @@ memberAccess
     | arrayAccess DOT ID (DOT ID)*  // Array element member access (arr[0].field)
     ;
 
-// Array/Vector access - accesses an element in an array or vector by index
+// Array access - accesses an element in an array
 // Example --- a[0]
 // Example --- points[i + 1]
-// Example --- vector_name[3]
 arrayAccess
     : ID (LEFTBRACKET expr RIGHTBRACKET)+
     ;

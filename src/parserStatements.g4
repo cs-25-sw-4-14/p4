@@ -14,6 +14,7 @@ statement
     | returnStmt SEMICOLON        // [6] Return statements
     | expr SEMICOLON              // [7] Expression statements
     | functionCall SEMICOLON      // Function call statement
+    | methodCall SEMICOLON        // Method call statement
     | typeCasting SEMICOLON       // Type casting statement
     ;
 
