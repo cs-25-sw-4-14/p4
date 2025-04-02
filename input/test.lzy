@@ -285,3 +285,47 @@ void main(){
 
 
 }
+
+// ------------- ARRAY AND VECTOR TESTING ---------------- 
+
+void test_arrays_and_vectors() {
+    // Basic array declaration and initialization
+    u8[] empty_array;
+    u8[] non_empty_array = {1, 2, 3, 4, 5};
+    i32[] int_array = {-10, 0, 10, 20, 30};
+    
+    // Array access and modification
+    u8 first = non_empty_array[0];
+    non_empty_array[2] = 42;
+    
+    // Array as function parameter
+    i32 sum = sum_array(int_array, 5);
+    
+    // Nested arrays
+    i32[][] matrix = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+    
+    i32 middle = matrix[1][1];
+    
+    // Basic vector declaration and initialization
+    Vec<u8> empty_vector;
+    Vec<i32> int_vector = {10, 20, 30, 40};
+    Vec<f32> float_vector = {1.1, 2.2, 3.3};
+    
+    // Vector access and modification
+    i32 second = int_vector[1];
+    int_vector[0] = 15;
+    
+    // Vector of structs
+    Vec<Point> points = {
+        Point {x: 1, y: 2},
+        Point {x: 3, y: 4}
+    };
+    
+    // Accessing struct members from vector
+    i32 point_x = points[0].x;
+    points[1].y = 5;
+}

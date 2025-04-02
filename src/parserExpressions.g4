@@ -64,6 +64,7 @@ unaryExpr
 // Example --- "hello" (string literal)
 // Example --- Person {name: "Marc", age: 24} (struct initialization)
 // Example --- user.name (member access)
+// Example --- a[0] (array access)
 // Example --- (x + y) (parenthesized expression)
 primaryExpr
     : ID                         // Variable reference
@@ -72,6 +73,10 @@ primaryExpr
     | STRING_LITERAL             // String literal
     | BOOL_LITERAL               // Boolean literal
     | structInit                 // [8] Struct initialization
+    | arrayInit                  // Array initialization
+    | vectorInit                 // Vector initialization
     | memberAccess               // [9] Struct field access
+    | arrayAccess                // Array/Vector element access
+    | functionCall               // Function call
     | LEFTPAREN expr RIGHTPAREN  // Parenthesized expression
     ;

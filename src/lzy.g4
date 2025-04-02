@@ -23,14 +23,10 @@ function
       RIGHTBRACE
     ;
 
-
 functionCall
-    : type ID EQUAL ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
-    | ID LEFTPAREN (ID (COMMA ID)*)? RIGHTPAREN
+    : type ID EQUAL ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
+    | ID LEFTPAREN (expr (COMMA expr)*)? RIGHTPAREN
     ;
-
-
-
 
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork
@@ -73,6 +69,29 @@ structInitField
 // Example --- company.address.zipCode
 memberAccess
     : ID DOT ID (DOT ID)*  // Supports nested access (a.b.c)
+    | arrayAccess DOT ID (DOT ID)*  // Array element member access (arr[0].field)
+    ;
+
+// Array/Vector access - accesses an element in an array or vector by index
+// Example --- a[0]
+// Example --- points[i + 1]
+// Example --- vector_name[3]
+arrayAccess
+    : ID (LEFTBRACKET expr RIGHTBRACKET)+
+    ;
+
+// Array initialization - creates a new array with values
+// Example --- {1, 2, 3, 8}
+arrayInit
+    : LEFTBRACE (expr | arrayInit) (COMMA (expr | arrayInit))* RIGHTBRACE
+    | LEFTBRACE RIGHTBRACE
+    ;
+
+// Vector initialization - creates a new vector with values (same syntax as array init)
+// Example --- {3, 5, 2}
+vectorInit
+    : LEFTBRACE (expr | vectorInit) (COMMA (expr | vectorInit))* RIGHTBRACE
+    | LEFTBRACE RIGHTBRACE
     ;
 
 // ============================== TYPE SYSTEM ================================
@@ -81,12 +100,15 @@ memberAccess
 // Example --- String
 // Example --- u32
 // Example --- Person (user-defined struct)
+// Example --- u8[]
+// Example --- Vec<u8>
 type
-    : STRING      // String type
-    | UINT        // Unsigned integer types (u8, u16, etc.)
-    | INT_TYPE    // Signed integer types (i8, i16, etc.)
-    | FLOAT_TYPE  // Floating-point types (f8, f16, etc.)
-    | BOOL        // Boolean type
-    | ID          // User-defined struct types
+    : STRING                                 // String type
+    | UINT                                   // Unsigned integer types (u8, u16, etc.)
+    | INT_TYPE                               // Signed integer types (i8, i16, etc.)
+    | FLOAT_TYPE                             // Floating-point types (f8, f16, etc.)
+    | BOOL                                   // Boolean type
+    | ID                                     // User-defined struct types
+    | type LEFTBRACKET RIGHTBRACKET          // Array type (e.g., u8[])
+    | VEC LESS type GREATER                  // Vector type (e.g., Vec<u8>)
     ;
-
