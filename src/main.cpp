@@ -3,6 +3,7 @@
 #include <antlr4-runtime.h>
 #include "lzyLexer.h"
 #include "lzyParser.h"
+#include "huttel.h"
 
 using namespace antlr4;
 
@@ -36,7 +37,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "Parse tree: " << tree->toStringTree(&parser) << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "Error during parsing: " << e.what() << std::endl;
+        std::cerr << HUTTEL << "Error during parsing: " << e.what() << std::endl;
         return 1;
     }
     
