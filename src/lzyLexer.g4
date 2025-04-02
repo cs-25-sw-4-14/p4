@@ -15,6 +15,7 @@ BREAK   : 'break' ;
 CONTINUE: 'continue' ;
 RETURN  : 'return' ;
 STRUCT  : 'struct' ;
+VEC     : 'Vec' ;
 
 // -------------------- TYPE LITERALS --------------------
 
@@ -59,6 +60,8 @@ LEFTPAREN      : '(' ;   // Opening parenthesis
 RIGHTPAREN     : ')' ;   // Closing parenthesis
 LEFTBRACE      : '{' ;   // Opening curly brace
 RIGHTBRACE     : '}' ;   // Closing curly brace
+LEFTBRACKET    : '[' ;   // Opening square bracket
+RIGHTBRACKET   : ']' ;   // Closing square bracket
 
 // Other punctuation
 COMMA          : ',' ;   // Comma for separating items

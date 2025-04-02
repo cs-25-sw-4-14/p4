@@ -13,15 +13,17 @@ statement
     | continueStmt SEMICOLON      // [5] Continue statements
     | returnStmt SEMICOLON        // [6] Return statements
     | expr SEMICOLON              // [7] Expression statements
-    | functionCall SEMICOLON      // TODO FUNCTIONCALL COMMENT
-    | typeCasting SEMICOLON       // TODO TYPECASTING comment
+    | functionCall SEMICOLON      // Function call statement
+    | typeCasting SEMICOLON       // Type casting statement
     ;
 
 // Variable declaration - defines a new variable with optional initialization --------------------- [0]
 // Example --- mut String name = "Marc";
 // Example --- triv u32 age = 24;
+// Example --- u8[] a;
+// Example --- Vec<u8> a;
 declaration
-    : modifier* type ID (EQUAL expr)?
+    : modifier* type ID (EQUAL (expr | arrayInit | vectorInit))?
     ;
 
 // Variable modifiers - affects variable behavior (e.g., mutability) ------------------------------ [0]
@@ -32,11 +34,13 @@ modifier
     | MUT     // Mutable
     ;
 
-// Assignment - sets a value to an existing variable or struct field ------------------------------ [1] 
+// Assignment - sets a value to an existing variable, struct field, or array/vector element ------------- [1] 
 // Example --- count = 10;
 // Example --- person.age = 30;
+// Example --- a[0] = 42;
+// Example --- vec[1] = 5;
 assignment
-    : (ID | memberAccess) EQUAL expr
+    : (ID | memberAccess | arrayAccess) EQUAL expr
     ;
 
 typeCasting
