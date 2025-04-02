@@ -3,6 +3,7 @@
 #include <antlr4-runtime.h>
 #include "lzyLexer.h"
 #include "lzyParser.h"
+#include "huttel.h"
 
 using namespace antlr4;
 
@@ -27,7 +28,8 @@ int main(int argc, const char* argv[]) {
         tree::ParseTree* tree = parser.program();
         
         if (parser.getNumberOfSyntaxErrors() > 0) {
-            std::cerr << "Parsing failed with " 
+            std::cerr << HUTTEL 
+                      << "Parsing failed with " 
                       << parser.getNumberOfSyntaxErrors() 
                       << " syntax errors" << std::endl;
             return 1;
