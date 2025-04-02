@@ -28,8 +28,7 @@ int main(int argc, const char* argv[]) {
         tree::ParseTree* tree = parser.program();
         
         if (parser.getNumberOfSyntaxErrors() > 0) {
-            std::cerr << HUTTEL 
-                      << "Parsing failed with " 
+            std::cerr << "Parsing failed with " 
                       << parser.getNumberOfSyntaxErrors() 
                       << " syntax errors" << std::endl;
             return 1;
@@ -38,7 +37,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "Parse tree: " << tree->toStringTree(&parser) << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "Error during parsing: " << e.what() << std::endl;
+        std::cerr << HUTTEL << "Error during parsing: " << e.what() << std::endl;
         return 1;
     }
     
