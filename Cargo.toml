@@ -1,0 +1,11 @@
+[package]
+name = "p4-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+antlr-rust = "0.3.0-beta"
+build-print = "0.1.1"
+
+[build-dependencies]
+build-print = "0.1.1"
