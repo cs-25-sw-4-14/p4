@@ -78,5 +78,7 @@ primaryExpr
     | memberAccess               // [9] Struct field access
     | arrayAccess                // Array/Vector element access
     | functionCall               // Function call
+    | methodCall                 // Method call for vectors and strings
+    | methodAccess               // Method access with chaining support
     | LEFTPAREN expr RIGHTPAREN  // Parenthesized expression
     ;

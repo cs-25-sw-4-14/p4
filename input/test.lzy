@@ -288,13 +288,26 @@ void main(){
 
 // ------------- ARRAY AND VECTOR TESTING ---------------- 
 
+
+// Helper function for array testing
+i32 sum_array(i32[] arr, u8 size) {
+    i32 total = 0;
+    mut u8 i = 0;
+    
+    while (i < size) {
+        total = total + arr[i];
+        i = i + 1;
+    }
+    
+    return total;
+}
 void test_arrays_and_vectors() {
     // Basic array declaration and initialization
     u8[] empty_array;
     u8[] non_empty_array = {1, 2, 3, 4, 5};
     i32[] int_array = {-10, 0, 10, 20, 30};
     
-    // Array access and modification
+    // Array access and modification (arrays use indexing syntax)
     u8 first = non_empty_array[0];
     non_empty_array[2] = 42;
     
@@ -315,9 +328,21 @@ void test_arrays_and_vectors() {
     Vec<i32> int_vector = {10, 20, 30, 40};
     Vec<f32> float_vector = {1.1, 2.2, 3.3};
     
-    // Vector access and modification
-    i32 second = int_vector[1];
-    int_vector[0] = 15;
+    // Vector access and modification through methods
+    i32 second = int_vector.get(1);
+    int_vector.push(15);
+    
+    // Other vector methods
+    u32 length = int_vector.len();         // Get vector length
+    int_vector.remove(0);                  // Remove element at index
+    int_vector.clear();                    // Clear all elements
+    
+    // String method calls
+    String text = "Hello, world!";
+    u32 str_len = text.length();           // Get string length
+    String upper = text.to_upper();        // Convert to uppercase
+    String upper = text.to_upper().to_lower();        // Convert to uppercase & back to lower
+    bool contains = text.contains("world"); // Check if contains substring
     
     // Vector of structs
     Vec<Point> points = {
@@ -325,7 +350,10 @@ void test_arrays_and_vectors() {
         Point {x: 3, y: 4}
     };
     
-    // Accessing struct members from vector
-    i32 point_x = points[0].x;
-    points[1].y = 5;
+    // Accessing struct members from vector elements
+    Point p = points.get(0);               // Get Point from vector
+    i32 point_x = p.x;                     // Access field
+    
+    // Method chaining
+    int_vector.clear().push(100).push(200);
 }
