@@ -1,5 +1,4 @@
 grammar ParserExpressions;
-options  {tokenVocab=LzyLexer;}
 
 // ============================== EXPRESSIONS =================================
 
@@ -13,14 +12,14 @@ expr
 // Example --- isAdmin || hasSpecialPermission
 logicalOrExpr
     : left=logicalAndExpr                             # LogicalOrSingle
-    | left=logicalOrExpr op=OR right=logicalAndExpr   # LogicalOrExpr
+    | left=logicalOrExpr op=OR right=logicalAndExpr   # LogicalOrExpression
     ;
 
 // Logical AND expression - combines equality expressions with AND -------------------------------- [7]
 // Example --- isLoggedIn && hasPermission
 logicalAndExpr
     : left=equalityExpr                              # LogicalAndSingle
-    | left=logicalAndExpr op=AND right=equalityExpr  # LogicalAndExpr
+    | left=logicalAndExpr op=AND right=equalityExpr  # LogicalAndExpression
     ;
 
 // Equality expression - compares expressions for equality/inequality ----------------------------- [7]
@@ -28,7 +27,7 @@ logicalAndExpr
 // Example --- status != "error"
 equalityExpr
     : left=relationalExpr                                        # EqualitySingle
-    | left=equalityExpr op=(EQUAL_EQUAL | NOT_EQUAL) right=relationalExpr  # EqualityExpr
+    | left=equalityExpr op=(EQUAL_EQUAL | NOT_EQUAL) right=relationalExpr  # EqualityExpression
     ;
 
 // Relational expression - compares expressions with ordering operators --------------------------- [7]
@@ -36,7 +35,7 @@ equalityExpr
 // Example --- score <= 100
 relationalExpr
     : left=additiveExpr                                                      # RelationalSingle
-    | left=relationalExpr op=(LESS | LESS_EQUAL | GREATER | GREATER_EQUAL) right=additiveExpr  # RelationalExpr
+    | left=relationalExpr op=(LESS | LESS_EQUAL | GREATER | GREATER_EQUAL) right=additiveExpr  # RelationalExpression
     ;
 
 // Additive expression - performs addition and subtraction ---------------------------------------- [7]
@@ -44,7 +43,7 @@ relationalExpr
 // Example --- total - discount
 additiveExpr
     : left=multiplicativeExpr                               # AdditiveSingle
-    | left=additiveExpr op=(PLUS | MINUS) right=multiplicativeExpr  # AdditiveExpr
+    | left=additiveExpr op=(PLUS | MINUS) right=multiplicativeExpr  # AdditiveExpression
     ;
 
 // Multiplicative expression - performs multiplication, division, and modulo ---------------------- [7]
@@ -53,7 +52,7 @@ additiveExpr
 // Example --- value % 10
 multiplicativeExpr
     : left=unaryExpr                                   # MultiplicativeSingle
-    | left=multiplicativeExpr op=(MUL | DIV | MOD) right=unaryExpr  # MultiplicativeExpr
+    | left=multiplicativeExpr op=(MUL | DIV | MOD) right=unaryExpr  # MultiplicativeExpression
     ;
 
 // Unary expression - applies unary operators to expressions -------------------------------------- [7]

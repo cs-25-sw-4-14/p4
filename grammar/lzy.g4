@@ -18,13 +18,13 @@ program
 // Function definition - includes return type, name, parameters, and body
 // Example --- i32 add(i32 a, i32 b) { return a + b; }
 function
-    : returnType=(VOID | type_t) name=ID LEFTPAREN params=paramList? RIGHTPAREN LEFTBRACE
+    : (VOID | rettype=type_t) id=ID LEFTPAREN params=paramList? RIGHTPAREN LEFTBRACE
       body=statement*
-      RIGHTBRACE # FunctionDef
+      RIGHTBRACE
     ;
 
 functionCall
-    : type=type_t var=ID EQUAL func=ID LEFTPAREN (args+=expr (COMMA args+=expr)*)? RIGHTPAREN  # AssignFunctionCall
+    : ttype=type_t var=ID EQUAL func=ID LEFTPAREN (args+=expr (COMMA args+=expr)*)? RIGHTPAREN  # AssignFunctionCall
     | func=ID LEFTPAREN (args+=expr (COMMA args+=expr)*)? RIGHTPAREN                          # SimpleFunctionCall
     ;
 
@@ -52,7 +52,7 @@ structField
 // Struct initialization - creates a new struct instance ------------------------------------------ [8]
 // Example --- Person {name: "Marc", age: 24, is_dork: true}
 structInit
-    : structType=ID LEFTBRACE fields+=structInitField (COMMA fields+=structInitField)* RIGHTBRACE  # StructInitialization
+    : ID LEFTBRACE structInitField (COMMA fields+=structInitField)* RIGHTBRACE  # StructInitialization
     ;
 
 
@@ -60,7 +60,7 @@ structInit
 // Example --- name: "Marc"
 // Example --- age: 24
 structInitField
-    : fieldName=ID COLON fieldValue=expr  # StructInitField
+    : ID COLON expr
     ;
 
 
@@ -83,14 +83,14 @@ arrayAccess
 // Array initialization - creates a new array with values
 // Example --- {1, 2, 3, 8}
 arrayInit
-    : LEFTBRACE (elements+=(expr | arrayInit)) (COMMA elements+=(expr | arrayInit))* RIGHTBRACE  # NonEmptyArrayInit
+    : LEFTBRACE ((expr | arrayInit)) (COMMA (expr | arrayInit))* RIGHTBRACE  # NonEmptyArrayInit
     | LEFTBRACE RIGHTBRACE  # EmptyArrayInit
     ;
 
 // Vector initialization - creates a new vector with values (same syntax as array init)
 // Example --- {3, 5, 2}
 vectorInit
-    : LEFTBRACE (elements+=(expr | vectorInit)) (COMMA elements+=(expr | vectorInit))* RIGHTBRACE  # NonEmptyVectorInit
+    : LEFTBRACE ((expr | vectorInit)) (COMMA (expr | vectorInit))* RIGHTBRACE  # NonEmptyVectorInit
     | LEFTBRACE RIGHTBRACE  # EmptyVectorInit
     ;
 
