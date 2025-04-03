@@ -5,7 +5,5 @@ edition = "2024"
 
 [dependencies]
 antlr-rust = "0.3.0-beta"
-build-print = "0.1.1"
+ptree = "0.5.2"
 
-[build-dependencies]
-build-print = "0.1.1"

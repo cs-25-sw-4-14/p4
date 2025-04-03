@@ -1,44 +1,40 @@
-use std::path::Path;
-use std::path::PathBuf;
+use std::error::Error;
 use std::process::Command;
 use std::str;
-use build_print::{info, warn};
 
 fn main() {
-    let crate_root: PathBuf = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
-
-    let grammar_dir = crate_root.join("grammar");
-
-    let lzy = grammar_dir.join("Lzy.g4");
-    let lzy_lexer = grammar_dir.join("LzyLexer.g4");
-
-    generate_antlr(&lzy, &crate_root);
-    generate_antlr(&lzy_lexer, &crate_root);
+    let _ = gen_for_grammar("LzyLexer", "../antlr-complete.jar", Some("-visitor"));
+    let _ = gen_for_grammar("Lzy", "../antlr-complete.jar", Some("-visitor"));
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=grammar/*");
     println!("cargo:rerun-if-changed=antlr-complete.jar");
+    println!("cargo:rerun-if-changed=grammar/LzyLexer.g4");
+    println!("cargo:rerun-if-changed=grammar/Lzy.g4");
+    println!("cargo:rerun-if-changed=grammar/ParserExpressions.g4");
+    println!("cargo:rerun-if-changed=grammar/ParserStatements.g4");
 }
 
-fn generate_antlr(grammar_path: &Path, root_dir: &Path) {
-    let antlr_jar = root_dir.join("antlr-complete.jar");
-    let output_dir = root_dir.join("src").join("antlr_gen");
-    let output = Command::new("java")
-        .current_dir(output_dir.clone())
+fn gen_for_grammar(
+    grammar_file_name: &str,
+    antlr_path: &str,
+    additional_arg: Option<&str>,
+) -> Result<(), Box<dyn Error>> {
+    let input = std::env::current_dir().unwrap().join("grammar");
+    let file_name = grammar_file_name.to_owned() + ".g4";
+
+    let _c = Command::new("java")
+        .current_dir(input)
         .arg("-cp")
-        .arg(antlr_jar)
+        .arg(antlr_path)
         .arg("org.antlr.v4.Tool")
         .arg("-Dlanguage=Rust")
         .arg("-o")
-        .arg(output_dir)
-        .arg(grammar_path)
-        .output()
-        .expect("antlr tool failed to start");
+        .arg("../src/antlr_gen")
+        .arg(&file_name)
+        .args(additional_arg)
+        .spawn()
+        .expect("antlr tool failed to start")
+        .wait_with_output()?;
 
-    if output.status.success() {
-        info!("ANTLR generated files successfully for {}", grammar_path.display());
-    } else {
-        let error_message = str::from_utf8(&output.stderr).unwrap();
-        warn!("ANTLR: {}", error_message);
-    }
+    Ok(())
 }
