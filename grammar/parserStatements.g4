@@ -22,7 +22,13 @@ statement
 // Example --- u8[] a;
 // Example --- Vec<u8> a;
 declaration
-    : modifier* type_t ID (EQUAL (expr | arrayInit | vectorInit))?
+    : modifiers+=modifier* ttype=type_t id=ID EQUAL body=declerationBody
+    ;
+
+declerationBody
+    : expr # ExprInitialization
+    | arrayInit # ArrayInitialization
+    | vectorInit # VectorInitialization
     ;
 
 // Variable modifiers - affects variable behavior (e.g., mutability) ------------------------------ [0]
