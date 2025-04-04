@@ -1,8 +1,12 @@
 use std::error::Error;
+use std::path::Path;
 use std::process::Command;
-use std::str;
+use std::{fs, str};
 
 fn main() {
+    let out_dir = Path::new("src/gen");
+    fs::create_dir_all(&out_dir).unwrap();
+
     let _ = gen_for_grammar("LzyLexer", "../antlr-complete.jar", Some("-visitor"));
     let _ = gen_for_grammar("Lzy", "../antlr-complete.jar", Some("-visitor"));
 
@@ -12,6 +16,17 @@ fn main() {
     println!("cargo:rerun-if-changed=grammar/Lzy.g4");
     println!("cargo:rerun-if-changed=grammar/ParserExpressions.g4");
     println!("cargo:rerun-if-changed=grammar/ParserStatements.g4");
+
+    eprintln!("ANTLR output:");
+    eprintln!("ANTLR output:");
+    eprintln!("ANTLR output:");
+
+    for file in &["lzylexer.rs", "lzyparser.rs", "lzylistener.rs", "lzyvisitor.rs"] {
+        let path = out_dir.join(file);
+        let content = fs::read_to_string(&path).unwrap();
+        let patched = fix_inner_attrs(&content);
+        fs::write(path, patched).unwrap();
+    }
 }
 
 fn gen_for_grammar(
@@ -29,12 +44,31 @@ fn gen_for_grammar(
         .arg("org.antlr.v4.Tool")
         .arg("-Dlanguage=Rust")
         .arg("-o")
-        .arg("../src/antlr_gen")
+        .arg("../src/gen")
         .arg(&file_name)
         .args(additional_arg)
         .spawn()
         .expect("antlr tool failed to start")
         .wait_with_output()?;
 
+
+    eprintln!("{}", str::from_utf8(&_c.stdout).unwrap());
+
+
     Ok(())
+}
+
+/// Replace all inner attributes (#![...]) with outer ones (#[...])
+fn fix_inner_attrs(content: &str) -> String {
+    content
+        .lines()
+        .map(|line| {
+            if line.trim_start().starts_with("#![") {
+                line.replacen("#![", "#[", 1)
+            } else {
+                line.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }

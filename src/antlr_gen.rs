@@ -1,15 +1,21 @@
-#[path = "antlr_gen/lzylexer.rs"]
-#[allow(unused_parens, unused_imports, unused_variables)]
-pub mod lzylexer;
+#[allow(warnings)]
+pub mod lzylexer {
+    include!("gen/lzylexer.rs");
+}
 
-#[path = "antlr_gen/lzylistener.rs"]
-#[allow(unused_parens, unused_imports, unused_variables)]
-pub mod lzylistener;
+#[allow(warnings)]
+pub mod lzylistener {
+    include!("gen/lzylistener.rs");
+}
 
-#[path = "antlr_gen/lzyparser.rs"]
-#[allow(unused_parens, unused_imports, unused_variables)]
-pub mod lzyparser;
+#[allow(warnings)]
+pub mod lzyparser {
+    include!("gen/lzyparser.rs");
+}
 
-#[path = "antlr_gen/lzyvisitor.rs"]
-#[allow(unused_parens, unused_imports, unused_variables)]
-pub mod lzyvisitor;
+#[allow(warnings)]
+pub mod lzyvisitor {
+    include!("gen/lzyvisitor.rs");
+}
+
+
