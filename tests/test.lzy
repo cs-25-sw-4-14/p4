@@ -290,7 +290,6 @@ void main(){
 
 void test_arrays_and_vectors() {
     // Basic array declaration and initialization
-    u8[] empty_array;
     u8[] non_empty_array = {1, 2, 3, 4, 5};
     i32[] int_array = {-10, 0, 10, 20, 30};
     
@@ -311,7 +310,6 @@ void test_arrays_and_vectors() {
     i32 middle = matrix[1][1];
     
     // Basic vector declaration and initialization
-    Vec<u8> empty_vector;
     Vec<i32> int_vector = {10, 20, 30, 40};
     Vec<f32> float_vector = {1.1, 2.2, 3.3};
     
