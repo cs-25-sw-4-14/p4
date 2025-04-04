@@ -20,7 +20,8 @@ impl TypeChecker {
         println!("Function Table:\n{}", function_table_visitor);
         println!("Struct Table:\n{}", struct_table_visitor);
 
-        // Visit all function bodies to collect variable declarations
+        // TODO: Visit all function bodies to collect variable declarations
+        
         // for (name, ctx) in &function_table_visitor.table {
         //     let mut variable_table_visitor = variable_table::VariableTableVisitor::new();
         //     ctx.get_children();
