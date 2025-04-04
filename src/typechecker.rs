@@ -15,10 +15,10 @@ impl TypeChecker {
         let mut function_table_visitor = function_table::FunctionTableVisitor::new();
         let mut struct_table_visitor = struct_table::StructTableVisitor::new();
 
-        function_table_visitor.visit(Rc::clone(&ctx).as_ref());
         struct_table_visitor.visit(Rc::clone(&ctx).as_ref());
-        println!("Function Table:\n{}", function_table_visitor);
+        function_table_visitor.visit(Rc::clone(&ctx).as_ref());
         println!("Struct Table:\n{}", struct_table_visitor);
+        println!("Function Table:\n{}", function_table_visitor);
 
         // TODO: Visit all function bodies to collect variable declarations
         

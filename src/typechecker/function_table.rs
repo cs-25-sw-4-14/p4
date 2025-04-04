@@ -6,19 +6,24 @@ use antlr_rust::tree::ParseTreeVisitorCompat;
 use crate::antlr_gen::lzyvisitor::LzyVisitorCompat;
 use crate::antlr_gen::lzyparser::{FunctionContext, FunctionContextExt, LzyParserContextType};
 
+use super::variable_table::VariableTableVisitor;
 
 pub struct FunctionEntry<'i> {
     pub ctx: FunctionContextExt<'i>,
+    pub variable_visitor: VariableTableVisitor<'i>,
 }
 
 pub struct FunctionTableVisitor<'i> {
-    pub table: HashMap<String,FunctionContextExt<'i>>,
+    pub table: HashMap<String,FunctionEntry<'i>>,
 }
 
 impl Display for FunctionTableVisitor<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (name, _) in &self.table {
             writeln!(f, "Function: {}", name)?;
+            for (variable_name, _) in &self.table[name].variable_visitor.table {
+                writeln!(f, "  Variable: {}", variable_name)?;
+            }
         }
         Ok(())
     }
@@ -44,7 +49,16 @@ impl<'input> ParseTreeVisitorCompat<'input> for FunctionTableVisitor<'input> {
 impl<'input> LzyVisitorCompat<'input> for FunctionTableVisitor<'input> {
     fn visit_function(&mut self, ctx: &FunctionContext<'input>) -> Self::Return {
         let name = ctx.id.clone().unwrap().get_text().to_string();
-        self.table.insert(name, ctx.deref().clone());
+
+        let mut variable_visitor = VariableTableVisitor::new();
+        variable_visitor.visit(ctx);
+
+        let function_entry = FunctionEntry {
+            ctx: ctx.deref().clone(),
+            variable_visitor,
+        };
+
+        self.table.insert(name, function_entry);
     }
 }
 
