@@ -19,7 +19,7 @@ program
 // Example --- i32 add(i32 a, i32 b) { return a + b; }
 function
     : (VOID | rettype=type_t) id=ID LEFTPAREN params=paramList? RIGHTPAREN LEFTBRACE
-      body=statement*
+      body_=statement*
       RIGHTBRACE
     ;
 
@@ -31,28 +31,28 @@ functionCall
 // Function parameters - list of type-name pairs
 // Example --- u32 age, String name, bool is_dork
 paramList
-    : paramTypes+=type_t paramNames+=ID (COMMA paramTypes+=type_t paramNames+=ID)*  # ParameterList
+    : paramTypes+=type_t paramNames+=ID (COMMA paramTypes+=type_t paramNames+=ID)*
     ;
 
 // Struct definition - a named collection of fields
 // Example --- struct Person { String name; u32 age; bool is_dork; }
 structDefinition
-    : STRUCT name=ID LEFTBRACE
+    : STRUCT id=ID LEFTBRACE
       fields+=structField*
-      RIGHTBRACE  # StructDef
+      RIGHTBRACE
     ;
 
 // Fields within a struct - each has a type and name
 // Example --- String name;
 // Example --- u32 count;
 structField
-    : fieldType=type_t fieldName=ID SEMICOLON  # StructFieldDef
+    : fieldType=type_t fieldName=ID SEMICOLON
     ;
 
 // Struct initialization - creates a new struct instance ------------------------------------------ [8]
 // Example --- Person {name: "Marc", age: 24, is_dork: true}
 structInit
-    : ID LEFTBRACE structInitField (COMMA fields+=structInitField)* RIGHTBRACE  # StructInitialization
+    : ID LEFTBRACE structInitField (COMMA fields+=structInitField)* RIGHTBRACE
     ;
 
 
@@ -103,12 +103,12 @@ vectorInit
 // Example --- u8[]
 // Example --- Vec<u8>
 type_t
-    : STRING                                 # StringType
-    | UINT                                   # UintType
-    | INT_TYPE                               # IntType
-    | FLOAT_TYPE                             # FloatType
-    | BOOL                                   # BoolType
-    | ID                                     # UserDefinedType
+    : STRING                                    # StringType
+    | UINT                                      # UintType
+    | INT_TYPE                                  # IntType
+    | FLOAT_TYPE                                # FloatType
+    | BOOL                                      # BoolType
+    | ID                                        # UserDefinedType
     | elemType=type_t LEFTBRACKET RIGHTBRACKET  # ArrayType
-    | VEC LESS elemType=type_t GREATER      # VectorType
+    | VEC LESS elemType=type_t GREATER          # VectorType
     ;
