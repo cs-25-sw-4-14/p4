@@ -19,6 +19,6 @@ fn main() {
 
     typechecker::TypeChecker::check(result);
 
-    // let tree = result.to_string_tree(&*parser)
+    // let tree = result.to_string_tree(&*parser);
     // println!("Parse Tree: {}", tree);
 }
