@@ -7,6 +7,7 @@ use crate::antlr_gen::lzyparser::ProgramContextAll;
 pub mod function_table;
 pub mod struct_table;
 pub mod variable_table;
+pub mod expression_checker;
 
 pub struct TypeChecker {}
 
@@ -19,5 +20,8 @@ impl TypeChecker {
         function_table_visitor.visit(Rc::clone(&ctx).as_ref());
         println!("Struct Table:\n{}", struct_table_visitor);
         println!("Function Table:\n{}", function_table_visitor);
+
+        let mut expression_checker = expression_checker::ExpressionCheckingVisitor::new(function_table_visitor);
+        expression_checker.visit(Rc::clone(&ctx).as_ref());
     }
 }
