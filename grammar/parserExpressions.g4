@@ -5,7 +5,7 @@ grammar ParserExpressions;
 // Expression - the building block for conditions and values -------------------------------------- [7]
 // Example --- a + b * c
 expr
-    : logicalOrExpr # Expression
+    : expression=logicalOrExpr
     ;
 
 // Logical OR expression - combines AND expressions with OR --------------------------------------- [7]
