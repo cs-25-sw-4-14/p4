@@ -1,12 +1,11 @@
 [package]
-name = "p4-rs"
+name = "lossy"
 version = "0.1.0"
 edition = "2024"
-build = "build.rs"
+
+[build-dependencies]
+lalrpop = "0.22.1"
 
 [dependencies]
-antlr-rust = "0.3.0-beta"
-anyhow = "1.0.97"
-ptree = "0.5.2"
-
-
+lalrpop-util = { version = "0.21.0", features = ["lexer", "unicode"] }
+logos = "0.15.0"
