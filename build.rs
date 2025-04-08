@@ -17,10 +17,6 @@ fn main() {
     println!("cargo:rerun-if-changed=grammar/ParserExpressions.g4");
     println!("cargo:rerun-if-changed=grammar/ParserStatements.g4");
 
-    eprintln!("ANTLR output:");
-    eprintln!("ANTLR output:");
-    eprintln!("ANTLR output:");
-
     for file in &["lzylexer.rs", "lzyparser.rs", "lzylistener.rs", "lzyvisitor.rs"] {
         let path = out_dir.join(file);
         let content = fs::read_to_string(&path).unwrap();
