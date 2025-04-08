@@ -117,6 +117,7 @@ vectorInit
 // Example --- Vec<u8>
 type
     : STRING                                 // String type
+    | CHAR                                   // Character type
     | UINT                                   // Unsigned integer types (u8, u16, etc.)
     | INT_TYPE                               // Signed integer types (i8, i16, etc.)
     | FLOAT_TYPE                             // Floating-point types (f8, f16, etc.)

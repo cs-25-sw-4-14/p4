@@ -16,6 +16,7 @@ CONTINUE: 'continue' ;
 RETURN  : 'return' ;
 STRUCT  : 'struct' ;
 VEC     : 'Vec' ;
+CHAR    : 'char' ;
 
 // -------------------- TYPE LITERALS --------------------
 
@@ -78,6 +79,9 @@ FLOAT : [0-9]+ '.' [0-9]+ ;     // Floating point (digits, decimal point, more d
 
 // String literals with escape sequence support
 STRING_LITERAL : '"' (~["\\\r\n] | '\\' .)* '"' ;
+
+// Character literals with escape sequence support
+CHAR_LITERAL : '\'' (~['\\\r\n] | '\\' .) '\'' ;
 
 // Boolean literals
 BOOL_LITERAL : 'true' | 'false' ;

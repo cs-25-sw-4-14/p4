@@ -71,6 +71,7 @@ primaryExpr
     | INT                        // Integer literal
     | FLOAT                      // Floating-point literal
     | STRING_LITERAL             // String literal
+    | CHAR_LITERAL               // Character literal
     | BOOL_LITERAL               // Boolean literal
     | structInit                 // [8] Struct initialization
     | arrayInit                  // Array initialization

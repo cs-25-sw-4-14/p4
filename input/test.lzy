@@ -357,3 +357,28 @@ void test_arrays_and_vectors() {
     // Method chaining
     int_vector.clear().push(100).push(200);
 }
+
+
+// ------------- CHAR TESTING ---------------- 
+
+// Example code for using character type
+void test_character_type() {
+    // Basic character declaration and initialization
+    char first_letter = 'A';
+    char digit = '5';
+    char symbol = '@';
+    
+    // Character with escape sequences
+    char newline = '\n';
+    char tab = '\t';
+    char backslash = '\\';
+    char single_quote = '\'';
+    
+    // Array of characters
+    char[] initials = {'J', 'D', 'M', 'B'};
+    char first_initial = initials[0];
+    
+    // Vector of characters
+    Vec<char> char_vector = {'H', 'e', 'l', 'l', 'o'};
+    char first_char = char_vector.get(0);
+}
