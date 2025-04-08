@@ -25,7 +25,7 @@ impl<'input> ParseTreeVisitorCompat<'input> for ExpressionCheckingVisitor<'input
 impl<'input> LzyVisitorCompat<'input> for ExpressionCheckingVisitor<'input> {
     fn visit_expr(&mut self,_ctx: &crate::antlr_gen::lzyparser::ExprContext<'input>) -> Self::Return {
         // TODO: Check if the expression is valid
-        println!("Checking expression...");
+        // println!("Checking expression...");
     }
 }
 
