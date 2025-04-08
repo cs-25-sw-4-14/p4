@@ -6,6 +6,7 @@ build = "build.rs"
 
 [dependencies]
 antlr-rust = "0.3.0-beta"
+anyhow = "1.0.97"
 ptree = "0.5.2"
 
 
