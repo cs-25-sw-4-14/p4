@@ -12,7 +12,7 @@ import ParserStatements, ParserExpressions;
 // Root rule - a program consists of one or more functions or struct definitions
 // Example --- struct Person { String name; u32 age; } void main() { ... }
 program
-    : (function | structDefinition)+ EOF # ProgramStructure
+    : (function | structDefinition)* function (function | structDefinition)* EOF # ProgramStructure
     ;
 
 // Function definition - includes return type, name, parameters, and body
@@ -104,6 +104,7 @@ vectorInit
 // Example --- Vec<u8>
 type_t
     : STRING                                    # StringType
+    | CHAR                                      # CharType
     | UINT                                      # UintType
     | INT_TYPE                                  # IntType
     | FLOAT_TYPE                                # FloatType

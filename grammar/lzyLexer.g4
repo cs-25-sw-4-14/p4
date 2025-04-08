@@ -16,6 +16,7 @@ CONTINUE: 'continue' ;
 RETURN  : 'return' ;
 STRUCT  : 'struct' ;
 VEC     : 'Vec' ;
+CHAR    : 'char' ;
 
 // -------------------- TYPE LITERALS --------------------
 
@@ -81,6 +82,9 @@ STRING_LITERAL : '"' (~["\\\r\n] | '\\' .)* '"' ;
 
 // Boolean literals
 BOOL_LITERAL : 'true' | 'false' ;
+
+// Character literals with escape sequence support
+CHAR_LITERAL : '\'' (~['\\\r\n] | '\\' .) '\'' ;
 
 // -------------------- IGNORED TOKENS --------------------
 

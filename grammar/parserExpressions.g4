@@ -76,6 +76,7 @@ primaryExpr
     | INT                               # IntLiteral
     | FLOAT                             # FloatLiteral
     | STRING_LITERAL                    # StringLiteral
+    | CHAR_LITERAL                      # CharLiteral
     | BOOL_LITERAL                      # BoolLiteral
     | structInit                        # StructInitExpr
     | arrayInit                         # ArrayInitExpr
