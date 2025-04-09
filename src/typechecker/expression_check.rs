@@ -21,43 +21,27 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::FunctionCall(function_call) => {
 
             // Check if the function is defined in the function table
-            if let Some(func) = ftable.get(&function_call.name) {
-                //the return type of the function
-                let functype = func.def.return_type.clone().unwrap_or(Type::Void);
+            let func = ftable.get(&function_call.name)
+                .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
 
+            let return_type = func.def.return_type.clone()
+                .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function_call.name))?;
 
-
-                // check if the number of arguments is correct
-                if func.def.params.len() != function_call.args.len() {
-                    return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
-                }
-                
-
-                // get all the argument types from ftable
-                let fTableArgTypes = func.def.params.iter()
-                .map(|param| param.param_type.clone())
-                .collect::<Vec<Type>>();      
-
-                // get all the argument types from the function call
-                let actualArgTypes = function_call.args.iter()
-                .map(|arg| check(arg, vtable, ftable))
-                .collect::<Result<Vec<Type>>>()?;
-                
-                //check if the types are the same
-                for i in 0..fTableArgTypes.len() {
-                    if fTableArgTypes[i] != actualArgTypes[i] {
-                        return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
-                    }
-                }
-            
-            
-            println!("function checked {}, with return type {}", function_call.name, functype);
-            Ok(functype)
-
-
-            }else {
-                Err(anyhow::anyhow!("function: {}, not defined", function_call.name))
+            // check if the number of arguments is correct
+            if func.def.params.len() != function_call.args.len() {
+                return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
             }
+
+             //check if the types are the same
+             for i in 0..func.def.params.len() {
+                let expected_type = func.def.params[i].param_type.clone();
+                let actual_type = check(&function_call.args[i], vtable, ftable)?;
+                 if expected_type != actual_type {
+                     return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
+                }
+             }
+
+            Ok(return_type)
 
 
         }
