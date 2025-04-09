@@ -2,6 +2,13 @@ use crate::ast::*;
 
 grammar;
 
+match {
+    r"\s*" => { }, // Skip whitespace
+    r"//[^\n\r]*[\n\r]*" => { }, // Skip line comments
+    r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/" => { }, // Skip block comments
+    _
+}
+
 pub Program: Program = {
     TopLevelDefinition+ => Program { definitions: <> }
 };
@@ -344,8 +351,3 @@ BoolLiteral: bool = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string()
 };
 
-// BUG: Make Comments work
-CommentOrWhitespace: () = {
-    r"[ \t\r\n]+" => (),
-    r"[ \t]*//[^\n]*\n?" => (),  
-};
