@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use crate::ast::{FunctionDef, Program, TopLevelDefinition};
 use super::variable_table::VTable;
 
+#[derive(Debug)]
 pub struct FunctionEntry {
     pub def: FunctionDef,
     pub vtable: VTable,

@@ -22,5 +22,8 @@ impl Typechecker {
     pub fn walk(&mut self, program: Program) {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
+
+        println!("Function Table: {:#?}", self.ftable.functions);
+        println!("Struct Table: {:#?}", self.stable.structs);
     }
 }

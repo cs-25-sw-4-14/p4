@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::ast::{Statement, VariableDeclaration};
 
+#[derive(Debug)]
 pub struct VTable {
     pub variables: HashMap<String, VariableDeclaration>,
 }
