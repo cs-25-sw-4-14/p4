@@ -5,7 +5,7 @@ use anyhow::Result;
 pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
 
     match expression {
-        Expression::Literal(literal) => Ok(Type::from(literal.clone())),
+        Expression::Literal(literal) => Ok(Type::from(literal.clone())), 
         Expression::Variable(name) => {
             if let Some(var) = vtable.get(name) {
                 Ok(var.var_type.clone())
@@ -41,6 +41,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
                 }
              }
 
+            println!("Function {} called with correct argument types", function_call.name);
             Ok(return_type)
 
 
