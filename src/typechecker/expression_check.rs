@@ -22,16 +22,37 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
 
             // Check if the function is defined in the function table
             if let Some(func) = ftable.get(&function_call.name) {
+                //the return type of the function
+                let functype = func.def.return_type.clone().unwrap_or(Type::Void);
 
-                // Check if the function has the correct number of arguments
+
+
+                // check if the number of arguments is correct
                 if func.def.params.len() != function_call.args.len() {
                     return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
                 }
                 
 
-                let functype = func.def.return_type.clone().expect("REASON");
-                println!("function checked {:?}",functype );
-                Ok(functype)
+                // get all the argument types from ftable
+                let fTableArgTypes = func.def.params.iter()
+                .map(|param| param.param_type.clone())
+                .collect::<Vec<Type>>();      
+
+                // get all the argument types from the function call
+                let actualArgTypes = function_call.args.iter()
+                .map(|arg| check(arg, vtable, ftable))
+                .collect::<Result<Vec<Type>>>()?;
+                
+                //check if the types are the same
+                for i in 0..fTableArgTypes.len() {
+                    if fTableArgTypes[i] != actualArgTypes[i] {
+                        return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
+                    }
+                }
+            
+            
+            println!("function checked {}, with return type {}", function_call.name, functype);
+            Ok(functype)
 
 
             }else {
