@@ -31,3 +31,68 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::TypeCast(type_cast) => todo!(),
     }
 }
+
+#[cfg(test)]
+pub mod literal_tests {
+    use super::*;
+    use crate::lossy::ExpressionParser;
+
+    #[test]
+    fn check_literal_should_return_type() {
+        let tests = vec![
+            ("'r'", Type::Char),
+            ("\"test\"", Type::String),
+            ("true", Type::Bool),
+            ("false", Type::Bool),
+            ("4", Type::I64),
+            ("4.2", Type::FP64),
+        ];
+
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        for (input, expected_type) in tests {
+            let expression = ExpressionParser::new()
+                .parse(input)
+                .expect("Failed to parse: ");
+
+
+            let result = check(&expression, &vtable, &ftable).unwrap();
+            assert_eq!(result, expected_type);
+        }
+    }
+}
+
+#[cfg(test)]
+pub mod variable_tests {
+    use super::*;
+    use crate::{ast::{Literal, VariableDeclaration}, lossy::ExpressionParser};
+
+    #[test]
+    fn check_variable_should_return_type() {
+        let mut vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = ExpressionParser::new()
+            .parse("x")
+            .expect("Failed to parse: ");
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+
+        vtable.variables.insert(
+            "x".to_string(),
+            VariableDeclaration {
+                trivial: None,
+                mutable: None,
+                var_type: Type::I64,
+                name: "x".to_string(),
+                value: Expression::Literal(Literal::Int(4)),
+            },
+        );
+
+        check(&expression, &vtable, &ftable).unwrap();
+    }
+
+}
+
+
