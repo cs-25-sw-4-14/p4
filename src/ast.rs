@@ -1,16 +1,16 @@
 // NOTE: ENTRY POINT
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program {
     pub definitions: Vec<TopLevelDefinition>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TopLevelDefinition {
     Function(FunctionDef),
     Struct(StructDef),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionDef {
     pub return_type: Option<Type>,
     pub name: String,
@@ -18,19 +18,19 @@ pub struct FunctionDef {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Param {
     pub name: String,
     pub param_type: Type,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructDef {
     pub name: String,
     pub fields: Vec<StructField>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructField {
     pub name: String,
     pub field_type: Type,
@@ -38,7 +38,7 @@ pub struct StructField {
 
 
 // NOTE: STATEMENTS
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     VariableDeclaration(VariableDeclaration),
     Assignment(VariableAssignment),
@@ -48,10 +48,9 @@ pub enum Statement {
     Continue,
     Return(ReturnStatement),
     FunctionCall(FunctionCall),
-
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VariableDeclaration {
     pub trivial: Option<()>,
     pub mutable: Option<()>,
@@ -60,13 +59,13 @@ pub struct VariableDeclaration {
     pub value: Expression,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IfStatement {
     pub condition: Expression,
     pub then_block: Vec<Statement>,
@@ -74,24 +73,24 @@ pub struct IfStatement {
     pub else_block: Option<Vec<Statement>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ElseIf {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WhileStatement {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ReturnStatement {
     pub value: Option<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionCall {
     pub name: String,
     pub args: Vec<Expression>,
@@ -99,7 +98,7 @@ pub struct FunctionCall {
 
 // INFO: EXPRESSIONS
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Literal(Literal),
     Variable(String),
@@ -113,7 +112,7 @@ pub enum Expression {
     TypeCast(TypeCast),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     Int(i64),
     Float(f64),
@@ -122,20 +121,20 @@ pub enum Literal {
     Bool(bool),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinaryOperation {
     pub left: Box<Expression>,
     pub operator: BinaryOperator,
     pub right: Box<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnaryOperation {
     pub operator: UnaryOperator,
     pub operand: Box<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BinaryOperator {
     Multiply,       // 1
     Divide,         // 1
@@ -152,48 +151,48 @@ pub enum BinaryOperator {
     Or,             // 6
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum UnaryOperator {
     Negate,
     Not,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructInit {
     pub name: String,
     pub fields: Vec<StructFieldInit>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructFieldInit {
     pub name: String,
     pub value: Expression,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructFieldAccess {
     pub struct_expr: Box<Expression>,
     pub field_name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypeCast {
     pub expression: Box<Expression>,
     pub target_type: Type,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Type {
     U8,
     U16,
