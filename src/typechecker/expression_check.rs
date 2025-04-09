@@ -18,7 +18,31 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         // TODO: Kristoffer
         Expression::UnaryOp(unary_operation) => todo!(),
         // TODO: Thorbjoern
-        Expression::FunctionCall(function_call) => todo!(),
+        Expression::FunctionCall(function_call) => {
+
+            // Check if the function is defined in the function table
+            if let Some(func) = ftable.get(&function_call.name) {
+
+                // Check if the function has the correct number of arguments
+                if func.def.params.len() != function_call.args.len() {
+                    return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
+                }
+                
+
+                let functype = func.def.return_type.clone().expect("REASON");
+                println!("function checked {:?}",functype );
+                Ok(functype)
+
+
+            }else {
+                Err(anyhow::anyhow!("function: {}, not defined", function_call.name))
+            }
+
+
+        }
+        
+        
+        
         // TODO: Marck
         Expression::StructInit(struct_init) => todo!(),
         // TODO: Marck
