@@ -20,7 +20,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
             if left_type == right_type {
                 Ok(left_type)
             } else {
-                Err(anyhow::anyhow!("Type mismatch: {:?} and {:?}", left_type, right_type))
+                Err(anyhow::anyhow!("Type mismatch: {:?} {:?} {:?}", left_type, binary_operation.operator, right_type))
             }
         },
         // TODO: Kristoffer
