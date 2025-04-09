@@ -38,7 +38,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
                 return Err(anyhow::anyhow!("Array literal is empty"));
             }
 
-            let mut first_type = check(&array_literal.elements[0], vtable, ftable)?;
+            let first_type = check(&array_literal.elements[0], vtable, ftable)?;
             
             for element in &array_literal.elements[1..] {
                 let element_type = check(element, vtable, ftable)?;
