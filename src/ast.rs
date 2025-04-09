@@ -56,7 +56,7 @@ pub struct VariableDeclaration {
     pub modifiers: bool,
     pub var_type: Type,
     pub name: String,
-    pub value: Option<Expression>,
+    pub value: Expression,
 }
 
 #[derive(Debug)]
@@ -101,13 +101,14 @@ pub struct FunctionCall {
 pub enum Expression {
     Literal(Literal),
     Variable(String),
-    Operation(Operation),
+    BinaryOp(BinaryOperation),
+    UnaryOp(UnaryOperation),
     FunctionCall(FunctionCall),
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
-    ArrayInit(ArrayInit),
-    ArrayAccess(ArrayAccess),
-    VectorInit(VectorInit),
+    ArrayInit(Box<ArrayInit>),
+    ArrayAccess(Box<ArrayAccess>),
+    VectorInit(Box<VectorInit>),
     TypeCast(TypeCast),
 }
 
@@ -120,17 +121,14 @@ pub enum Literal {
     Bool(bool),
 }
 
-pub enum Operation {
-    Binary(BinaryOperation),
-    Unary(UnaryOperation),
-}
-
+#[derive(Debug)]
 pub struct BinaryOperation {
     pub left: Box<Expression>,
     pub operator: BinaryOperator,
     pub right: Box<Expression>,
 }
 
+#[derive(Debug)]
 pub struct UnaryOperation {
     pub operator: UnaryOperator,
     pub operand: Box<Expression>,
@@ -220,6 +218,6 @@ pub enum Type {
     Char,
     Bool,
     Custom(String),
-    Array(Type, Option<usize>),
-    Vector(Type),
+    Array(Box<Type>, Option<usize>),
+    Vector(Box<Type>),
 }
