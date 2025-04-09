@@ -19,7 +19,6 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::UnaryOp(unary_operation) => todo!(),
         // TODO: Thorbjoern
         Expression::FunctionCall(function_call) => {
-
             // Check if the function is defined in the function table
             let func = ftable.get(&function_call.name)
                 .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
@@ -43,12 +42,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
 
             println!("Function {} called with correct argument types", function_call.name);
             Ok(return_type)
-
-
         }
-        
-        
-        
         // TODO: Marck
         Expression::StructInit(struct_init) => todo!(),
         // TODO: Marck
@@ -61,3 +55,90 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::TypeCast(type_cast) => todo!(),
     }
 }
+
+#[cfg(test)]
+pub mod function_tests {
+    use super::*;
+    use crate::ast::{Expression, FunctionDef, Literal, Param, Type};
+    use crate::lossy::ExpressionParser;
+    use crate::typechecker::function_table::FunctionEntry;
+
+    #[test]
+    fn check_function_should_err_on_function_not_defined() {
+        let expression = ExpressionParser::new()
+            .parse("test()")
+            .expect("Failed to parse: ");
+
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+    #[test]
+    fn check_function_should_have_return_type() {
+        let expression = ExpressionParser::new()
+            .parse("test()")
+            .expect("Failed to parse: ");
+
+        let vtable = VTable::new();
+        let mut ftable = Ftable::new();
+
+        ftable.functions.insert(String::from("test"), FunctionEntry { 
+            def: FunctionDef {
+                name: String::from("test"),
+                params: vec![],
+                return_type: None,
+                body: vec![],
+            },
+            vtable: VTable::new(),
+        });
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+    #[test]
+    fn check_function_args_and_params_are_same_length() {
+        let expression = ExpressionParser::new()
+            .parse("test()")
+            .expect("Failed to parse: ");
+
+        let vtable = VTable::new();
+        let mut ftable = Ftable::new();
+
+        ftable.functions.insert(String::from("test"), FunctionEntry { 
+            def: FunctionDef {
+                name: String::from("test"),
+                params: vec![ Param { name: String::from("a"), param_type: Type::I32 }],
+                return_type: None,
+                body: vec![],
+            },
+            vtable: VTable::new(),
+        });
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+    #[test]
+    fn check_function_args_and_params_are_same_type() {
+        let expression = ExpressionParser::new()
+            .parse("test(4.2)")
+            .expect("Failed to parse: ");
+
+        let vtable = VTable::new();
+        let mut ftable = Ftable::new();
+
+        ftable.functions.insert(String::from("test"), FunctionEntry { 
+            def: FunctionDef {
+                name: String::from("test"),
+                params: vec![ Param { name: String::from("a"), param_type: Type::I32 }],
+                return_type: None,
+                body: vec![],
+            },
+            vtable: VTable::new(),
+        });
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+}
+
