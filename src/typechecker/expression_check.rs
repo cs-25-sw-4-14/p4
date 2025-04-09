@@ -34,6 +34,10 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         // TODO: Rasmus
         Expression::ArrayAccess(array_access) => todo!(),
         Expression::ArrayLiteral(array_literal) => {
+            if array_literal.elements.is_empty() {
+                return Err(anyhow::anyhow!("Array literal is empty"));
+            }
+
             let mut first_type = check(&array_literal.elements[0], vtable, ftable)?;
             
             for element in &array_literal.elements[1..] {
@@ -182,6 +186,20 @@ pub mod array_literal_tests {
                     Expression::Literal(Literal::Float(2.0)),
                     Expression::Literal(Literal::Int(3)),
                 ],
+            })
+        );
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+#[test]
+    fn check_array_literal_empty() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::ArrayLiteral(
+            Box::new(ArrayLiteral {
+                elements: vec![],
             })
         );
 
