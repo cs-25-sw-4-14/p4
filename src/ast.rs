@@ -213,3 +213,15 @@ pub enum Type {
     Array(Box<Type>, i64),
     Vector(Box<Type>),
 }
+
+impl From<Literal> for Type {
+    fn from(literal: Literal) -> Self {
+        match literal {
+            Literal::Int(_) => Type::I64,
+            Literal::Float(_) => Type::FP64,
+            Literal::String(_) => Type::String,
+            Literal::Char(_) => Type::Char,
+            Literal::Bool(_) => Type::Bool,
+        }
+    }
+}

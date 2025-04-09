@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-
-use crate::ast::{FunctionDef, Program};
-
+use crate::ast::{FunctionDef, Program, TopLevelDefinition};
 use super::vtable::VTable;
 
 pub struct FunctionEntry {
@@ -23,7 +21,7 @@ impl Ftable {
     pub fn walk(&mut self, program: Program) {
         for def in program.definitions {
             match def {
-                crate::ast::TopLevelDefinition::Function(func) => {
+                TopLevelDefinition::Function(func) => {
 
                     let mut vtable = VTable::new();
                     vtable.walk(func.body.clone());

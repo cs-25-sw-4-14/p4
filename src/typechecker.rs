@@ -1,3 +1,5 @@
+use crate::ast::Program;
+
 pub mod ftable;
 pub mod stable;
 pub mod vtable;
@@ -16,7 +18,7 @@ impl Typechecker {
         }
     }
 
-    pub fn walk(&mut self, program: crate::ast::Program) {
+    pub fn walk(&mut self, program: Program) {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
     }

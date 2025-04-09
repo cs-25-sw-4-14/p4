@@ -1,45 +1,35 @@
-use std::collections::HashMap;
+use crate::ast::{Expression, Literal, Type};
+use super::{ftable::Ftable, vtable::VTable};
+use anyhow::Result;
 
-use crate::ast::{FunctionDef, Program};
 
-use super::vtable::VTable;
-
-pub struct FunctionEntry {
-    pub def: FunctionDef,
-    pub vtable: VTable,
+pub struct ECheck {
 }
 
-pub struct Ftable {
-    pub functions: HashMap<String, FunctionEntry>,
-}
-
-impl Ftable {
+impl ECheck {
     pub fn new() -> Self {
-        Ftable {
-            functions: HashMap::new(),
-        }
+        ECheck {}
     }
 
-    pub fn walk(&mut self, program: Program) {
-        for def in program.definitions {
-            match def {
-                crate::ast::TopLevelDefinition::Function(func) => {
+    pub fn check_e(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
 
-                    let mut vtable = VTable::new();
-                    vtable.walk(func.body.clone());
-
-                    self.functions.insert(func.name.clone(), FunctionEntry {
-                        def: func.clone(),
-                        vtable,
-                    });
-
+        match expression {
+            Expression::Literal(literal) => Ok(Type::from(literal.clone())),
+            Expression::Variable(name) => {
+                if let Some(var) = vtable.get(name) {
+                    Ok(var.var_type.clone())
+                } else {
+                    Err(anyhow::anyhow!("Variable {} not found in vtable", name))
                 }
-                _ => {}
             }
+            Expression::BinaryOp(binary_operation) => todo!(),
+            Expression::UnaryOp(unary_operation) => todo!(),
+            Expression::FunctionCall(function_call) => todo!(),
+            Expression::StructInit(struct_init) => todo!(),
+            Expression::StructFieldAccess(struct_field_access) => todo!(),
+            Expression::ArrayAccess(array_access) => todo!(),
+            Expression::ArrayLiteral(array_literal) => todo!(),
+            Expression::TypeCast(type_cast) => todo!(),
         }
-    }
-
-    pub fn get(&self, name: &str) -> Option<&FunctionEntry> {
-        self.functions.get(name)
     }
 }
