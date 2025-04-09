@@ -57,7 +57,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
 }
 
 #[cfg(test)]
-pub mod function_tests {
+pub mod function_call_tests {
     use super::*;
     use crate::ast::{Expression, FunctionDef, Literal, Param, Type};
     use crate::lossy::ExpressionParser;
