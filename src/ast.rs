@@ -53,7 +53,8 @@ pub enum Statement {
 
 #[derive(Debug)]
 pub struct VariableDeclaration {
-    pub modifiers: bool,
+    pub trivial: Option<()>,
+    pub mutable: Option<()>,
     pub var_type: Type,
     pub name: String,
     pub value: Expression,
@@ -61,13 +62,14 @@ pub struct VariableDeclaration {
 
 #[derive(Debug)]
 pub struct Assignment {
-    pub name: String,
+    pub target: String,
     pub value: Expression,
 }
 
 #[derive(Debug)]
 pub struct IfStatement {
     pub condition: Expression,
+    pub then_block: Vec<Statement>,
     pub else_if_blocks: Vec<ElseIf>,
     pub else_block: Option<Vec<Statement>>,
 }
@@ -75,7 +77,7 @@ pub struct IfStatement {
 #[derive(Debug)]
 pub struct ElseIf {
     pub condition: Expression,
-    pub block: Vec<Statement>,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Debug)]
@@ -106,9 +108,8 @@ pub enum Expression {
     FunctionCall(FunctionCall),
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
-    ArrayInit(Box<ArrayInit>),
     ArrayAccess(Box<ArrayAccess>),
-    VectorInit(Box<VectorInit>),
+    ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
 }
 
@@ -159,7 +160,7 @@ pub enum UnaryOperator {
 
 #[derive(Debug)]
 pub struct StructInit {
-    pub struct_name: String,
+    pub name: String,
     pub fields: Vec<StructFieldInit>,
 }
 
@@ -176,22 +177,14 @@ pub struct StructFieldAccess {
 }
 
 #[derive(Debug)]
-pub struct ArrayInit {
-    pub array_type: Type,
-    pub size: usize,
-    pub initial_value: Option<Expression>,
-}
-
-#[derive(Debug)]
 pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
 
 #[derive(Debug)]
-pub struct VectorInit {
-    pub vector_type: Type,
-    pub initial_value: Option<Expression>,
+pub struct ArrayLiteral {
+    pub elements: Vec<Expression>,
 }
 
 #[derive(Debug)]
@@ -218,6 +211,6 @@ pub enum Type {
     Char,
     Bool,
     Custom(String),
-    Array(Box<Type>, Option<usize>),
+    Array(Box<Type>, i64),
     Vector(Box<Type>),
 }

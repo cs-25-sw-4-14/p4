@@ -12,56 +12,51 @@ TopLevelDefinition: TopLevelDefinition = {
 };
 
 FunctionDef: FunctionDef = {
-    <r:ReturnOpt> <n:ID> "(" <p:ParamListOpt> ")" "{" <b:Statement*> "}" => FunctionDef {
+    <r:ReturnOpt> <n:ID> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
          return_type: r,
          name: n,
-         params: p,
+         params: p.unwrap_or(vec![]),
          body: b,
     }
 };
 
 ReturnOpt: Option<Type> = {
     <t:Type> => Some(t),
-    "Void" => None
-};
-
-ParamListOpt: Option<Vec<Param>> = {
-    <p:ParamList> => Some(p),
-    "" => None
+    "void" => None
 };
 
 ParamList: Vec<Param> = {
     <p:Param> <pn:("," Param)*> => {
         let mut params = vec![p];
-        params.extend(__1.into_iter().map(|x| x.1));
+        params.extend(pn.into_iter().map(|x| x.1));
         params
     }
 };
 
 Param: Param = {
     <t:Type> <n:ID> => Param {
-        var_type: t,
+        param_type: t,
         name: n,
     }
 };
 
 StructDef: StructDef = {
-    "Struct" <n:ID> "{" <f:StructField*> "}" => StructDef {
+    "struct" <n:ID> "{" <f:StructField*> "}" => StructDef {
         name: n,
         fields: f,
     }
 };
 
 StructField: StructField = {
-    <t:Type> <n:ID> => StructField {
-        var_type: t,
+    <t:Type> <n:ID> ";" => StructField {
+        field_type: t,
         name: n,
     }
 };
 
 StructFieldInit: StructFieldInit = {
     <n:ID> ":" <v:Expression> => StructFieldInit {
-        field_name: n,
+        name: n,
         value: v,
     }
 };
@@ -71,14 +66,14 @@ Statement: Statement = {
     <t:Assignment> => Statement::Assignment(t),
     <t:If> => Statement::If(t),
     <t:While> => Statement::While(t),
-    Break => Statement::Break,
-    Continue => Statement::Continue,
+    "break" ";" => Statement::Break,
+    "continue" ";" => Statement::Continue,
     <t:Return> => Statement::Return(t),
     <t:FunctionCall> => Statement::FunctionCall(t),
 };
 
 VariableDeclaration: VariableDeclaration = {
-    <tr:TrivialOpt> <mu:MutableOpt> <t:Type> <n:ID> "=" <v:Expression> ";" => VariableDeclaration {
+    <tr:Trivial?> <mu:Mutable?> <t:Type> <n:ID> "=" <v:Expression> ";" => VariableDeclaration {
         trivial: tr,
         mutable: mu,
         var_type: t,
@@ -87,14 +82,12 @@ VariableDeclaration: VariableDeclaration = {
     }
 };
 
-TrivialOpt: bool = {
-    "Triv" => true,
-    "" => false,
+Trivial: () = {
+    "triv" => (),
 };
 
-MutableOpt: bool = {
-    "Mut" => true,
-    "" => false,
+Mutable: () = {
+    "mut" => (),
 };
 
 Assignment: Assignment = {
@@ -105,11 +98,11 @@ Assignment: Assignment = {
 };
 
 If: IfStatement = {
-    "if" "(" <c:Expression> ")" "{" <t:Statement*> "}" <ei:ElseIf*> <e:("Else" "{" Statement* "}")?> => If {
+    "if" "(" <c:Expression> ")" "{" <t:Statement*> "}" <ei:ElseIf*> <e:Else?> => IfStatement {
         condition: c,
-        then_branch: t,
-        else_if_branches: ei,
-        else_branch: e,
+        then_block: t,
+        else_if_blocks: ei,
+        else_block: e,
     }
 };
 
@@ -120,19 +113,15 @@ ElseIf: ElseIf = {
     }
 };
 
+Else: Vec<Statement> = {
+    "else" "{" <b:Statement*> "}" => b,
+};
+
 While: WhileStatement = {
-    "while" "(" <c:Expression> ")" "{" <b:Statement*> "}" => While {
+    "while" "(" <c:Expression> ")" "{" <b:Statement*> "}" => WhileStatement {
         condition: c,
         body: b,
     }
-};
-
-Break: Break = {
-    "break" ";" => Break,
-};
-
-Continue: Continue = {
-    "continue" ";" => Continue,
 };
 
 Return: ReturnStatement = {
@@ -143,7 +132,7 @@ Return: ReturnStatement = {
 FunctionCall: FunctionCall = {
     <n:ID> "(" <a:ArgumentList?> ")" ";"=> FunctionCall {
         name: n,
-        args: a,
+        args: a.unwrap_or(vec![]),
     }
 };
 
@@ -160,97 +149,106 @@ Expression: Expression = {
     Term,
 
     #[precedence(level="1")] #[assoc(side="left")]
-    "-" <o:Expression> => Expression::UnaryOp(UnaryExpression {
+    "-" <o:Expression> => Expression::UnaryOp(UnaryOperation {
         operator: UnaryOperator::Negate,
         operand: Box::new(o),
     }),
-    "!" <o:Expression> => Expression::UnaryOp(UnaryExpression {
+    "!" <o:Expression> => Expression::UnaryOp(UnaryOperation {
         operator: UnaryOperator::Not,
         operand: Box::new(o),
     }),
 
     #[precedence(level="2")] #[assoc(side="left")]
-    <l:Expression> "/" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "/" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Divide,
         right: Box::new(r),
     }), 
-    <l:Expression> "*" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "*" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Multiply,
         right: Box::new(r),
     }),
-    <l:Expression> "%" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "%" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Modulus,
         right: Box::new(r),
     }),
     #[precedence(level="3")] #[assoc(side="left")]
-    <l:Expression> "+" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "+" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Add,
         right: Box::new(r),
     }),
-    <l:Expression> "-" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "-" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Subtract,
         right: Box::new(r),
     }),
     #[precedence(level="4")] #[assoc(side="left")]
-    <l:Expression> "<" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "<" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::LessThan,
         right: Box::new(r),
     }),
-    <l:Expression> ">" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> ">" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThan,
         right: Box::new(r),
     }),
-    <l:Expression> "<=" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "<=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::LessThanOrEqual,
         right: Box::new(r),
     }),
-    <l:Expression> ">=" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> ">=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThanOrEqual,
         right: Box::new(r),
     }),
     #[precedence(level="5")] #[assoc(side="left")]
-    <l:Expression> "==" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "==" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Equal,
         right: Box::new(r),
     }),
-    <l:Expression> "!=" <r:Expression> => Expression::BinaryOp(BinaryExpression {
-        right: Box::new(__o),
+    <l:Expression> "!=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
+        left: Box::new(l),
         operator: BinaryOperator::NotEqual,
         right: Box::new(r),
     }),
-    <l:Expression> "&&" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "&&" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
         right: Box::new(r),
     }),
-    <l:Expression> "||" <r:Expression> => Expression::BinaryOp(BinaryExpression {
+    <l:Expression> "||" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
         right: Box::new(r),
     }),
     <e:Literal> => Expression::Literal(e),
-    <e:Variable> => Expression::Variable(e),
+    <e:ID> => Expression::Variable(e),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
     <e:StructFieldAccess> => Expression::StructFieldAccess(e),
-    <e:ArrayInit> => Expression::ArrayInit(e),
-    <e:ArrayAccess> => Expression::ArrayAccess(e),
-    <e:VectorInit> => Expression::VectorInit(e),
+    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
+    <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
     <e:TypeCast> => Expression::TypeCast(e),
 };
 
 Term: Expression = {
     "(" <e:Expression> ")" => e,
+};
+
+ArrayLiteral: ArrayLiteral = {
+    "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
+        elements: {
+            let mut elements = vec![e];
+            elements.extend(en.into_iter().map(|x| x.1));
+            elements
+        },
+    }
 };
 
 Literal: Literal = {
@@ -261,10 +259,6 @@ Literal: Literal = {
     <l:BoolLiteral> => Literal::Bool(l),
 };
 
-Variable: Variable = {
-    <n:ID> => Variable { name:n },
-};
-
 StructInit: StructInit = {
     <n:ID> "{" <f:StructFieldInit*> "}" => StructInit {
         name: n,
@@ -273,19 +267,9 @@ StructInit: StructInit = {
 };
 
 StructFieldAccess: StructFieldAccess = {
-    <sn:ID> "." <fn:ID> => StructFieldAccess {
-        struct_name: sn,
-        field_name: fn,
-    }
-};
-
-ArrayInit: ArrayInit = {
-    "[" <e:Expression> <en:("," Expression)*> "]" => ArrayInit {
-        elements: {
-            let mut elements = vec![e];
-            elements.extend(en.into_iter().map(|x| x.1));
-            elements
-        },
+    <s:ID> "." <f:ID> => StructFieldAccess {
+        field_name: f,
+        struct_name: s,
     }
 };
 
@@ -296,20 +280,9 @@ ArrayAccess: ArrayAccess = {
     }
 };
 
-VectorInit: VectorInit = {
-    "Vec" "<" <t:Type> ">" "[" <e:Expression> <en:("," Expression)*> "]" => VectorInit {
-        var_type: t,
-        elements: {
-            let mut elements = vec![e];
-            elements.extend(en.into_iter().map(|x| x.1));
-            elements
-        },
-    }
-};
-
 TypeCast: TypeCast = {
     <e:Expression> "as" <t:Type> => TypeCast {
-        expression: e,
+        expression: Box::new(e),
         target_type: t,
     }
 };
@@ -324,50 +297,50 @@ Type: Type = {
     "i16" => Type::I16,
     "i32" => Type::I32,
     "i64" => Type::I64,
-    "f8" => Type::F8,
-    "f16" => Type::F16,
-    "f32" => Type::F32,
-    "f64" => Type::F64,
+    "fp8" => Type::FP8,
+    "fp16" => Type::FP16,
+    "fp32" => Type::FP32,
+    "fp64" => Type::FP64,
     "bool" => Type::Bool,
     "String" => Type::String,
-    "Vec" "<" <t:Type> ">" => Type::Vector(t),
-    "Array" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(t, l),
+    "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
+    "Array" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
+    <i:ID> => Type::Custom(i.to_string()),
 };
 
 
 // String literals with escape support (e.g., "hello\nworld")
 StringLiteral: String = {
-    r#""([^"\\\r\n]|\\.)*""# => |s| {
-        let inner = &s[1..s.len()-1]; // Strip surrounding quotes
-        unescape_str(inner)
-    }
+    <s:r#""([^"\\\r\n]|\\.)*""#> => s.to_string()
 };
 
 // Integer literals (e.g., 0, 42)
 IntLiteral: i64 = {
-    r"0|[1-9][0-9]*" => |s| s.parse().unwrap()
+    <s:r"0|[1-9][0-9]*"> => s.parse().unwrap()
 };
 
 // Floating-point literals (e.g., 3.14, 0.001)
 FloatLiteral: f64 = {
-    r"[0-9]+\.[0-9]+" => |s| s.parse().unwrap()
+    <s:r"[0-9]+\.[0-9]+"> => s.parse().unwrap()
 };
 
 // Character literals with escape support (e.g., 'a', '\n')
 CharLiteral: char = {
-    r#"'([^'\\\r\n]|\\.)'"# => |s| {
-        let inner = &s[1..s.len()-1]; // Strip surrounding quotes
-        unescape_char(inner)
-    }
+    <s:r#"'([^'\\\r\n]|\\.)'"#> => s.chars().nth(1).unwrap()
 };
 
 // Boolean literals (true / false)
 BoolLiteral: bool = {
-    "true" => |_| true,
-    "false" => |_| false,
+    "true" => true,
+    "false" => false,
 };
 
 // Identifiers (variable and function names)
-ID: String = {
-    r"[a-zA-Z_][a-zA-Z0-9_]*" => |s| s.to_string()
+  ID: String = {
+    <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string()
+};
+
+CommentOrWhitespace: () = {
+    r"[ \t\r\n]+" => (),
+    r"[ \t]*//[^\n]*\n?" => (),  
 };

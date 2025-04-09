@@ -7,5 +7,12 @@ lalrpop_mod!(
 );
 pub mod ast;
 
-fn main() {}
+fn main() {
+let file = std::fs::read_to_string("test.lzy").unwrap();
+let expr = lossy::ProgramParser::new()
+        .parse(file.as_str())
+        .expect("Failed to parse: ");
+
+println!("{:#?}", expr);
+}
 
