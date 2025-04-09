@@ -41,7 +41,7 @@ pub struct StructField {
 #[derive(Debug)]
 pub enum Statement {
     VariableDeclaration(VariableDeclaration),
-    Assignment(Assignment),
+    Assignment(VariableAssignment),
     If(IfStatement),
     While(WhileStatement),
     Break,
@@ -61,7 +61,7 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Debug)]
-pub struct Assignment {
+pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,
 }
@@ -172,7 +172,7 @@ pub struct StructFieldInit {
 
 #[derive(Debug)]
 pub struct StructFieldAccess {
-    pub struct_name: String,
+    pub struct_expr: Box<Expression>,
     pub field_name: String,
 }
 
