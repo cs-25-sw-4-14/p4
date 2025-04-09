@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::ast::{FunctionDef, Program, TopLevelDefinition};
-use super::vtable::VTable;
+use super::variable_table::VTable;
 
 pub struct FunctionEntry {
     pub def: FunctionDef,
