@@ -153,6 +153,7 @@ Expression: Expression = {
         operator: UnaryOperator::Negate,
         operand: Box::new(o),
     }),
+    #[precedence(level="1")] #[assoc(side="left")]
     "!" <o:Expression> => Expression::UnaryOp(UnaryOperation {
         operator: UnaryOperator::Not,
         operand: Box::new(o),
@@ -164,11 +165,13 @@ Expression: Expression = {
         operator: BinaryOperator::Divide,
         right: Box::new(r),
     }), 
+    #[precedence(level="2")] #[assoc(side="left")]
     <l:Expression> "*" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Multiply,
         right: Box::new(r),
     }),
+    #[precedence(level="2")] #[assoc(side="left")]
     <l:Expression> "%" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Modulus,
@@ -180,6 +183,7 @@ Expression: Expression = {
         operator: BinaryOperator::Add,
         right: Box::new(r),
     }),
+    #[precedence(level="3")] #[assoc(side="left")]
     <l:Expression> "-" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Subtract,
@@ -191,16 +195,19 @@ Expression: Expression = {
         operator: BinaryOperator::LessThan,
         right: Box::new(r),
     }),
+    #[precedence(level="4")] #[assoc(side="left")]
     <l:Expression> ">" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThan,
         right: Box::new(r),
     }),
+    #[precedence(level="4")] #[assoc(side="left")]
     <l:Expression> "<=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::LessThanOrEqual,
         right: Box::new(r),
     }),
+    #[precedence(level="4")] #[assoc(side="left")]
     <l:Expression> ">=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThanOrEqual,
@@ -212,16 +219,19 @@ Expression: Expression = {
         operator: BinaryOperator::Equal,
         right: Box::new(r),
     }),
+    #[precedence(level="5")] #[assoc(side="left")]
     <l:Expression> "!=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::NotEqual,
         right: Box::new(r),
     }),
+    #[precedence(level="5")] #[assoc(side="left")]
     <l:Expression> "&&" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
         right: Box::new(r),
     }),
+    #[precedence(level="5")] #[assoc(side="left")]
     <l:Expression> "||" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
