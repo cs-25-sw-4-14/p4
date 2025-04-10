@@ -111,7 +111,7 @@ pub mod function_call_tests {
         ftable.functions.insert(String::from("test"), FunctionEntry { 
             def: FunctionDef {
                 name: String::from("test"),
-                params: vec![ Param { name: String::from("a"), param_type: Type::I32 }],
+                params: vec![ Param { name: String::from("a"), param_type: Type::String }],
                 return_type: None,
                 body: vec![],
             },
