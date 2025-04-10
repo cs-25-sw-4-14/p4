@@ -59,15 +59,16 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
 #[cfg(test)]
 pub mod function_call_tests {
     use super::*;
-    use crate::ast::{Expression, FunctionDef, Literal, Param, Type};
+    use crate::ast::{Expression, FunctionDef, Literal, Param, Type, FunctionCall};
     use crate::lossy::ExpressionParser;
     use crate::typechecker::function_table::FunctionEntry;
 
     #[test]
     fn check_function_should_err_on_function_not_defined() {
-        let expression = ExpressionParser::new()
-            .parse("test()")
-            .expect("Failed to parse: ");
+        let expression = Expression::FunctionCall( FunctionCall {
+            name: String::from("test"),
+            args: vec![],
+        });
 
         let vtable = VTable::new();
         let ftable = Ftable::new();
@@ -77,9 +78,10 @@ pub mod function_call_tests {
 
     #[test]
     fn check_function_should_have_return_type() {
-        let expression = ExpressionParser::new()
-            .parse("test()")
-            .expect("Failed to parse: ");
+        let expression = Expression::FunctionCall( FunctionCall {
+            name: String::from("test"),
+            args: vec![],
+        });
 
         let vtable = VTable::new();
         let mut ftable = Ftable::new();
@@ -99,10 +101,10 @@ pub mod function_call_tests {
 
     #[test]
     fn check_function_args_and_params_are_same_length() {
-        let expression = ExpressionParser::new()
-            .parse("test()")
-            .expect("Failed to parse: ");
-
+        let expression = Expression::FunctionCall( FunctionCall {
+            name: String::from("test"),
+            args: vec![],
+        });
         let vtable = VTable::new();
         let mut ftable = Ftable::new();
 
@@ -121,9 +123,10 @@ pub mod function_call_tests {
 
     #[test]
     fn check_function_args_and_params_are_same_type() {
-        let expression = ExpressionParser::new()
-            .parse("test(4.2)")
-            .expect("Failed to parse: ");
+        let expression = Expression::FunctionCall( FunctionCall {
+            name: String::from("test"),
+            args: vec![Expression::Literal(Literal::Int(1))],
+        });
 
         let vtable = VTable::new();
         let mut ftable = Ftable::new();
