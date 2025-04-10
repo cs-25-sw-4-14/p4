@@ -24,7 +24,27 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         // TODO: Marck
         Expression::StructFieldAccess(struct_field_access) => todo!(),
         // TODO: Rasmus
-        Expression::ArrayAccess(array_access) => todo!(),
+        Expression::ArrayAccess(array_access) => {
+            // Kontroller at array-udtrykket har en array-type
+            let array_type = check(&array_access.array, vtable, ftable)?;
+            
+            // Kontroller at array_type faktisk er et array
+            if let Type::Array(element_type) = array_type {
+                // Kontroller at indekset er et heltal
+                let index_type = check(&array_access.index, vtable, ftable)?;
+                
+                if matches!(index_type, Type::Int) {
+                    // Returnér element-typen
+                    Ok(*element_type)
+                } else {
+                    Err(anyhow::anyhow!("Array index must be an integer, got {:?}", index_type))
+                }
+            } else {
+                Err(anyhow::anyhow!("Cannot index into non-array type {:?}", array_type))
+            }
+        }
+    
+
         // TODO: Mads
         Expression::ArrayLiteral(array_literal) => todo!(),
         // TODO: Mads
