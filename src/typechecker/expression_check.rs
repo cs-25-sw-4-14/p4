@@ -2,6 +2,8 @@ use crate::ast::{Expression, Type};
 use super::{function_table::Ftable, variable_table::VTable};
 use anyhow::Result;
 
+
+
 pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
 
     match expression {
@@ -25,25 +27,29 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::StructFieldAccess(struct_field_access) => todo!(),
         // TODO: Rasmus
         Expression::ArrayAccess(array_access) => {
-            // Kontroller at array har en array type
-            let array_type = check(&array_access.array, vtable, ftable)?;
+            // Check if the array is declared in the variable table
+            let array_type = check(&Expression::Variable(array_access.array_name.clone()), vtable, ftable)?;
             
-            // Kontroller at array_type faktisk er et array
-            if let Type::Array(element_type) = array_type {
-                // Kontroller at indekset er et heltal
+            // Check if the type is an array
+            if let Type::Array(element_type, _) = array_type {
+                // Check if the index is an integer type
                 let index_type = check(&array_access.index, vtable, ftable)?;
-                
-                if matches!(index_type, Type::Int) {
-                    // Returnér elementtypen
-                    Ok(*element_type)
-                } else {
-                    Err(anyhow::anyhow!("Array index must be an integer, got {:?}", index_type))
+    
+                // Check if index is any integer type
+                match index_type {
+                    Type::I8 | Type::I16 | Type::I32 | Type::I64 |
+                    Type::U8 | Type::U16 | Type::U32 | Type::U64 => {
+                        // Return the element type of the array
+                        Ok(*element_type)
+                    },
+                    _ => {
+                        Err(anyhow::anyhow!("Array index must be an integer, got {:?}", index_type))
+                    }
                 }
             } else {
-                Err(anyhow::anyhow!("Cannot index into non-array type {:?}", array_type))
+                Err(anyhow::anyhow!("Array access on non-array type {:?}", array_type))
             }
         }
-    
 
         // TODO: Mads
         Expression::ArrayLiteral(array_literal) => todo!(),
