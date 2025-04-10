@@ -25,7 +25,31 @@ impl ECheck {
             // TODO: Mads
             Expression::BinaryOp(binary_operation) => todo!(),
             // TODO: Kristoffer
-            Expression::UnaryOp(unary_operation) => todo!(),
+            Expression::UnaryOp(unary_op) => {
+                let operand_type = ECheck::check_e(&unary_op.operand, vtable, ftable)?;
+                match unary_op.operator {
+                    UnaryOperator::Negate => {
+                        match operand_type {
+                            Type::I8 | Type::I16 | Type::I32 | Type::I64 |
+                            Type::FP8 | Type::FP16 | Type::FP32 | Type::FP64 => Ok(operand_type),
+                            _ => Err(anyhow::anyhow!(
+                                "Unary '-' not supported for type {:?}",
+                                operand_type
+                            )),
+                        }
+                    }
+                    UnaryOperator::Not => {
+                        if operand_type == Type::Bool {
+                            Ok(Type::Bool)
+                        } else {
+                            Err(anyhow::anyhow!(
+                                "Unary '!' expects a Bool, but found {:?}",
+                                operand_type
+                            ))
+                        }
+                    }
+                }
+            }
             // TODO: Thorbjoern
             Expression::FunctionCall(function_call) => todo!(),
             // TODO: Marck
