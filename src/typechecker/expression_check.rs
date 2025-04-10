@@ -25,7 +25,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::StructFieldAccess(struct_field_access) => todo!(),
         // TODO: Rasmus
         Expression::ArrayAccess(array_access) => {
-            // Kontroller at array-udtrykket har en array-type
+            // Kontroller at array har en array type
             let array_type = check(&array_access.array, vtable, ftable)?;
             
             // Kontroller at array_type faktisk er et array
@@ -34,7 +34,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
                 let index_type = check(&array_access.index, vtable, ftable)?;
                 
                 if matches!(index_type, Type::Int) {
-                    // Returnér element-typen
+                    // Returnér elementtypen
                     Ok(*element_type)
                 } else {
                     Err(anyhow::anyhow!("Array index must be an integer, got {:?}", index_type))
