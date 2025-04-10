@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-
-use crate::ast::{Program, StructDef};
+use crate::ast::{Program, StructDef, TopLevelDefinition};
 
 pub struct STable {
     pub structs: HashMap<String, StructDef>,
@@ -16,8 +15,8 @@ impl STable {
     pub fn walk(&mut self, program: Program) {
         for def in program.definitions {
             match def {
-                crate::ast::TopLevelDefinition::Struct(func) => {
-                    self.structs.insert(func.name.clone(), func.clone());
+                TopLevelDefinition::Struct(struct_def) => {
+                    self.structs.insert(struct_def.name.clone(), struct_def.clone());
                 }
                 _ => {}
             }

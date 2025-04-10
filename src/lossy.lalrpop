@@ -308,10 +308,10 @@ Type: Type = {
     "i16" => Type::I16,
     "i32" => Type::I32,
     "i64" => Type::I64,
-    "fp8" => Type::FP8,
-    "fp16" => Type::FP16,
-    "fp32" => Type::FP32,
-    "fp64" => Type::FP64,
+    "f8" => Type::FP8,
+    "f16" => Type::FP16,
+    "f32" => Type::FP32,
+    "f64" => Type::FP64,
     "bool" => Type::Bool,
     "String" => Type::String,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
@@ -350,4 +350,3 @@ BoolLiteral: bool = {
   ID: String = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string()
 };
-

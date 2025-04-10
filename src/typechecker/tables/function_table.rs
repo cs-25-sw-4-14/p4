@@ -23,7 +23,6 @@ impl Ftable {
         for def in program.definitions {
             match def {
                 TopLevelDefinition::Function(func) => {
-
                     let mut vtable = VTable::new();
                     vtable.walk(func.body.clone());
 
@@ -31,7 +30,6 @@ impl Ftable {
                         def: func.clone(),
                         vtable,
                     });
-
                 }
                 _ => {}
             }
