@@ -14,32 +14,44 @@ pub fn check(binary_operation: &BinaryOperation, vtable: &VTable, ftable: &Ftabl
 }
 
 #[cfg(test)]
-pub mod variable_tests {
+pub mod tests {
     use super::*;
-    use crate::{ast::{Expression, Literal, VariableDeclaration}, typechecker::function_table::Ftable};
-    use crate::typechecker::expression_check;
+    use crate::ast::{BinaryOperation, BinaryOperator, Expression, Literal};
 
     #[test]
-    fn check_variable_should_return_type() {
-        let mut vtable = VTable::new();
+    fn check_binary_op_types_match() {
+        let vtable = VTable::new();
         let ftable = Ftable::new();
 
-        let expression = Expression::Variable("x".to_string());
-
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
-
-        vtable.variables.insert(
-            "x".to_string(),
-            VariableDeclaration {
-                trivial: None,
-                mutable: None,
-                var_type: Type::I64,
-                name: "x".to_string(),
-                value: Expression::Literal(Literal::Int(4)),
-            },
+        let expression = Expression::BinaryOp(
+            BinaryOperation {
+                left: Box::new(Expression::Literal(Literal::Int(4))),
+                operator: BinaryOperator::Add,
+                right: Box::new(Expression::Literal(Literal::Int(0))),
+            }
         );
 
         expression_check::check(&expression, &vtable, &ftable).unwrap();
     }
 
+    #[test]
+    fn check_binary_op_types_not_match() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+
+        let expression = Expression::BinaryOp(
+            BinaryOperation {
+                left: Box::new(Expression::Literal(Literal::Int(4))),
+                operator: BinaryOperator::Add,
+                right: Box::new(Expression::Literal(Literal::Float(0.0))),
+            }
+        );
+
+        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
 }
+
+
+

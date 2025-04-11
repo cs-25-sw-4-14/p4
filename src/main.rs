@@ -16,7 +16,7 @@ fn main() {
 
     let mut typechecker = typechecker::Typechecker::new();
 
-    //typechecker.walk(expr.clone());
+    typechecker.walk(expr.clone());
 
     //println!("{:#?}", expr);
     //println!("Function Table: {:#?}", typechecker.ftable.functions);
