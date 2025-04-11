@@ -23,7 +23,6 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
                 Err(anyhow::anyhow!("Type mismatch: {:?} {:?} {:?}", left_type, binary_operation.operator, right_type))
             }
         },
-        // TODO: Kristoffer
         Expression::UnaryOp(unary_op) => {
             let operand_type = check(&unary_op.operand, vtable, ftable)?;
             match unary_op.operator {
