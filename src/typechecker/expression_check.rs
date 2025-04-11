@@ -13,8 +13,16 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
                 Err(anyhow::anyhow!("Variable {} not found in vtable", name))
             }
         }
-        // TODO: Mads
-        Expression::BinaryOp(binary_operation) => todo!(),
+        Expression::BinaryOp(binary_operation) => {
+            let left_type = check(&binary_operation.left, vtable, ftable)?;
+            let right_type = check(&binary_operation.right, vtable, ftable)?;
+
+            if left_type == right_type {
+                Ok(left_type)
+            } else {
+                Err(anyhow::anyhow!("Type mismatch: {:?} {:?} {:?}", left_type, binary_operation.operator, right_type))
+            }
+        },
         // TODO: Kristoffer
         Expression::UnaryOp(unary_operation) => todo!(),
         // TODO: Thorbjoern
@@ -49,10 +57,200 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         Expression::StructFieldAccess(struct_field_access) => todo!(),
         // TODO: Rasmus
         Expression::ArrayAccess(array_access) => todo!(),
-        // TODO: Mads
-        Expression::ArrayLiteral(array_literal) => todo!(),
-        // TODO: Mads
-        Expression::TypeCast(type_cast) => todo!(),
+        Expression::ArrayLiteral(array_literal) => {
+            if array_literal.elements.is_empty() {
+                return Err(anyhow::anyhow!("Array literal is empty"));
+            }
+
+            let first_type = check(&array_literal.elements[0], vtable, ftable)?;
+            
+            for element in &array_literal.elements[1..] {
+                let element_type = check(element, vtable, ftable)?;
+                if element_type != first_type {
+                    return Err(anyhow::anyhow!("Array elements have different types: {:?} and {:?}", first_type, element_type));
+                }
+            }
+            Ok(Type::Array(Box::new(first_type), array_literal.elements.len() as i64))
+        },
+        Expression::TypeCast(type_cast) => {
+            check(&type_cast.expression, vtable, ftable)?;
+            Ok(type_cast.target_type.clone())
+        },
+    }
+}
+
+#[cfg(test)]
+pub mod literal_tests {
+    use super::*;
+    use crate::ast::Literal;
+
+    #[test]
+    fn check_literal_should_return_type() {
+        let tests = vec![
+            (Expression::Literal(Literal::Char('b')), Type::Char),
+            (Expression::Literal(Literal::String("test".to_string())), Type::String),
+            (Expression::Literal(Literal::Bool(true)), Type::Bool),
+            (Expression::Literal(Literal::Float(0.1)), Type::FP64),
+            (Expression::Literal(Literal::Int(0)), Type::I64),
+        ];
+
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        for (expression, expected_type) in tests {
+            let result = check(&expression, &vtable, &ftable).unwrap();
+            assert_eq!(result, expected_type);
+        }
+    }
+}
+
+#[cfg(test)]
+pub mod variable_tests {
+    use super::*;
+    use crate::ast::{Literal, VariableDeclaration};
+
+    #[test]
+    fn check_variable_should_return_type() {
+        let mut vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::Variable("x".to_string());
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+
+        vtable.variables.insert(
+            "x".to_string(),
+            VariableDeclaration {
+                trivial: None,
+                mutable: None,
+                var_type: Type::I64,
+                name: "x".to_string(),
+                value: Expression::Literal(Literal::Int(4)),
+            },
+        );
+
+        check(&expression, &vtable, &ftable).unwrap();
+    }
+
+}
+
+#[cfg(test)]
+pub mod binary_op_tests {
+    use super::*;
+    use crate::ast::{BinaryOperation, BinaryOperator, Literal};
+
+    #[test]
+    fn check_binary_op_types_match() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::BinaryOp(
+            BinaryOperation {
+                left: Box::new(Expression::Literal(Literal::Int(4))),
+                operator: BinaryOperator::Add,
+                right: Box::new(Expression::Literal(Literal::Int(0))),
+            }
+        );
+
+        check(&expression, &vtable, &ftable).unwrap();
+    }
+
+    #[test]
+    fn check_binary_op_types_not_match() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+
+        let expression = Expression::BinaryOp(
+            BinaryOperation {
+                left: Box::new(Expression::Literal(Literal::Int(4))),
+                operator: BinaryOperator::Add,
+                right: Box::new(Expression::Literal(Literal::Float(0.0))),
+            }
+        );
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+}
+
+#[cfg(test)]
+pub mod array_literal_tests {
+    use super::*;
+    use crate::ast::{ArrayLiteral, Literal};
+
+    #[test]
+    fn check_array_literal_should_return_type() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::ArrayLiteral(
+            Box::new(ArrayLiteral {
+                elements: vec![
+                    Expression::Literal(Literal::Int(1)),
+                    Expression::Literal(Literal::Int(2)),
+                    Expression::Literal(Literal::Int(3)),
+                ],
+            })
+        );
+
+        let result = check(&expression, &vtable, &ftable).unwrap();
+        assert_eq!(result, Type::Array(Box::new(Type::I64), 3));
+    }
+
+    #[test]
+    fn check_array_literal_should_return_type_mixed() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::ArrayLiteral(
+            Box::new(ArrayLiteral {
+                elements: vec![
+                    Expression::Literal(Literal::Int(1)),
+                    Expression::Literal(Literal::Float(2.0)),
+                    Expression::Literal(Literal::Int(3)),
+                ],
+            })
+        );
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+#[test]
+    fn check_array_literal_empty() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::ArrayLiteral(
+            Box::new(ArrayLiteral {
+                elements: vec![],
+            })
+        );
+
+        check(&expression, &vtable, &ftable).unwrap_err();
+    }
+
+}
+
+#[cfg(test)]
+pub mod type_cast_tests {
+
+    use super::*;
+    use crate::ast::{Literal, TypeCast};
+
+    #[test]
+    fn check_type_cast_should_return_type() {
+        let vtable = VTable::new();
+        let ftable = Ftable::new();
+
+        let expression = Expression::TypeCast(
+            TypeCast {
+                expression: Box::new(Expression::Literal(Literal::Int(4))),
+                target_type: Type::I64,
+            }
+        );
+        let result = check(&expression, &vtable, &ftable).unwrap();
+        assert_eq!(result, Type::I64);
     }
 }
 
