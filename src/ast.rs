@@ -209,7 +209,7 @@ pub enum Type {
     String,
     Char,
     Bool,
-    Custom(String),
+    Struct(String),
     Array(Box<Type>, i64),
     Vector(Box<Type>),
 }
