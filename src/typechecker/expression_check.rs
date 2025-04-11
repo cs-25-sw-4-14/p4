@@ -1,5 +1,5 @@
-use crate::ast::{Expression, Type, UnaryOperator};
-use super::{function_table::{self, Ftable}, variable_table::VTable};
+use crate::ast::{Expression, Type};
+use super::{function_table::Ftable, variable_table::VTable};
 use anyhow::Result;
 
 mod array_access;
@@ -25,7 +25,7 @@ pub fn check(expression: &Expression, vtable: &VTable, ftable: &Ftable) -> Resul
         // TODO: Marck
         Expression::StructFieldAccess(struct_field_access) => todo!(),
         // TODO: Rasmus
-        Expression::ArrayAccess(array_access) => todo!(),
+        Expression::ArrayAccess(array_access) => array_access::check(array_access, vtable, ftable),
         Expression::ArrayLiteral(array_literal) => {
             if array_literal.elements.is_empty() {
                 return Err(anyhow::anyhow!("Array literal is empty"));
