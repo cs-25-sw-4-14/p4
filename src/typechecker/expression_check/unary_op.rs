@@ -1,9 +1,9 @@
-use crate::{ast::{Type, UnaryOperation, UnaryOperator}, typechecker::{function_table::Ftable, variable_table::VTable}};
+use crate::{ast::{Type, UnaryOperation, UnaryOperator}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
-pub fn check(unary_operation: &UnaryOperation, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
-    let operand_type = expression_check::check(&unary_operation.operand, vtable, ftable)?;
+pub fn check(unary_operation: &UnaryOperation, vtable: &VTable, ftable: &FTable, stable: &STable) -> Result<Type> {
+    let operand_type = expression_check::check(&unary_operation.operand, vtable, ftable, stable)?;
             match unary_operation.operator {
                 UnaryOperator::Negate => {
                     match operand_type {
@@ -33,6 +33,7 @@ pub mod tests {
     use super::*;
     use crate::ast::{Expression, Literal, Type, UnaryOperation};
 use crate::typechecker::expression_check;
+use crate::typechecker::struct_table::STable;
 
     #[test]
     fn check_unary_op_negate_ok() {
@@ -44,9 +45,10 @@ use crate::typechecker::expression_check;
         );
 
         let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let ftable = FTable::new();
+        let stable = STable::new();
 
-        let result = expression_check::check(&expression, &vtable, &ftable).unwrap();
+        let result = expression_check::check(&expression, &vtable, &ftable, &stable).unwrap();
         assert_eq!(result, Type::I64);
     }
 
@@ -60,9 +62,10 @@ use crate::typechecker::expression_check;
         );
 
         let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let ftable = FTable::new();
+        let stable = STable::new();
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &vtable, &ftable, &stable).unwrap_err();
     }
 
     #[test]
@@ -75,9 +78,10 @@ use crate::typechecker::expression_check;
         );
 
         let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let ftable = FTable::new();
+        let stable = STable::new();
 
-        let result = expression_check::check(&expression, &vtable, &ftable).unwrap();
+        let result = expression_check::check(&expression, &vtable, &ftable, &stable).unwrap();
         assert_eq!(result, Type::Bool);
     }
 
@@ -91,9 +95,10 @@ use crate::typechecker::expression_check;
         );
 
         let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let ftable = FTable::new();
+        let stable = STable::new();
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &vtable, &ftable, &stable).unwrap_err();
     }
 
 }

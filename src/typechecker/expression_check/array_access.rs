@@ -1,11 +1,11 @@
 
-use crate::{ast::{ArrayAccess, Expression, Literal, Type}, typechecker::{function_table::Ftable, variable_table::VTable}};
+use crate::{ast::{ArrayAccess, Expression, Literal, Type}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
-pub fn check(array_access: &Box<ArrayAccess>, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
+pub fn check(array_access: &Box<ArrayAccess>, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
 
-    let array_type = vtable.get(&array_access.array_name)
+    let array_type = v_table.get(&array_access.array_name)
         .ok_or_else(|| anyhow::anyhow!("array: {}, not defined", array_access.array_name))?;
 
     let (element_type, length) = match &array_type.var_type {
@@ -16,7 +16,7 @@ pub fn check(array_access: &Box<ArrayAccess>, vtable: &VTable, ftable: &Ftable) 
         )),
     };
 
-    match expression_check::check(&array_access.index, vtable, ftable)? {
+    match expression_check::check(&array_access.index, v_table, f_table, s_table)? {
         Type::I64 => {
             match array_access.index {
                 Expression::Literal(Literal::Int(index)) => {
@@ -38,7 +38,7 @@ pub fn check(array_access: &Box<ArrayAccess>, vtable: &VTable, ftable: &Ftable) 
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::{ast::{Expression, Literal}, typechecker::{function_table::Ftable, variable_table::VTable}};
+    use crate::{ast::{Expression, Literal}, typechecker::{function_table::FTable, variable_table::VTable}};
     use crate::typechecker::expression_check;
 
     #[test]
@@ -51,11 +51,12 @@ pub mod tests {
             (Expression::Literal(Literal::Int(0)), Type::I64),
         ];
 
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         for (expression, expected_type) in tests {
-            let result = expression_check::check(&expression, &vtable, &ftable).unwrap();
+            let result = expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
             assert_eq!(result, expected_type);
         }
     }

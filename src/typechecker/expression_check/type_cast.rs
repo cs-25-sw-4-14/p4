@@ -1,10 +1,10 @@
 
-use crate::{ast::{Type, TypeCast}, typechecker::{function_table::Ftable, variable_table::VTable}};
+use crate::{ast::{Type, TypeCast}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
-pub fn check(type_cast: &TypeCast, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
-    expression_check::check(&type_cast.expression, vtable, ftable)?;
+pub fn check(type_cast: &TypeCast, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    expression_check::check(&type_cast.expression, v_table, f_table, s_table)?;
     Ok(type_cast.target_type.clone())
 }
 
@@ -14,11 +14,13 @@ pub mod tests {
     use super::*;
     use crate::ast::{Expression, Literal, TypeCast};
     use crate::typechecker::expression_check;
+    use crate::typechecker::struct_table::STable;
 
     #[test]
     fn check_type_cast_should_return_type() {
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         let expression = Expression::TypeCast(
             TypeCast {
@@ -26,7 +28,7 @@ pub mod tests {
                 target_type: Type::I64,
             }
         );
-        let result = expression_check::check(&expression, &vtable, &ftable).unwrap();
+        let result = expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
         assert_eq!(result, Type::I64);
     }
 }

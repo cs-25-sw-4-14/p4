@@ -1,10 +1,10 @@
-use crate::{ast::{BinaryOperation, Type}, typechecker::{function_table::Ftable, variable_table::VTable}};
+use crate::{ast::{BinaryOperation, Type}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
-pub fn check(binary_operation: &BinaryOperation, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
-    let left_type = expression_check::check(&binary_operation.left, vtable, ftable)?;
-    let right_type = expression_check::check(&binary_operation.right, vtable, ftable)?;
+pub fn check(binary_operation: &BinaryOperation, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    let left_type = expression_check::check(&binary_operation.left, v_table, f_table, s_table)?;
+    let right_type = expression_check::check(&binary_operation.right, v_table, f_table, s_table)?;
 
     if left_type == right_type {
         Ok(left_type)
@@ -20,8 +20,9 @@ pub mod tests {
 
     #[test]
     fn check_binary_op_types_match() {
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         let expression = Expression::BinaryOp(
             BinaryOperation {
@@ -31,14 +32,14 @@ pub mod tests {
             }
         );
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
     }
 
     #[test]
     fn check_binary_op_types_not_match() {
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
-
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         let expression = Expression::BinaryOp(
             BinaryOperation {
@@ -48,7 +49,7 @@ pub mod tests {
             }
         );
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 
 }

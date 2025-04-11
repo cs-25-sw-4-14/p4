@@ -8,7 +8,7 @@ pub fn check(literal: &Literal) -> Result<Type> {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::{ast::{Expression, Literal}, typechecker::{function_table::Ftable, variable_table::VTable}};
+    use crate::{ast::{Expression, Literal}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
     use crate::typechecker::expression_check;
 
     #[test]
@@ -21,11 +21,12 @@ pub mod tests {
             (Expression::Literal(Literal::Int(0)), Type::I64),
         ];
 
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         for (expression, expected_type) in tests {
-            let result = expression_check::check(&expression, &vtable, &ftable).unwrap();
+            let result = expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
             assert_eq!(result, expected_type);
         }
     }

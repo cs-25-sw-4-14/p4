@@ -12,19 +12,20 @@ pub fn check(name: &str, vtable: &VTable) -> Result<Type> {
 #[cfg(test)]
 pub mod variable_tests {
     use super::*;
-    use crate::{ast::{Expression, Literal, VariableDeclaration}, typechecker::function_table::Ftable};
+    use crate::{ast::{Expression, Literal, VariableDeclaration}, typechecker::{function_table::FTable, struct_table::STable}};
     use crate::typechecker::expression_check;
 
     #[test]
     fn check_variable_should_return_type() {
-        let mut vtable = VTable::new();
-        let ftable = Ftable::new();
+        let mut v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
         let expression = Expression::Variable("x".to_string());
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
 
-        vtable.variables.insert(
+        v_table.variables.insert(
             "x".to_string(),
             VariableDeclaration {
                 trivial: None,
@@ -35,7 +36,7 @@ pub mod variable_tests {
             },
         );
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
     }
 
 }

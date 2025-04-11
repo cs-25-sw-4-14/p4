@@ -1,8 +1,8 @@
-use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_table::Ftable, variable_table::VTable}};
+use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 
-pub fn check(function_call: &FunctionCall, vtable: &VTable, ftable: &Ftable) -> Result<Type> {
-    let func = ftable.get(&function_call.name)
+pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    let func = f_table.get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
 
     let return_type = func.def.return_type.clone()
@@ -16,7 +16,7 @@ pub fn check(function_call: &FunctionCall, vtable: &VTable, ftable: &Ftable) -> 
         //check if the types are the same
         for i in 0..func.def.params.len() {
         let expected_type = func.def.params[i].param_type.clone();
-        let actual_type = expression_check::check(&function_call.args[i], vtable, ftable)?;
+        let actual_type = expression_check::check(&function_call.args[i], v_table, f_table, s_table)?;
             if expected_type != actual_type {
                 return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
         }
@@ -41,10 +41,11 @@ pub mod tests {
             args: vec![],
         });
 
-        let vtable = VTable::new();
-        let ftable = Ftable::new();
+        let v_table = VTable::new();
+        let f_table = FTable::new();
+        let s_table = STable::new();
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 
     #[test]
@@ -54,10 +55,11 @@ pub mod tests {
             args: vec![],
         });
 
-        let vtable = VTable::new();
-        let mut ftable = Ftable::new();
+        let v_table = VTable::new();
+        let mut f_table = FTable::new();
+        let s_table = STable::new();
 
-        ftable.functions.insert(String::from("test"), FunctionEntry { 
+        f_table.functions.insert(String::from("test"), FunctionEntry { 
             def: FunctionDef {
                 name: String::from("test"),
                 params: vec![],
@@ -66,8 +68,7 @@ pub mod tests {
             },
             vtable: VTable::new(),
         });
-
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 
     #[test]
@@ -76,10 +77,12 @@ pub mod tests {
             name: String::from("test"),
             args: vec![],
         });
-        let vtable = VTable::new();
-        let mut ftable = Ftable::new();
 
-        ftable.functions.insert(String::from("test"), FunctionEntry { 
+        let v_table = VTable::new();
+        let mut f_table = FTable::new();
+        let s_table = STable::new();
+
+        f_table.functions.insert(String::from("test"), FunctionEntry { 
             def: FunctionDef {
                 name: String::from("test"),
                 params: vec![ Param { name: String::from("a"), param_type: Type::String }],
@@ -89,7 +92,7 @@ pub mod tests {
             vtable: VTable::new(),
         });
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 
     #[test]
@@ -99,10 +102,11 @@ pub mod tests {
             args: vec![Expression::Literal(Literal::Int(1))],
         });
 
-        let vtable = VTable::new();
-        let mut ftable = Ftable::new();
+        let v_table = VTable::new();
+        let mut f_table = FTable::new();
+        let s_table = STable::new();
 
-        ftable.functions.insert(String::from("test"), FunctionEntry { 
+        f_table.functions.insert(String::from("test"), FunctionEntry { 
             def: FunctionDef {
                 name: String::from("test"),
                 params: vec![ Param { name: String::from("a"), param_type: Type::I32 }],
@@ -112,7 +116,7 @@ pub mod tests {
             vtable: VTable::new(),
         });
 
-        expression_check::check(&expression, &vtable, &ftable).unwrap_err();
+        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 }
 

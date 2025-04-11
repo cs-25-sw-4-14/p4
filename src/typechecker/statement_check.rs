@@ -1,9 +1,9 @@
 
 use crate::ast::Statement;
-use super::{function_table::Ftable, variable_table::VTable};
+use super::{function_table::FTable, variable_table::VTable};
 use anyhow::Result;
 
-pub fn check(expression: &Statement, _vtable: &VTable, _ftable: &Ftable) -> Result<()> {
+pub fn check(expression: &Statement, _vtable: &VTable, _ftable: &FTable) -> Result<()> {
 
     match expression {
         Statement::VariableDeclaration(_variable_declaration) => todo!(),
