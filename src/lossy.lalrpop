@@ -71,7 +71,7 @@ Statement: Statement = {
     "break" ";" => Statement::Break,
     "continue" ";" => Statement::Continue,
     <t:Return> => Statement::Return(t),
-    <t:FunctionCall> => Statement::FunctionCall(t),
+    <t:FunctionCall> ";" => Statement::FunctionCall(t),
 };
 
 VariableDeclaration: VariableDeclaration = {
@@ -132,7 +132,7 @@ Return: ReturnStatement = {
 };
 
 FunctionCall: FunctionCall = {
-    <n:ID> "(" <a:ArgumentList?> ")" ";"=> FunctionCall {
+    <n:ID> "(" <a:ArgumentList?> ")"=> FunctionCall {
         name: n,
         args: a.unwrap_or(vec![]),
     }
@@ -156,7 +156,7 @@ Term: Expression = {
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
 };
 
-Expression: Expression = {
+pub Expression: Expression = {
     #[precedence(level="0")]
     Term,
     #[precedence(level="1")] #[assoc(side="right")]

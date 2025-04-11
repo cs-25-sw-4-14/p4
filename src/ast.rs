@@ -192,7 +192,7 @@ pub struct TypeCast {
     pub target_type: Type,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Type {
     U8,
     U16,
