@@ -15,8 +15,7 @@ pub fn check(declaration: &VariableDeclaration, v_table: &VTable, f_table: &FTab
         return Err(anyhow::anyhow!("Type mismatch: expected {:?}, found {:?}", declaration.var_type, value_type));
     }
 
-    // Add the variable to the variable table
-    v_table.insert(declaration.name.clone(), declaration.var_type);
+ 
 
     Ok(value_type)
 }
