@@ -87,7 +87,7 @@ pub struct WhileStatement {
 
 #[derive(Debug, Clone)]
 pub struct ReturnStatement {
-    pub value: Option<Expression>,
+    pub value: Expression,
 }
 
 #[derive(Debug, Clone)]
