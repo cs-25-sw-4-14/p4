@@ -1,18 +1,18 @@
 
 use crate::ast::Statement;
-use super::{function_table::Ftable, variable_table::VTable};
+use super::{function_table::FTable, variable_table::VTable};
 use anyhow::Result;
 
-pub fn check(expression: &Statement, vtable: &VTable, ftable: &Ftable) -> Result<()> {
+pub fn check(expression: &Statement, _vtable: &VTable, _ftable: &FTable) -> Result<()> {
 
     match expression {
-        Statement::VariableDeclaration(variable_declaration) => todo!(),
-        Statement::Assignment(variable_assignment) => todo!(),
-        Statement::If(if_statement) => todo!(),
-        Statement::While(while_statement) => todo!(),
+        Statement::VariableDeclaration(_variable_declaration) => todo!(),
+        Statement::Assignment(_variable_assignment) => todo!(),
+        Statement::If(_if_statement) => todo!(),
+        Statement::While(_while_statement) => todo!(),
         Statement::Break => todo!(),
         Statement::Continue => todo!(),
-        Statement::Return(return_statement) => todo!(),
-        Statement::FunctionCall(function_call) => todo!(),
+        Statement::Return(_return_statement) => todo!(),
+        Statement::FunctionCall(_function_call) => todo!(),
     }
 }

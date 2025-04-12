@@ -7,14 +7,14 @@ pub mod expression_check;
 pub mod statement_check;
 
 pub struct Typechecker {
-    pub ftable: function_table::Ftable,
+    pub ftable: function_table::FTable,
     pub stable: struct_table::STable,
 }
 
 impl Typechecker {
     pub fn new() -> Self {
         Typechecker {
-            ftable: function_table::Ftable::new(),
+            ftable: function_table::FTable::new(),
             stable: struct_table::STable::new(),
         }
     }

@@ -8,13 +8,13 @@ pub struct FunctionEntry {
     pub vtable: VTable,
 }
 
-pub struct Ftable {
+pub struct FTable {
     pub functions: HashMap<String, FunctionEntry>,
 }
 
-impl Ftable {
+impl FTable {
     pub fn new() -> Self {
-        Ftable {
+        FTable {
             functions: HashMap::new(),
         }
     }

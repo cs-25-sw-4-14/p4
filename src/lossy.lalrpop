@@ -316,7 +316,7 @@ Type: Type = {
     "String" => Type::String,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "Array" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
-    <i:ID> => Type::Custom(i.to_string()),
+    <i:ID> => Type::Struct(i.to_string()),
 };
 
 
