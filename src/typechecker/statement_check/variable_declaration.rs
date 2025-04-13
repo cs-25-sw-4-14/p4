@@ -2,13 +2,9 @@ use crate::{ast::{ Type, VariableDeclaration}, typechecker::{function_table::FTa
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
-pub fn check(declaration: &VariableDeclaration, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
-    // Check if the variable is already declared
-    if Some (v_table.get(&declaration.name)).is_some() {
-        return Err(anyhow::anyhow!("Variable {} already declared", declaration.name));
-    }
-
-
+pub fn check(declaration: &VariableDeclaration, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<()> {	
+    
+   
     // Check if the type of the value matches the declared type
     let value_type = expression_check::check(&declaration.value, v_table, f_table, s_table)?;
     if value_type != declaration.var_type {
@@ -17,5 +13,5 @@ pub fn check(declaration: &VariableDeclaration, v_table: &VTable, f_table: &FTab
 
     // TODO add the variable to the v table ?? 
 
-    Ok(value_type)
+    Ok(())
 }
