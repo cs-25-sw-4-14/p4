@@ -127,7 +127,8 @@ While: WhileStatement = {
 };
 
 Return: ReturnStatement = {
-    "return" <e:Expression> ";" => ReturnStatement { value: e },
+    "return" <e:Expression> ";" => ReturnStatement { value: Some(e) },
+    "return" ";" => ReturnStatement { value: None },
 };
 
 FunctionCall: FunctionCall = {
