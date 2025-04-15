@@ -17,12 +17,12 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
 pub fn semantic_check_function_is_defined<'a>(function_call: &'a FunctionCall, f_table: &'a FTable) -> Result<&'a FunctionDef> {
     let func = f_table.get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-    Ok(func.def)
+    Ok(&func.def)
 }
 
 pub fn semantic_check_function_has_return_type<'a>(function: &'a FunctionDef) -> Result<Type>{
     let return_type = function.return_type.clone()
-        .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function.def.name))?;
+        .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function.name))?;
     Ok(return_type)
 }
 
