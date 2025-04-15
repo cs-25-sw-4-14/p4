@@ -1,4 +1,4 @@
-use crate::{ast::{FunctionCall,FunctionDef, Type}, typechecker::{expression_check, function_table::{FTable, FunctionEntry}, struct_table::STable, variable_table::VTable}};
+use crate::{ast::{FunctionCall,FunctionDef, Type}, typechecker::{expression_check, function_table::{FTable}, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 
 pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
