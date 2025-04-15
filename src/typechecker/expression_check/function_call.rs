@@ -7,12 +7,8 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
 
     let return_type = semantic_check_function_has_return_type(func)?;
 
-    semantic_check_argument_length_are_equal(func,function_call);
-    semantic_check_arguments_are_same_type(func, function_call, f_table, v_table, s_table);
-
-    
-        //check if the types are the same
-       
+    semantic_check_argument_length_are_equal(func,function_call)?;
+    semantic_check_arguments_are_same_type(func, function_call, f_table, v_table, s_table)?;
 
     println!("Function {} called with correct argument types", function_call.name);
     Ok(return_type)
