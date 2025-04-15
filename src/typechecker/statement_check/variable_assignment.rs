@@ -6,11 +6,17 @@ use crate::typechecker::expression_check;
 pub fn check(declaration: &VariableAssignment, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<()> {	
     
     let expression_type = expression_check::check(&declaration.value, v_table, f_table, s_table)?;
-    let name_type =  v_table.get(&declaration.target);
-    if expression_type !=name_type {
-        return Err(anyhow::anyhow!("Type mismatch: expected {:?}, found {:?}", expression_type, name_type));
-    }
 
+    if let Some (var) =  v_table.get(&declaration.target) {
+        let var_type = &var.var_type;
+        if var_type != &expression_type {
+            return Err(anyhow::anyhow!("Type mismatch: expected {:?}, found {:?}", var_type, expression_type));
+        }
+    } 
+    else {
+        return Err(anyhow::anyhow!("Variable {} declared", declaration.target));
+    }
+    
     // TODO add the variable to the v table ?? 
 
     Ok(())
