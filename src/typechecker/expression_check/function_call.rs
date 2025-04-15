@@ -5,7 +5,7 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
     
     let func = semantic_check_function_is_defined(function_call,f_table)?;
 
-    let return_type = semantic_check_function_has_no_return_type(func)?;
+    let return_type = semantic_check_function_has_return_type(func)?;
 
     semantic_check_argument_length_are_equal(func,function_call);
     semantic_check_arguments_are_same_type(func, function_call, f_table, v_table, s_table);
@@ -24,7 +24,7 @@ pub fn semantic_check_function_is_defined<'a>(function_call: &'a FunctionCall, f
     Ok(func)
 }
 
-pub fn semantic_check_function_has_no_return_type<'a>(function: &'a FunctionEntry) -> Result<Type>{
+pub fn semantic_check_function_has_return_type<'a>(function: &'a FunctionEntry) -> Result<Type>{
     let return_type = function.def.return_type.clone()
         .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function.def.name))?;
     Ok(return_type)
