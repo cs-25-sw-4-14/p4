@@ -16,9 +16,6 @@ pub fn check(declaration: &VariableAssignment, v_table: &VTable, f_table: &FTabl
     else {
         return Err(anyhow::anyhow!("Variable {} declared", declaration.target));
     }
-    
-    // TODO add the variable to the v table ?? 
 
     Ok(())
-    }
-
+}
