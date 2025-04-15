@@ -7,6 +7,7 @@ lalrpop_mod!(
 );
 pub mod ast;
 pub mod typechecker;
+pub mod codegenerator;
 
 fn main() {
     let file = std::fs::read_to_string("test.lzy").unwrap();
