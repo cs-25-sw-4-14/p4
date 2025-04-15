@@ -2,8 +2,7 @@ use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_
 use anyhow::Result;
 
 pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
-    let func = f_table.get(&function_call.name)
-        .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
+    let func = semantic_check_function_definition(function_call,f_table)
 
     let return_type = func.def.return_type.clone()
         .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function_call.name))?;
@@ -25,6 +24,19 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
     println!("Function {} called with correct argument types", function_call.name);
     Ok(return_type)
 }
+
+pub fn semantic_check_function_definition(function_call: &FunctionCall, f_table: &FTable) -> Result<&FunctionEntry> {
+    let func = f_table.get(&function_call.name)
+        .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
+
+ 
+
+    Ok(func)
+
+
+
+}
+
 
 #[cfg(test)]
 pub mod tests {
