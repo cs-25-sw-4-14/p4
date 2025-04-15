@@ -2,24 +2,17 @@ use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_
 use anyhow::Result;
 
 pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    
     let func = semantic_check_function_is_defined(function_call,f_table)?;
 
-    let return_type = func.def.return_type.clone()
-        .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function_call.name))?;
+    let return_type = semantic_check_function_has_no_return_type(func)?;
 
-    // check if the number of arguments is correct
-    if func.def.params.len() != function_call.args.len() {
-        return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
-    }
+    semantic_check_argument_length_are_equal(func,function_call);
+    semantic_check_arguments_are_same_type(func, function_call, f_table, v_table, s_table);
 
+    
         //check if the types are the same
-        for i in 0..func.def.params.len() {
-        let expected_type = func.def.params[i].param_type.clone();
-        let actual_type = expression_check::check(&function_call.args[i], v_table, f_table, s_table)?;
-            if expected_type != actual_type {
-                return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
-        }
-        }
+       
 
     println!("Function {} called with correct argument types", function_call.name);
     Ok(return_type)
@@ -31,6 +24,30 @@ pub fn semantic_check_function_is_defined<'a>(function_call: &'a FunctionCall, f
     Ok(func)
 }
 
+pub fn semantic_check_function_has_no_return_type<'a>(function: &'a FunctionEntry) -> Result<Type>{
+    let return_type = function.def.return_type.clone()
+        .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function.def.name))?;
+    Ok(return_type)
+}
+
+pub fn semantic_check_argument_length_are_equal<'a>(function: &'a FunctionEntry, function_call: &'a FunctionCall) -> Result<()>{
+    if function.def.params.len() != function_call.args.len(){
+        return Err(anyhow::anyhow!("Function {} called with incorrect number of arguments", function_call.name));
+    }
+    Ok(())
+}
+
+pub fn semantic_check_arguments_are_same_type<'a>(function: &'a FunctionEntry, function_call: &'a FunctionCall, f_table: &'a FTable, v_table: &'a VTable, s_table: &'a STable )-> Result<()>{
+
+    for i in 0..function.def.params.len() {
+        let expected_type = function.def.params[i].param_type.clone();
+        let actual_type = expression_check::check(&function_call.args[i], v_table, f_table, s_table)?;
+            if expected_type != actual_type {
+                return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
+        }
+        }
+    Ok(())
+}
 
 #[cfg(test)]
 pub mod tests {
