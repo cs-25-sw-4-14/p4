@@ -1,8 +1,8 @@
-use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_table::FTable, struct_table::STable, variable_table::VTable}};
+use crate::{ast::{FunctionCall, Type}, typechecker::{expression_check, function_table::{FTable, FunctionEntry}, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 
 pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
-    let func = semantic_check_function_definition(function_call,f_table)
+    let func = semantic_check_function_is_defined(function_call,f_table)?;
 
     let return_type = func.def.return_type.clone()
         .ok_or_else(|| anyhow::anyhow!("Function {} has no return type and is therefore not an expression", function_call.name))?;
@@ -25,16 +25,10 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
     Ok(return_type)
 }
 
-pub fn semantic_check_function_definition(function_call: &FunctionCall, f_table: &FTable) -> Result<&FunctionEntry> {
+pub fn semantic_check_function_is_defined<'a>(function_call: &'a FunctionCall, f_table: &'a FTable) -> Result<&'a FunctionEntry> {
     let func = f_table.get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-
- 
-
     Ok(func)
-
-
-
 }
 
 
