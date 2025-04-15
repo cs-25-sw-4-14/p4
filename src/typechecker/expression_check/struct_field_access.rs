@@ -1,38 +1,47 @@
 use crate::{ast::{StructFieldAccess, Type}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
-
+use crate::ast::StructDef;
 pub fn check(struct_field_access: &StructFieldAccess, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
 
-    let expr_type = expression_check::check(&struct_field_access.struct_expr, v_table, f_table, s_table)?;
+    let struct_definition = semantic_check_struct_defined(struct_field_access, v_table,f_table,s_table)?;
+    
 
-    let struct_definition = match expr_type {
-        Type::Struct(name) => {
-            match s_table.structs.get(&name) {
-                Some(struct_type) => struct_type,
-                None => {
-                    return Err(anyhow::anyhow!("struct: {}, not defined", name));
-                }
-            }
-        }
-        _ => {
-            return Err(anyhow::anyhow!("cannot access field of non-struct type"));
-        }
-    };
+    
 
-    let resulting_type = struct_definition.fields
-        .iter()
-        .find(|field| field.name == struct_field_access.field_name)
-        .ok_or(anyhow::anyhow!(
-            "Field `{}` not found in struct `{}`",
-            struct_field_access.field_name,
-            struct_definition.name
-        ))?
-        .field_type
-        .clone();
+    let resulting_type = semantic_check_field_access_type(struct_field_access, v_table, f_table, s_table)?;
 
     Ok(resulting_type)
 }
+
+pub fn semantic_check_struct_defined<'a>(struct_field_access: &'a StructFieldAccess, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<&'a StructDef> {
+    let expr_type = expression_check::check(&struct_field_access.struct_expr, v_table, f_table, s_table)?;
+
+    // Check if the expression type is a struct
+    let Type::Struct(name) = expr_type else {
+        return Err(anyhow::anyhow!("struct field access must be on a struct type"));
+    };
+
+    // Check if the struct is defined in the symbol table
+    let struct_definition = s_table.structs.get(&name)
+        .ok_or_else(|| {anyhow::anyhow!("struct: {}, not defined", name)})?;
+
+    Ok(struct_definition)
+}
+
+pub fn semantic_check_field_access_type<'a>(struct_field_access: &'a StructFieldAccess, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<Type> {
+    let struct_definition = semantic_check_struct_defined(struct_field_access, v_table, f_table, s_table)?;
+
+    // Check if the field is defined in the struct
+    let field_type = struct_definition.fields.iter()
+        .find(|field| field.name == struct_field_access.field_name)
+        .ok_or_else(|| {anyhow::anyhow!("field: {}, not defined in struct: {}", struct_field_access.field_name, struct_definition.name)})?
+        .field_type
+        .clone();
+
+    Ok(field_type)
+}
+
 
 #[cfg(test)]
 pub mod tests {
