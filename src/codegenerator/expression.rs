@@ -8,8 +8,11 @@ impl<'ctx> CodeGenerator<'ctx> {
         match expr {
             // EXAMPLE
             // Expression::Literal(literal) => self.compile_literal(literal),
+            // TODO: Rasmus
             Expression::Literal(literal) => todo!(),
+            // TODO: Mads
             Expression::Variable(variable) => todo!(),
+            // TODO: Marc
             Expression::BinaryOp(binary_operation) => todo!(),
             Expression::UnaryOp(unary_operation) => todo!(),
             Expression::FunctionCall(function_call) => todo!(),
