@@ -14,7 +14,39 @@ impl<'ctx> CodeGenerator<'ctx> {
             // TODO: Marc
             Expression::BinaryOp(binary_operation) => todo!(),
             Expression::UnaryOp(unary_operation) => todo!(),
-            Expression::FunctionCall(function_call) => todo!(),
+
+            Expression::FunctionCall(function_call) => {
+                // Look up the function in the module
+                let function = match self.module.get_function(&function_call.name) {
+                    Some(f) => f,
+                    None => return Err(anyhow::anyhow!("Function '{}' not found", function_call.name)),
+                };
+                
+                // Compile each argument expression
+                let mut arg_values = Vec::with_capacity(function_call.arguments.len());
+                for arg_expr in &function_call.arguments {
+                    self.compile_expression(arg_expr)?;
+                    arg_values.push(self.last_value);
+                }
+                
+                // Convert the arguments to LLVM's expected format (BasicMetadataValueEnum)
+                let args: Vec<inkwell::values::BasicMetadataValueEnum> = arg_values
+                    .iter()
+                    .map(|val| val.into())
+                    .collect();
+                
+                // Build the function call
+                let call_site_value = self.builder
+                    .build_call(function, &args, &format!("call_{}", function_call.name))
+                    .try_as_basic_value()
+                    .left();
+                
+                // Store the result if the function returns a value
+                if let Some(value) = call_site_value {
+                    self.last_value = value;
+                }
+            },
+
             Expression::StructInit(struct_init) => todo!(),
             Expression::StructFieldAccess(struct_field_access) => todo!(),
             Expression::ArrayAccess(array_access) => todo!(),
