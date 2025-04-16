@@ -23,10 +23,9 @@ impl<'ctx> CodeGenerator<'ctx> {
                 };
                 
                 // Compile each argument expression
-                let mut arg_values = Vec::with_capacity(function_call.arguments.len());
-                for arg_expr in &function_call.arguments {
-                    self.compile_expression(arg_expr)?;
-                    arg_values.push(self.last_value);
+                let mut arg_values = Vec::with_capacity(function_call.args.len());
+                for arg_expr in &function_call.args {
+                    arg_values.push(self.compile_expression(arg_expr)?);
                 }
                 
                 // Convert the arguments to LLVM's expected format (BasicMetadataValueEnum)
@@ -37,14 +36,12 @@ impl<'ctx> CodeGenerator<'ctx> {
                 
                 // Build the function call
                 let call_site_value = self.builder
-                    .build_call(function, &args, &format!("call_{}", function_call.name))
+                    .build_call(function, &args, &format!("call_{}", function_call.name))?
                     .try_as_basic_value()
                     .left();
                 
-                // Store the result if the function returns a value
-                if let Some(value) = call_site_value {
-                    self.last_value = value;
-                }
+                call_site_value
+                    .ok_or_else(|| anyhow::anyhow!("Function call did not return a value"))
             },
 
             Expression::StructInit(struct_init) => todo!(),
