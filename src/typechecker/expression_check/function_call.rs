@@ -42,10 +42,10 @@ pub fn semantic_check_arguments_are_same_type<'a>(function: &'a FunctionDef, fun
                 return Err(anyhow::anyhow!("Function {} called with incorrect argument types", function_call.name));
         }
         }
+
     Ok(())
+
 }
-
-
 
 #[cfg(test)]
 pub mod tests {
