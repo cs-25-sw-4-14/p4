@@ -7,7 +7,7 @@ pub fn check(array_literal: &Box<ArrayLiteral>, v_table: &VTable, f_table: &FTab
 
     let array_type = semantic_check_all_elements_same_type(array_literal, v_table, f_table, s_table)?;
     
-    Ok(Type::Array(Box::new(array_type.clone()), array_literal.elements.len() as u64))
+    Ok(Type::Array(Box::new(array_type.clone()), array_literal.elements.len() as i64))
 }
 
 pub fn semantic_check_literal_not_empty<'a>(array_literal: &'a Box<ArrayLiteral>)-> Result<()>{
