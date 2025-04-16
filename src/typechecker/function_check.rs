@@ -5,7 +5,7 @@ use crate::ast::{FunctionDef, ReturnStatement, Statement, Type};
 use anyhow::{Result, anyhow};
 use std::collections::HashSet;
 
-pub fn check(function: &FunctionDef, f_table: &FTable, s_table: &STable) -> Result<()> {
+pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable) -> Result<()> {
     // check if function exists in the function table
     if f_table.get(&function.name).is_none() {
         return Err(anyhow!(
@@ -14,8 +14,7 @@ pub fn check(function: &FunctionDef, f_table: &FTable, s_table: &STable) -> Resu
         ));
     }
 
-    // variable table for this function scope
-    let mut v_table = VTable::new();
+    let v_table = &mut f_table.get_mut(&function.name).unwrap().vtable;
 
     //check for duplicate parameter names
     check_duplicate_params(function)?;
@@ -35,7 +34,7 @@ pub fn check(function: &FunctionDef, f_table: &FTable, s_table: &STable) -> Resu
     }
 
     // type-check the function body
-    check_function_body(function, &v_table, f_table, s_table)?;
+    check_function_body(function, v_table, f_table, s_table)?;
 
     // check return statements
     check_return_statements(function, &v_table, f_table, s_table)?;
@@ -61,12 +60,12 @@ fn check_duplicate_params(function: &FunctionDef) -> Result<()> {
 
 fn check_function_body(
     function: &FunctionDef,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {
     for statement in &function.body {
-        statement_check::check(statement, v_table, f_table, s_table)?;
+        statement_check::var_declaration(statement, v_table, f_table, s_table)?;
     }
 
     Ok(())

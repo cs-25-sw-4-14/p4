@@ -41,4 +41,7 @@ impl FTable {
     pub fn get(&self, name: &str) -> Option<&FunctionEntry> {
         self.functions.get(name)
     }
+    pub fn get_mut(&mut self, name: &str) -> Option<&mut FunctionEntry> {
+        self.functions.get_mut(name)
+    }
 }
