@@ -3,6 +3,14 @@ use anyhow::Result;
 use crate::typechecker::expression_check;
 
 pub fn check(binary_operation: &BinaryOperation, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    
+    let result = semantic_check_binary_op(binary_operation, v_table, f_table, s_table)?;
+    match binary_operation.operator {
+        _ => Ok(result.clone()),
+    }
+}
+
+pub fn semantic_check_binary_op<'a>(binary_operation: &'a BinaryOperation, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<Type> {
     let left_type = expression_check::check(&binary_operation.left, v_table, f_table, s_table)?;
     let right_type = expression_check::check(&binary_operation.right, v_table, f_table, s_table)?;
 

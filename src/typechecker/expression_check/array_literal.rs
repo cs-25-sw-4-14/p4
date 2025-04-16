@@ -3,10 +3,21 @@ use anyhow::Result;
 use crate::typechecker::expression_check;
 
 pub fn check(array_literal: &Box<ArrayLiteral>, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
+    semantic_check_literal_not_empty(array_literal)?;
+
+    let array_type = semantic_check_all_elements_same_type(array_literal, v_table, f_table, s_table)?;
+    
+    Ok(Type::Array(Box::new(array_type.clone()), array_literal.elements.len() as i64))
+}
+
+pub fn semantic_check_literal_not_empty<'a>(array_literal: &'a Box<ArrayLiteral>)-> Result<()>{
     if array_literal.elements.is_empty() {
         return Err(anyhow::anyhow!("Array literal is empty"));
     }
+    Ok(())
+}
 
+pub fn semantic_check_all_elements_same_type<'a>(array_literal: &'a Box<ArrayLiteral>, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<Type> {
     let first_type = expression_check::check(&array_literal.elements[0], v_table, f_table, s_table)?;
 
     for element in &array_literal.elements[1..] {
@@ -15,7 +26,7 @@ pub fn check(array_literal: &Box<ArrayLiteral>, v_table: &VTable, f_table: &FTab
             return Err(anyhow::anyhow!("Array elements have different types: {:?} and {:?}", first_type, element_type));
         }
     }
-    Ok(Type::Array(Box::new(first_type), array_literal.elements.len() as i64))
+    Ok(first_type)
 }
 
 #[cfg(test)]
