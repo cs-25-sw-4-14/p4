@@ -15,12 +15,14 @@ fn main() {
             .parse(file.as_str())
             .expect("Failed to parse: ");
 
-    let mut typechecker = typechecker::Typechecker::new();
+     let mut typechecker = typechecker::Typechecker::new();
+
 
     typechecker.walk(expr.clone());
 
-    //println!("{:#?}", expr);
-    //println!("Function Table: {:#?}", typechecker.ftable.functions);
-    //println!("Struct Table: {:#?}", typechecker.stable.structs);
+
+    println!("{:#?}", expr);
+    println!("Function Table: {:#?}", typechecker.ftable.functions);
+    println!("Struct Table: {:#?}", typechecker.stable.structs);
 }
 
