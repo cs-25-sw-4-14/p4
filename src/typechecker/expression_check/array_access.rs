@@ -1,26 +1,54 @@
 
-use crate::{ast::{ArrayAccess, Expression, Literal, Type}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
+use crate::{ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 
 pub fn check(array_access: &Box<ArrayAccess>, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
 
-    let array_type = v_table.get(&array_access.array_name)
-        .ok_or_else(|| anyhow::anyhow!("array: {}, not defined", array_access.array_name))?;
+    let array = semantic_check_array_definition(array_access, v_table)?;
+    let array_type = semantic_check_array_type(array)?;
+    let array_length = semantic_check_array_length(array)?;
+    semantic_check_array_index(&array_access.index, array_length,v_table, f_table, s_table)?;
 
-    let (element_type, length) = match &array_type.var_type {
-        Type::Array(ty, len) => (ty, len),
-        _ => return Err(anyhow::anyhow!(
-            "Array access on non-array type: {:?}",
-            array_type
-        )),
+   
+    Ok(array_type.clone())
+}
+
+pub fn semantic_check_array_definition<'a>(array_acces: &'a Box<ArrayAccess>, v_table: &'a VTable) ->Result<&'a VariableDeclaration>{
+    let array = v_table.get(&array_acces.array_name)
+        .ok_or_else(|| anyhow::anyhow!("array: {}, not defined", array_acces.array_name))?;
+
+    match &array.var_type {
+        Type::Array(_,_) => Ok(array),
+        _ => Err(anyhow::anyhow!("Array access on non-array type: {:?}", array.var_type)),
+    }
+}
+
+pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&'a Type> {
+    let array_type = match &array.var_type{
+        Type::Array(ty, _) => ty,
+        _ => return Err(anyhow::anyhow!("Array access on non-array type: {:?}", array.var_type)),
+       
     };
+    Ok(array_type)
+   
+}
 
-    match expression_check::check(&array_access.index, v_table, f_table, s_table)? {
+pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a u64> {
+    let array_length = match &array.var_type {
+        Type::Array(_, length) => length,
+        _ => return Err(anyhow::anyhow!("Array access on non-array type: {:?}", array.var_type)),
+        
+    };
+    Ok(array_length)
+}
+
+pub fn semantic_check_array_index<'a>(array_index: &'a Expression, array_length: &'a u64, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<()> {
+    match expression_check::check(array_index, v_table, f_table, s_table)? {
         Type::I64 => {
-            match array_access.index {
+            match array_index {
                 Expression::Literal(Literal::Int(index)) => {
-                    if index > *length || index < 0 {
+                    if 0<=*index && *index < *array_length {
                         return Err(anyhow::anyhow!("Array access index out of bounds: {}", index));
                     }
                 }
@@ -28,11 +56,10 @@ pub fn check(array_access: &Box<ArrayAccess>, v_table: &VTable, f_table: &FTable
             }
         }
         _ => {
-            return Err(anyhow::anyhow!("Array access by non-integer expression: {:?}", array_access.index));
+            return Err(anyhow::anyhow!("Array access by non-integer expression: {:?}", array_index));
         }
     }
-
-    Ok(*element_type.clone())
+    Ok(())
 }
 
 #[cfg(test)]
