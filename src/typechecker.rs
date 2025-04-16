@@ -24,6 +24,16 @@ impl Typechecker {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
 
+        for def in program.definitions {
+            match def {
+                crate::ast::TopLevelDefinition::Function(func_def) => {
+                    function_check::check(&func_def, &mut self.ftable, &self.stable).unwrap();
+                }
+                _ => {}
+             
+            }
+        }
+
         println!("Function Table: {:#?}", self.ftable.functions);
         println!("Struct Table: {:#?}", self.stable.structs);
     }
