@@ -22,7 +22,11 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
         }
         }
 
+
+    //TODO check if the function holds at least one return statement, and if they are of the same type as the given return type
+    
     println!("Function {} called with correct argument types", function_call.name);
+
     Ok(return_type)
 }
 
