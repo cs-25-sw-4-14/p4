@@ -25,7 +25,7 @@ impl FTable {
                 TopLevelDefinition::Function(func) => {
 
                     let mut vtable = VTable::new();
-                    vtable.walk(func.body.clone());
+                
 
                     self.functions.insert(func.name.clone(), FunctionEntry {
                         def: func.clone(),
