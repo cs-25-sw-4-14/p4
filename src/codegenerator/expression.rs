@@ -2,16 +2,14 @@ use crate::ast::Expression;
 use super::CodeGenerator;
 use anyhow::Result;
 
+pub mod variable;
+
 impl<'ctx> CodeGenerator<'ctx> {
-// Compile an expression.
-    pub fn compile_expression(&mut self, expr: &Expression) -> Result<()> {
+    pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
         match expr {
-            // EXAMPLE
-            // Expression::Literal(literal) => self.compile_literal(literal),
             // TODO: Rasmus
             Expression::Literal(literal) => todo!(),
-            // TODO: Mads
-            Expression::Variable(variable) => todo!(),
+            Expression::Variable(variable) => self.compile_variable(variable),
             // TODO: Marc
             Expression::BinaryOp(binary_operation) => todo!(),
             Expression::UnaryOp(unary_operation) => todo!(),
@@ -22,6 +20,5 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::ArrayLiteral(array_literal) => todo!(),
             Expression::TypeCast(type_cast) => todo!(),
         }
-        Ok(())
     }
 }
