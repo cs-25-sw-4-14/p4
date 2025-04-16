@@ -16,8 +16,8 @@ impl STable {
     pub fn walk(&mut self, program: Program) {
         for def in program.definitions {
             match def {
-                crate::ast::TopLevelDefinition::Struct(func) => {
-                    self.structs.insert(func.name.clone(), func.clone());
+                crate::ast::TopLevelDefinition::Struct(struct_def) => {
+                    self.structs.insert(struct_def.name.clone(), struct_def.clone());
                 }
                 _ => {}
             }
