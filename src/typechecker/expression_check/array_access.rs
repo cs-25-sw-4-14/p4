@@ -34,7 +34,7 @@ pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&
    
 }
 
-pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a i64> {
+pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a u64> {
     let array_length = match &array.var_type {
         Type::Array(_, length) => length,
         _ => return Err(anyhow::anyhow!("Array access on non-array type: {:?}", array.var_type)),
@@ -43,7 +43,7 @@ pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result
     Ok(array_length)
 }
 
-pub fn semantic_check_array_index<'a>(array_index: &'a Expression, array_length: &'a i64, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<()> {
+pub fn semantic_check_array_index<'a>(array_index: &'a Expression, array_length: &'a u64, v_table: &'a VTable, f_table: &'a FTable, s_table: &'a STable) -> Result<()> {
     match expression_check::check(array_index, v_table, f_table, s_table)? {
         Type::I64 => {
             match array_index {
