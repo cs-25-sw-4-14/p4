@@ -61,7 +61,7 @@ fn check_duplicate_params(function: &FunctionDef) -> Result<()> {
 fn check_function_body(
     function: &FunctionDef,
     v_table: &mut VTable,
-    f_table: &FTable,
+    f_table: &mut FTable,
     s_table: &STable,
 ) -> Result<()> {
     for statement in &function.body {
@@ -74,7 +74,7 @@ fn check_function_body(
 fn check_return_statements(
     function: &FunctionDef,
     v_table: &VTable,
-    f_table: &FTable,
+    f_table: &mut FTable,
     s_table: &STable,
 ) -> Result<()> {
     let return_type = &function.return_type;
