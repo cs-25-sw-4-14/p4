@@ -1,53 +1,15 @@
-name: Format Rust Code
+on: push
 
-on:
-  # Run on pushes to main branch
-  push:
-    branches: [ main ]
-  # Allow manual triggering
-  workflow_dispatch:
-
-# Add permissions needed to push changes
-permissions:
-  contents: write
+name: Rustfmt
 
 jobs:
   format:
-    name: Format Rust code
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          fetch-depth: 0  # Fetch all history so we have access to all files
-      
-      - name: Setup Git
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
           components: rustfmt
-      
-      - name: Format Rust code
-        run: |
-          # Format all Rust files with 2024 edition
-          find . -name "*.rs" -type f -print0 | xargs -0 rustfmt --edition 2024
-      
-      - name: Commit changes
-        run: |
-          # Check if there are any changes after formatting
-          if ! git diff --quiet; then
-            echo "Committing formatting changes"
-            git add .
-            git commit -m "Apply rustfmt formatting"
-            git push
-          else
-            echo "No formatting changes needed"
-          fi
+      - uses: mbrobbel/rustfmt-check@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
