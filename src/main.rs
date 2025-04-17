@@ -12,8 +12,8 @@ fn main() {
     let huttel = std::fs::read_to_string("huttel.txt").unwrap();
     let file = std::fs::read_to_string("test.lzy").unwrap();
     let expr = lossy::ProgramParser::new()
-            .parse(file.as_str())
-            .expect(&format!("{}\nFailed to parse: ", &huttel));
+        .parse(file.as_str())
+        .expect(&format!("{}\nFailed to parse: ", &huttel));
 
     let mut typechecker = typechecker::Typechecker::new();
 
