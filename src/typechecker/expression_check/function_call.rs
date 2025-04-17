@@ -1,4 +1,4 @@
-use crate::{ast::{FunctionCall,FunctionDef, Type}, typechecker::{expression_check, function_table::{FTable}, struct_table::STable, variable_table::VTable}};
+use crate::{ast::{FunctionCall,FunctionDef, Type}, typechecker::{expression_check, function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 
 pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
@@ -15,9 +15,9 @@ pub fn check(function_call: &FunctionCall, v_table: &VTable, f_table: &FTable, s
 }
 
 pub fn semantic_check_function_is_defined<'a>(function_call: &'a FunctionCall, f_table: &'a FTable) -> Result<&'a FunctionDef> {
-    let func = f_table.get(&function_call.name)
+    let function_def = f_table.get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-    Ok(&func.def)
+    Ok(&function_def)
 }
 
 pub fn semantic_check_function_has_return_type<'a>(function: &'a FunctionDef) -> Result<Type>{
@@ -51,7 +51,6 @@ pub fn semantic_check_arguments_are_same_type<'a>(function: &'a FunctionDef, fun
 pub mod tests {
     use super::*;
     use crate::ast::{Expression, FunctionDef, Literal, Param, Type, FunctionCall};
-    use crate::typechecker::function_table::FunctionEntry;
     use crate::typechecker::expression_check;
     use crate::typechecker::variable_table::VTable;
 
@@ -80,15 +79,12 @@ pub mod tests {
         let mut f_table = FTable::new();
         let s_table = STable::new();
 
-        f_table.functions.insert(String::from("test"), FunctionEntry { 
-            def: FunctionDef {
+        f_table.functions.insert(String::from("test"), FunctionDef {
                 name: String::from("test"),
                 params: vec![],
                 return_type: None,
                 body: vec![],
-            },
-            vtable: VTable::new(),
-        });
+            });
         expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
 
@@ -103,15 +99,12 @@ pub mod tests {
         let mut f_table = FTable::new();
         let s_table = STable::new();
 
-        f_table.functions.insert(String::from("test"), FunctionEntry { 
-            def: FunctionDef {
+        f_table.functions.insert(String::from("test"), FunctionDef {
                 name: String::from("test"),
                 params: vec![ Param { name: String::from("a"), param_type: Type::String }],
                 return_type: None,
                 body: vec![],
-            },
-            vtable: VTable::new(),
-        });
+            });
 
         expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }
@@ -127,15 +120,12 @@ pub mod tests {
         let mut f_table = FTable::new();
         let s_table = STable::new();
 
-        f_table.functions.insert(String::from("test"), FunctionEntry { 
-            def: FunctionDef {
+        f_table.functions.insert(String::from("test"), FunctionDef {
                 name: String::from("test"),
                 params: vec![ Param { name: String::from("a"), param_type: Type::I32 }],
                 return_type: None,
                 body: vec![],
-            },
-            vtable: VTable::new(),
-        });
+            });
 
         expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
     }

@@ -2,7 +2,7 @@
 
 use super::{function_table::FTable, variable_table::VTable, struct_table::STable};
 use anyhow::Result;
-use crate::ast::{Type, Statement};
+use crate::ast::Statement;
 
 mod variable_assignment;
 

@@ -1,4 +1,4 @@
-use crate::{ast::{ Type, VariableDeclaration}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
+use crate::{ast::VariableDeclaration, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
 

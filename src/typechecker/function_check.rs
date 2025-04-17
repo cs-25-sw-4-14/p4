@@ -14,7 +14,7 @@ pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable) -> 
         ));
     }
 
-    let v_table = &mut f_table.get_mut(&function.name).unwrap().vtable;
+    let mut v_table = VTable::new();
 
     //check for duplicate parameter names
     check_duplicate_params(function)?;
@@ -34,7 +34,7 @@ pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable) -> 
     }
 
     // type-check the function body
-    check_function_body(function, v_table, f_table, s_table)?;
+    check_function_body(function, &mut v_table, f_table, s_table)?;
 
     // check return statements
     check_return_statements(function, &v_table, f_table, s_table)?;
