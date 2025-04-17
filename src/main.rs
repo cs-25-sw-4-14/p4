@@ -9,19 +9,17 @@ pub mod ast;
 pub mod typechecker;
 
 fn main() {
+    let huttel = std::fs::read_to_string("huttel.txt").unwrap();
     let file = std::fs::read_to_string("test.lzy").unwrap();
     let expr = lossy::ProgramParser::new()
             .parse(file.as_str())
-            .expect("Failed to parse: ");
+            .expect(&format!("{}\nFailed to parse: ", &huttel));
 
-     let mut typechecker = typechecker::Typechecker::new();
-
+    let mut typechecker = typechecker::Typechecker::new();
 
     typechecker.walk(expr.clone());
-
 
     println!("{:#?}", expr);
     println!("Function Table: {:#?}", typechecker.ftable.functions);
     println!("Struct Table: {:#?}", typechecker.stable.structs);
 }
-
