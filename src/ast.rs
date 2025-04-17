@@ -136,19 +136,19 @@ pub struct UnaryOperation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
-    Multiply,       // 1
-    Divide,         // 1
-    Modulus,        // 1
-    Add,            // 2
-    Subtract,       // 2
-    LessThan,       // 3
-    GreaterThan,    // 3
-    LessThanOrEqual,// 3
-    GreaterThanOrEqual, // 3
-    Equal,          // 4
-    NotEqual,       // 4
-    And,            // 5
-    Or,             // 6
+    Multiply,       
+    Divide,         
+    Modulus,        
+    Add,            
+    Subtract,       
+    LessThan,       
+    GreaterThan,    
+    LessThanOrEqual,
+    GreaterThanOrEqual, 
+    Equal,          
+    NotEqual,       
+    And,           
+    Or,            
 }
 
 #[derive(Debug, Clone)]
