@@ -1,0 +1,100 @@
+use super::CodeGenerator;
+use anyhow::Result;
+use inkwell::values::BasicValueEnum;
+use crate::ast::FunctionCall;
+
+impl<'ctx> CodeGenerator<'ctx> {
+    pub fn compile_struct_init(&mut self, struct_init: &StructInit) -> Result<()> {
+        // Look up the struct type
+        let struct_name = &struct_init.name;
+        let struct_type_opt = self.get_struct_type(struct_name)?;
+
+        let struct_type = match struct_type_opt {
+            Some(st) => st,
+            None => return Err(anyhow::anyhow!("Struct type '{}' not found", struct_name)),
+        };
+
+        // Allocate memory for the struct on the stack
+        let struct_ptr = self.builder.build_alloca(struct_type, &format!("{}_instance", struct_name));
+
+        // Process each field initializer
+        for field_init in &struct_init.fields {
+            // Find the field index in the struct definition
+            let field_index = self.get_field_index(struct_name, &field_init.name)?;
+
+            // Compile the field value expression
+            self.compile_expression(&field_init.value)?;
+            let field_value = self.last_value;
+
+            // Get a pointer to the field
+            let field_ptr = unsafe {
+                self.builder.build_struct_gep(
+                    struct_type,
+                    struct_ptr,
+                    field_index as u32,
+                    &format!("{}field{}", struct_name, field_init.name),
+                ).maperr(|| anyhow::anyhow!("Failed to get pointer to struct field"))?
+            };
+
+            // Store the value in the field
+            self.builder.build_store(field_ptr, field_value);
+        }
+
+        // Set the result to be a pointer to the struct
+        self.last_value = BasicValueEnum::PointerValue(struct_ptr);
+
+        Ok(())
+    }
+
+    // Helper function to get the struct type from the module
+    fn get_struct_type(&self, struct_name: &str) -> Result<Option<inkwell::types::StructType<'ctx>>> {
+        // This depends on how you've stored struct types in your compiler
+        // Typically, you would have a map of struct names to their LLVM types
+        if let Some(struct_type) = self.module.get_struct_type(struct_name) {
+            return Ok(Some(struct_type));
+        }
+
+        // If you're storing struct types elsewhere, check there
+        if let Some(struct_type) = self.struct_types.get(struct_name) {
+            return Ok(Some(*struct_type));
+        }
+
+        Ok(None)
+    }
+
+    // Helper function to get the index of a field in a struct
+    fn get_field_index(&self, struct_name: &str, field_name: &str) -> Result<usize> {
+        // Find the struct definition in your AST or type system
+        let struct_def = self.find_struct_definition(struct_name)?;
+
+        // Find the field index in the struct definition
+        for (index, field) in struct_def.fields.iter().enumerate() {
+            if field.name == field_name {
+                return Ok(index);
+            }
+        }
+
+        Err(anyhow::anyhow!(
+            "Field '{}' not found in struct '{}'", 
+            field_name, 
+            struct_name
+        ))
+    }
+
+    // Helper function to find a struct definition by name
+    fn find_struct_definition(&self, struct_name: &str) -> Result<&StructDef> {
+        // This depends on how you're storing struct definitions
+        // You might have them in a global program state or compiler context
+
+        // Example: search through program definitions
+        for def in &self.program.definitions {
+            if let TopLevelDefinition::Struct(struct_def) = def {
+                if struct_def.name == struct_name {
+                    return Ok(struct_def);
+                }
+            }
+        }
+
+        Err(anyhow::anyhow!("Struct definition '{}' not found", struct_name))
+    }
+}
