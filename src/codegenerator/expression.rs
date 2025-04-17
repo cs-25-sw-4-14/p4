@@ -31,7 +31,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 // Convert the arguments to LLVM's expected format (BasicMetadataValueEnum)
                 let args: Vec<inkwell::values::BasicMetadataValueEnum> = arg_values
                     .iter()
-                    .map(|val| val.into())
+                    .map(|val| (*val).into())
                     .collect();
                 
                 // Build the function call
