@@ -12,8 +12,8 @@ fn main() {
     let huttel = include_str!("huttel.txt");
     let file = include_str!("test.ss");
     let expr = lossy::ProgramParser::new()
-            .parse(file)
-            .expect(&format!("{}\nFailed to parse: ", &huttel));
+        .parse(file)
+        .expect(&format!("{}\nFailed to parse: ", &huttel));
 
     let mut typechecker = typechecker::Typechecker::new();
 

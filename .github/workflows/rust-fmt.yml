@@ -1,15 +1,44 @@
-on: push
+name: Rust format
 
-name: Rustfmt
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   format:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Debug secret
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: echo "Token ${BOT_TOKEN}"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.P4_SECRET }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
           components: rustfmt
-      - uses: mbrobbel/rustfmt-check@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run cargo fmt
+        run: cargo fmt --all
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -am "Formatting to weird standard"
+            git push
+          else
+            echo "No formatting changes to commit."
+          fi
