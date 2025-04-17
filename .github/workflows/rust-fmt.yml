@@ -7,6 +7,10 @@ on:
   # Allow manual triggering
   workflow_dispatch:
 
+# Add permissions needed to push changes
+permissions:
+  contents: write
+
 jobs:
   format:
     name: Format Rust code
