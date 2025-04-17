@@ -1,6 +1,7 @@
 use crate::{ast::{BinaryOperation, Type}, typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable}};
 use anyhow::Result;
 use crate::typechecker::expression_check;
+use crate::ast::BinaryOperator::*;
 
 pub fn check(binary_operation: &BinaryOperation, v_table: &VTable, f_table: &FTable, s_table: &STable) -> Result<Type> {
     
@@ -15,7 +16,15 @@ pub fn semantic_check_binary_op<'a>(binary_operation: &'a BinaryOperation, v_tab
     let right_type = expression_check::check(&binary_operation.right, v_table, f_table, s_table)?;
 
     if left_type == right_type {
-        Ok(left_type)
+        if binary_operation.operator == Equal ||
+        binary_operation.operator == NotEqual ||
+        binary_operation.operator == LessThan ||
+        binary_operation.operator == GreaterThan ||
+        binary_operation.operator == LessThanOrEqual ||
+        binary_operation.operator == GreaterThanOrEqual {
+            return Ok(Type::Bool);
+        }
+        return Ok(left_type.clone());
     } else {
         Err(anyhow::anyhow!("Type mismatch: {:?} {:?} {:?}", left_type, binary_operation.operator, right_type))
     }

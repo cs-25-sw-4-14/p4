@@ -134,7 +134,7 @@ pub struct UnaryOperation {
     pub operand: Box<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
     Multiply,       // 1
     Divide,         // 1
