@@ -6,6 +6,7 @@ use inkwell::values::BasicValueEnum;
 pub mod variable;
 pub mod literal;
 pub mod function_call;
+pub mod struct_init;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
@@ -16,7 +17,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::BinaryOp(binary_operation) => todo!(),
             Expression::UnaryOp(unary_operation) => todo!(),
             Expression::FunctionCall(function_call) => self.compile_function_call(function_call),
-            Expression::StructInit(struct_init) => todo!(),
+            Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
             Expression::StructFieldAccess(struct_field_access) => todo!(),
             Expression::ArrayAccess(array_access) => todo!(),
             Expression::ArrayLiteral(array_literal) => todo!(),
