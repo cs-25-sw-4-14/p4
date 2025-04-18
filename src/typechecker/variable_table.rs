@@ -20,10 +20,12 @@ impl VTable {
             match s {
                 Statement::VariableDeclaration(var_decl) => {
                     if (self.variables.contains_key(&var_decl.name)) {
-                        return Err(anyhow::anyhow!("Variable {} already declared", var_decl.name))?; 
+                        return Err(anyhow::anyhow!(
+                            "Variable {} already declared",
+                            var_decl.name
+                        ))?;
                     }
                     self.variables.insert(var_decl.name.clone(), var_decl);
-
                 }
                 _ => {}
             }

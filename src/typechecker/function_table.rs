@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use crate::ast::{FunctionDef, Program, TopLevelDefinition};
 use super::variable_table::VTable;
+use crate::ast::{FunctionDef, Program, TopLevelDefinition};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct FunctionEntry {
@@ -23,15 +23,16 @@ impl FTable {
         for def in program.definitions {
             match def {
                 TopLevelDefinition::Function(func) => {
-
                     let mut vtable = VTable::new();
                     vtable.walk(func.body.clone());
 
-                    self.functions.insert(func.name.clone(), FunctionEntry {
-                        def: func.clone(),
-                        vtable,
-                    });
-
+                    self.functions.insert(
+                        func.name.clone(),
+                        FunctionEntry {
+                            def: func.clone(),
+                            vtable,
+                        },
+                    );
                 }
                 _ => {}
             }

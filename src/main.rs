@@ -9,11 +9,11 @@ pub mod ast;
 pub mod typechecker;
 
 fn main() {
-    let huttel = std::fs::read_to_string("huttel.txt").unwrap();
-    let file = std::fs::read_to_string("test.lzy").unwrap();
+    let huttel = include_str!("huttel.txt");
+    let file = include_str!("test.ss");
     let expr = lossy::ProgramParser::new()
-            .parse(file.as_str())
-            .expect(&format!("{}\nFailed to parse: ", &huttel));
+        .parse(file)
+        .expect(&format!("{}\nFailed to parse: ", &huttel));
 
     let mut typechecker = typechecker::Typechecker::new();
 
