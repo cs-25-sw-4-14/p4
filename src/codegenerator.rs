@@ -22,6 +22,8 @@ pub struct CodeGenerator<'ctx> {
     pub module: Module<'ctx>,
     pub builder: Builder<'ctx>,
     pub variables: HashMap<String, (BasicTypeEnum<'ctx>, PointerValue<'ctx>)>,
+    pub last_value: Option<BasicValueEnum<'ctx>>,
+    pub program: Option<Program>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -32,6 +34,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             module,
             builder,
             variables: HashMap::new(),
+            last_value: None,
+            program: None
         }
     }
     
