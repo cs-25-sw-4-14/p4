@@ -244,13 +244,13 @@ pub Expression: Expression = {
         operator: BinaryOperator::NotEqual,
         right: Box::new(r),
     }),
-    #[precedence(level="6")] #[assoc(side="left")]
+    #[precedence(level="7")] #[assoc(side="left")]
     <l:Expression> "&&" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
         right: Box::new(r),
     }),
-    #[precedence(level="6")] #[assoc(side="left")]
+    #[precedence(level="7")] #[assoc(side="left")]
     <l:Expression> "||" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Or,

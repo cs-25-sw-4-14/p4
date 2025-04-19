@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::ast::{FunctionDef, Program, TopLevelDefinition};
+use std::collections::HashMap;
 
 pub struct FTable {
     pub functions: HashMap<String, FunctionDef>,
@@ -16,9 +16,7 @@ impl FTable {
         for def in program.definitions {
             match def {
                 TopLevelDefinition::Function(func) => {
-
                     self.functions.insert(func.name.clone(), func.clone());
-
                 }
                 _ => {}
             }

@@ -36,7 +36,6 @@ pub struct StructField {
     pub field_type: Type,
 }
 
-
 // NOTE: STATEMENTS
 #[derive(Debug, Clone)]
 pub enum Statement {
@@ -136,19 +135,19 @@ pub struct UnaryOperation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
-    Multiply,       
-    Divide,         
-    Modulus,        
-    Add,            
-    Subtract,       
-    LessThan,       
-    GreaterThan,    
+    Multiply,
+    Divide,
+    Modulus,
+    Add,
+    Subtract,
+    LessThan,
+    GreaterThan,
     LessThanOrEqual,
-    GreaterThanOrEqual, 
-    Equal,          
-    NotEqual,       
-    And,           
-    Or,            
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+    And,
+    Or,
 }
 
 #[derive(Debug, Clone)]

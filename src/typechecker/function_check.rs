@@ -65,7 +65,7 @@ fn check_function_body(
     s_table: &STable,
 ) -> Result<()> {
     for statement in &function.body {
-        statement_check::var_declaration(statement, v_table, f_table, s_table)?;
+        statement_check::check(statement, v_table, f_table, s_table)?;
     }
 
     Ok(())

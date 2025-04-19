@@ -30,7 +30,6 @@ impl Typechecker {
                     function_check::check(&func_def, &mut self.ftable, &self.stable).unwrap();
                 }
                 _ => {}
-             
             }
         }
 

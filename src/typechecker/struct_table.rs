@@ -17,7 +17,8 @@ impl STable {
         for def in program.definitions {
             match def {
                 crate::ast::TopLevelDefinition::Struct(struct_def) => {
-                    self.structs.insert(struct_def.name.clone(), struct_def.clone());
+                    self.structs
+                        .insert(struct_def.name.clone(), struct_def.clone());
                 }
                 _ => {}
             }
