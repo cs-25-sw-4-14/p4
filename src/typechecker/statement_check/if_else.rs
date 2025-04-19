@@ -8,7 +8,7 @@ use anyhow::Result;
 
 pub fn check(
     declaration: &IfStatement,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {
