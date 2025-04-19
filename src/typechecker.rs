@@ -1,4 +1,5 @@
 use crate::ast::Program;
+use crate::ast::Statement;
 
 pub mod expression_check;
 pub mod function_table;
@@ -25,5 +26,47 @@ impl Typechecker {
 
         println!("Function Table: {:#?}", self.ftable.functions);
         println!("Struct Table: {:#?}", self.stable.structs);
+    }
+
+    pub fn check_breaks_continues(stmt: &Statement, in_loop: bool) -> Result<(), String> {
+        match stmt {
+            Statement::Break => {
+                if in_loop {
+                    Ok(())
+                } else {
+                    Err("`break` used outside of loop".into())
+                }
+            }
+            Statement::Continue => {
+                if in_loop {
+                    Ok(())
+                } else {
+                    Err("`continue` used outside of loop".into())
+                }
+            }
+            Statement::While(while_stmt) => {
+                for stmt in &while_stmt.body {
+                    Self::check_breaks_continues(stmt, true)?
+                }
+                Ok(())
+            }
+            Statement::If(if_stmt) => {
+                for stmt in &if_stmt.then_block {
+                    Self::check_breaks_continues(stmt, in_loop)?
+                }
+                for else_if in &if_stmt.else_if_blocks {
+                    for stmt in &else_if.body {
+                Self::check_breaks_continues(stmt, in_loop)?
+                    }
+                }
+                if let Some(else_block) = &if_stmt.else_block {
+                    for stmt in else_block {
+                Self::check_breaks_continues(stmt, in_loop)?
+                    }
+                }
+                Ok(())
+            }
+            _ => Ok(())
+        }
     }
 }
