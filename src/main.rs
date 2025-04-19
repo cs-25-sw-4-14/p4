@@ -27,15 +27,4 @@ fn main() {
     println!("Function Table: {:#?}", typechecker.ftable.functions);
     println!("Struct Table: {:#?}", typechecker.stable.structs);
     */
-
-    for def in &expr.definitions {
-        if let ast::TopLevelDefinition::Function(func_def) = def {
-            for stmt in &func_def.body {
-                match typechecker::Typechecker::check_breaks_continues(&stmt, false) {
-                    Ok(()) => (),
-                    Err(e) => eprintln!("Error: {}", e),
-                }
-            }
-        }
-    }
 }
