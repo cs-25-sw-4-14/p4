@@ -1,4 +1,5 @@
 use crate::ast::Program;
+use anyhow::Result;
 
 pub mod expression_check;
 pub mod function_check;
@@ -20,14 +21,14 @@ impl Typechecker {
         }
     }
 
-    pub fn walk(&mut self, program: Program) {
+    pub fn walk(&mut self, program: Program) -> Result<()> {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
 
         for def in program.definitions {
             match def {
                 crate::ast::TopLevelDefinition::Function(func_def) => {
-                    function_check::check(&func_def, &mut self.ftable, &self.stable).unwrap();
+                    function_check::check(&func_def, &mut self.ftable, &self.stable)?;
                 }
                 _ => {}
             }
@@ -35,5 +36,7 @@ impl Typechecker {
 
         println!("Function Table: {:#?}", self.ftable.functions);
         println!("Struct Table: {:#?}", self.stable.structs);
+
+        Ok(())
     }
 }
