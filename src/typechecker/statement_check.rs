@@ -28,8 +28,8 @@ pub fn check(
         Statement::While(while_statement) => {
             while_statement::check(while_statement, v_table, f_table, s_table)?;
         } // check if condition is bool
-        Statement::Break => {}
-        Statement::Continue => {}
+        Statement::Break(_) => {}
+        Statement::Continue(_) => {}
         Statement::Return(_) => {}
         Statement::FunctionCall(function_call) => {
             function_call::check(function_call, v_table, f_table, s_table)?;

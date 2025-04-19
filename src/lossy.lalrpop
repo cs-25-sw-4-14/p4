@@ -61,15 +61,13 @@ StructField: StructField = {
     }
 };
 
-
-
 Statement: Statement = {
     <t:VariableDeclaration> => Statement::VariableDeclaration(t),
     <t:Assignment> => Statement::Assignment(t),
     <t:If> => Statement::If(t),
     <t:While> => Statement::While(t),
-    "break" ";" => Statement::Break,
-    "continue" ";" => Statement::Continue,
+    <l:@L> "break" ";" <r:@R> => Statement::Break(Span { start: l, end: r }),
+    <l:@L> "continue" ";" <r:@R> => Statement::Continue(Span { start: l, end: r }),
     <t:Return> => Statement::Return(t),
     <t:FunctionCall> ";" => Statement::FunctionCall(t),
 };

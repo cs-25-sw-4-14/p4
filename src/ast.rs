@@ -1,3 +1,22 @@
+// Line tracking
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Span {
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Location {
+    pub line: usize,
+    pub char: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SourceSpan {
+    pub start: Location,
+    pub end: Location,
+}
+
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone)]
 pub struct Program {
@@ -43,8 +62,8 @@ pub enum Statement {
     Assignment(VariableAssignment),
     If(IfStatement),
     While(WhileStatement),
-    Break,
-    Continue,
+    Break(Span),
+    Continue(Span),
     Return(ReturnStatement),
     FunctionCall(FunctionCall),
 }
