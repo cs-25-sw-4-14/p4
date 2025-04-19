@@ -21,8 +21,7 @@ struct Person {
     bool is_dork;
     Point location;
 }
-
-Void main() {
+void main() {
     
     triv i64 const_value = 10;
     mut i64 counter = 0;              
@@ -89,7 +88,7 @@ Void main() {
         counter = counter + 1;
         
         if (counter == 25) {
-            break;
+            
         }
     }
     
@@ -98,7 +97,7 @@ Void main() {
         item_count = item_count + 1;
         
         if (item_count % 2 == 0) {
-            continue;
+            
         }
         
         i64 odd_value = item_count * 10;
@@ -113,18 +112,18 @@ Void main() {
             j = j + 1;
             
             if (i == 2 && j == 2) {
-                continue;
+                
             }
             
             counter = counter + 1;
             
             if (j == 3) {
-                break;
+                
             }
         }
         
         if (i == 4) {
-            continue;
+            
         }
     }
     

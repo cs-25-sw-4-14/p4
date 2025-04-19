@@ -28,6 +28,8 @@ pub fn check(unary_operation: &UnaryOperation, vtable: &VTable, ftable: &FTable,
             }
 }
 
+
+
 #[cfg(test)]
 pub mod tests {
     use super::*;

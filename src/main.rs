@@ -9,7 +9,7 @@ pub mod ast;
 pub mod typechecker;
 
 fn main() {
-    let file = std::fs::read_to_string("test.lzy").unwrap();
+    let file = std::fs::read_to_string("test2.lzy").unwrap();
     let expr = lossy::ProgramParser::new()
             .parse(file.as_str())
             .expect("Failed to parse: ");
