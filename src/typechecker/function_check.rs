@@ -39,6 +39,10 @@ pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable) -> 
     // check return statements
     check_return_statements(function, &v_table, f_table, s_table)?;
 
+    for stmt in &function.body {
+        check_breaks_continues(&stmt, false)?;
+    }
+
     Ok(())
 }
 
@@ -132,5 +136,47 @@ fn check_return_type(
 
         // Case 4: Function returns void, and return statement is empty (valid)
         (None, None) => Ok(()),
+    }
+}
+
+pub fn check_breaks_continues(stmt: &Statement, in_loop: bool) -> Result<()> {
+    match stmt {
+        Statement::Break => {
+            if in_loop {
+                Ok(())
+            } else {
+                Err(anyhow!("`break` used outside of loop"))
+            }
+        }
+        Statement::Continue => {
+            if in_loop {
+                Ok(())
+            } else {
+                Err(anyhow!("`continue` used outside of loop"))
+            }
+        }
+        Statement::While(while_stmt) => {
+            for stmt in &while_stmt.body {
+                check_breaks_continues(stmt, true)?
+            }
+            Ok(())
+        }
+        Statement::If(if_stmt) => {
+            for stmt in &if_stmt.then_block {
+                check_breaks_continues(stmt, in_loop)?
+            }
+            for else_if in &if_stmt.else_if_blocks {
+                for stmt in &else_if.body {
+                    check_breaks_continues(stmt, in_loop)?
+                }
+            }
+            if let Some(else_block) = &if_stmt.else_block {
+                for stmt in else_block {
+                    check_breaks_continues(stmt, in_loop)?
+                }
+            }
+            Ok(())
+        }
+        _ => Ok(()),
     }
 }

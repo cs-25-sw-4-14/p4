@@ -22,7 +22,9 @@ fn main() {
         &huttel
     ));
 
+    /*
     println!("{:#?}", expr);
     println!("Function Table: {:#?}", typechecker.ftable.functions);
     println!("Struct Table: {:#?}", typechecker.stable.structs);
+    */
 }

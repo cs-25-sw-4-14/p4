@@ -86,7 +86,6 @@ pub mod tests {
     use super::*;
     use crate::ast::{Expression, FunctionCall, FunctionDef, Literal, Param, Type};
     use crate::typechecker::expression_check;
-    use crate::typechecker::function_table::FunctionEntry;
     use crate::typechecker::variable_table::VTable;
 
     #[test]
