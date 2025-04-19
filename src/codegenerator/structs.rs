@@ -1,5 +1,5 @@
-use crate::ast::StructDef;
 use super::CodeGenerator;
+use crate::ast::StructDef;
 use anyhow::Result;
 
 impl<'ctx> CodeGenerator<'ctx> {

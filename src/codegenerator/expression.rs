@@ -5,8 +5,8 @@ use inkwell::values::BasicValueEnum;
 
 pub mod binary_op;
 pub mod function_call;
-pub mod struct_init;
 pub mod literal;
+pub mod struct_init;
 pub mod unary_op;
 pub mod variable;
 

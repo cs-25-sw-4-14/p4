@@ -1,5 +1,5 @@
-use crate::ast::Statement;
 use super::CodeGenerator;
+use crate::ast::Statement;
 use anyhow::Result;
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -12,7 +12,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Statement::If(if_statement) => todo!(),
             Statement::While(while_statement) => todo!(),
             Statement::Break => todo!(),
-            Statement::Continue => todo!(), 
+            Statement::Continue => todo!(),
         }
     }
 }

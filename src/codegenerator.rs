@@ -1,21 +1,21 @@
-use inkwell::context::Context;
-use inkwell::builder::Builder;
-use inkwell::module::Module;
-use inkwell::values::{BasicValueEnum, FunctionValue, PointerValue};
-use inkwell::types::BasicTypeEnum;
-use inkwell::IntPredicate;
 use inkwell::AddressSpace;
+use inkwell::IntPredicate;
+use inkwell::builder::Builder;
+use inkwell::context::Context;
+use inkwell::module::Module;
+use inkwell::types::BasicTypeEnum;
+use inkwell::values::{BasicValueEnum, FunctionValue, PointerValue};
 
+use anyhow::Result;
 use std::collections::HashMap;
 use std::error::Error;
-use anyhow::Result;
 
 use crate::ast::{Program, TopLevelDefinition, Type};
 
-pub mod function;
-pub mod structs;
-pub mod statement;
 pub mod expression;
+pub mod function;
+pub mod statement;
+pub mod structs;
 
 pub struct CodeGenerator<'ctx> {
     pub context: &'ctx Context,
@@ -35,20 +35,20 @@ impl<'ctx> CodeGenerator<'ctx> {
             builder,
             variables: HashMap::new(),
             last_value: None,
-            program: None
+            program: None,
         }
     }
-    
+
     // Entry point for code generation: process all top-level definitions.
     pub fn compile_program(&mut self, program: &Program) -> Result<()> {
         for def in &program.definitions {
             match def {
                 TopLevelDefinition::Function(func_def) => {
                     self.compile_function(&func_def)?;
-                },
+                }
                 TopLevelDefinition::Struct(struct_def) => {
                     self.compile_struct(&struct_def)?;
-                },
+                }
             }
         }
         Ok(())
