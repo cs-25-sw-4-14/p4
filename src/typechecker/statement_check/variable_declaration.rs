@@ -1,13 +1,13 @@
 use crate::typechecker::expression_check;
 use crate::{
-    ast::{Type, VariableDeclaration},
+    ast::VariableDeclaration,
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
 use anyhow::Result;
 
 pub fn check(
     declaration: &VariableDeclaration,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {
@@ -21,7 +21,25 @@ pub fn check(
         ));
     }
 
-    // TODO add the variable to the v table ??
+    semantic_check_variable_already_declared(declaration, v_table)?;
 
+    v_table
+        .variables
+        .insert(declaration.name.clone(), declaration.clone());
+
+    Ok(())
+}
+
+pub fn semantic_check_variable_already_declared<'a>(
+    declaration: &'a VariableDeclaration,
+    v_table: &'a VTable,
+) -> Result<()> {
+    // Check if the variable is already declared in the current scope
+    if v_table.variables.contains_key(&declaration.name) {
+        return Err(anyhow::anyhow!(
+            "Variable {} is already declared",
+            declaration.name
+        ));
+    }
     Ok(())
 }

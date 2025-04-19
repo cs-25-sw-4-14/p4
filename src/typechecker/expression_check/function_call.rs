@@ -30,10 +30,10 @@ pub fn semantic_check_function_is_defined<'a>(
     function_call: &'a FunctionCall,
     f_table: &'a FTable,
 ) -> Result<&'a FunctionDef> {
-    let func = f_table
+    let function_def = f_table
         .get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-    Ok(&func.def)
+    Ok(&function_def)
 }
 
 pub fn semantic_check_function_has_return_type<'a>(function: &'a FunctionDef) -> Result<Type> {
@@ -116,14 +116,11 @@ pub mod tests {
 
         f_table.functions.insert(
             String::from("test"),
-            FunctionEntry {
-                def: FunctionDef {
-                    name: String::from("test"),
-                    params: vec![],
-                    return_type: None,
-                    body: vec![],
-                },
-                vtable: VTable::new(),
+            FunctionDef {
+                name: String::from("test"),
+                params: vec![],
+                return_type: None,
+                body: vec![],
             },
         );
         expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
@@ -142,17 +139,14 @@ pub mod tests {
 
         f_table.functions.insert(
             String::from("test"),
-            FunctionEntry {
-                def: FunctionDef {
-                    name: String::from("test"),
-                    params: vec![Param {
-                        name: String::from("a"),
-                        param_type: Type::String,
-                    }],
-                    return_type: None,
-                    body: vec![],
-                },
-                vtable: VTable::new(),
+            FunctionDef {
+                name: String::from("test"),
+                params: vec![Param {
+                    name: String::from("a"),
+                    param_type: Type::String,
+                }],
+                return_type: None,
+                body: vec![],
             },
         );
 
@@ -172,17 +166,14 @@ pub mod tests {
 
         f_table.functions.insert(
             String::from("test"),
-            FunctionEntry {
-                def: FunctionDef {
-                    name: String::from("test"),
-                    params: vec![Param {
-                        name: String::from("a"),
-                        param_type: Type::I32,
-                    }],
-                    return_type: None,
-                    body: vec![],
-                },
-                vtable: VTable::new(),
+            FunctionDef {
+                name: String::from("test"),
+                params: vec![Param {
+                    name: String::from("a"),
+                    param_type: Type::I32,
+                }],
+                return_type: None,
+                body: vec![],
             },
         );
 

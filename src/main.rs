@@ -17,7 +17,10 @@ fn main() {
 
     let mut typechecker = typechecker::Typechecker::new();
 
-    typechecker.walk(expr.clone());
+    typechecker.walk(expr.clone()).expect(&format!(
+        "{}\nSemantic check failed!!! You dork!!!: ",
+        &huttel
+    ));
 
     /*
     println!("{:#?}", expr);

@@ -11,8 +11,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<Type> {
-    let struct_definition =
-        semantic_check_struct_defined(struct_field_access, v_table, f_table, s_table)?;
+    let _ = semantic_check_struct_defined(struct_field_access, v_table, f_table, s_table)?;
     let resulting_type =
         semantic_check_field_access_type(struct_field_access, v_table, f_table, s_table)?;
 
