@@ -45,34 +45,5 @@ pub fn check(
         }
     }
 
-    // // Check for break or continue statements in the if statement
-    // for statement in &declaration.then_block {
-    //     if let Statement::Break | Statement::Continue = statement {
-    //         return Err(anyhow::anyhow!(
-    //             "Break or continue statement found in if statement."
-    //         ));
-    //     }
-    // }
-    // // Check for break or continue statements in the else if blocks
-    // for else_if in &declaration.else_if_blocks {
-    //     for statement in &else_if.body {
-    //         if let Statement::Break | Statement::Continue = statement {
-    //             return Err(anyhow::anyhow!(
-    //                 "Break or continue statement found in else if block."
-    //             ));
-    //         }
-    //     }
-    // }
-    // // Check for break or continue statements in the else block if it exists
-    // if let Some(else_block) = &declaration.else_block {
-    //     for statement in else_block {
-    //         if let Statement::Break | Statement::Continue = statement {
-    //             return Err(anyhow::anyhow!(
-    //                 "Break or continue statement found in else block."
-    //             ));
-    //         }
-    //     }
-    // }
-
     Ok(())
 }

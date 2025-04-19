@@ -39,6 +39,10 @@ pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable) -> 
     // check return statements
     check_return_statements(function, &v_table, f_table, s_table)?;
 
+    for stmt in &function.body {
+        check_breaks_continues(&stmt, false)?;
+    }
+
     Ok(())
 }
 
@@ -135,20 +139,20 @@ fn check_return_type(
     }
 }
 
-pub fn check_breaks_continues(stmt: &Statement, in_loop: bool) -> Result<(), String> {
+pub fn check_breaks_continues(stmt: &Statement, in_loop: bool) -> Result<()> {
     match stmt {
         Statement::Break => {
             if in_loop {
                 Ok(())
             } else {
-                Err("`break` used outside of loop".into())
+                Err(anyhow!("`break` used outside of loop"))
             }
         }
         Statement::Continue => {
             if in_loop {
                 Ok(())
             } else {
-                Err("`continue` used outside of loop".into())
+                Err(anyhow!("`continue` used outside of loop"))
             }
         }
         Statement::While(while_stmt) => {

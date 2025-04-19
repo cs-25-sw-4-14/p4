@@ -1,5 +1,4 @@
 use crate::ast::Program;
-use crate::ast::Statement;
 use anyhow::Result;
 
 pub mod expression_check;
