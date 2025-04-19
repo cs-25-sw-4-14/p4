@@ -56,17 +56,17 @@ impl Typechecker {
                 }
                 for else_if in &if_stmt.else_if_blocks {
                     for stmt in &else_if.body {
-                Self::check_breaks_continues(stmt, in_loop)?
+                        Self::check_breaks_continues(stmt, in_loop)?
                     }
                 }
                 if let Some(else_block) = &if_stmt.else_block {
                     for stmt in else_block {
-                Self::check_breaks_continues(stmt, in_loop)?
+                        Self::check_breaks_continues(stmt, in_loop)?
                     }
                 }
                 Ok(())
             }
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 }
