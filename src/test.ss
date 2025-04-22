@@ -1,11 +1,11 @@
 struct Point {
-    i32 x;
-    i32 y;
+    i64 x;
+    i64 y;
 }
 
 struct Circle {
     Point center;
-    f32 radius;
+    fp64 radius;
 }
 
 struct Rectangle {
@@ -17,19 +17,19 @@ struct Rectangle {
 struct Person {
     String first_name;
     String last_name;
-    u8 age;
+    i64 age;
     bool is_dork;
     Point location;
 }
-
-Void main() {
-    triv u8 const_value = 10 as u8;
-    mut u16 counter = 0 as u16;              
-    triv mut i32 value = -100 as i32;        
-    u64 large_number = 69420 as u64;
+void main() {
     
-    f32 pi = 3.14159 as f32;
-    f64 precise_value = 2.7182818284590452353602 as f64;
+    triv i64 const_value = 10;
+    mut i64 counter = 0;              
+    triv mut i64 value = -100;        
+    i64 large_number = 69420;
+    
+    fp64 pi = 3.14159;
+    fp64 precise_value = 2.7182818284590452353602;
     
     bool is_true = true;
     bool is_false = false;
@@ -37,14 +37,15 @@ Void main() {
     String with_text = "Antlr? I barely know her!";
     String empty = "";
     
-    i32 plus = (10 as i32) + (20 as i32);
-    i32 minus = (50 as i32) - (30 as i32);
-    i32 product = (6 as i32) * (7 as i32);
-    i32 division = (100 as i32) / (5 as i32);
-    i32 remainder = (10 as i32) % (3 as i32);
-    i32 complex = (10 as i32) + (5 as i32) * (2 as i32) / (4 as i32) - (1 as i32);
+    i64 plus = 10 + 20;
+    i64 minus = 50 - 30;
+    i64 product = 6 * 7;
+    i64 division = 100 / 5;
+    i64 remainder = 10 % 3;
     
-    i32 negated = -value as i32;
+    i64 complex = (10 + 5) * 2 / (4 - 1);
+    
+    i64 negated = -value;
     bool inverted = !is_true;
     
     if (counter < (5 as u16)) {
@@ -85,43 +86,43 @@ Void main() {
     while (counter < (30 as u16)) {
         counter = (counter + 1 as u16) as u16;
         
-        if (counter == 25 as u16) {
-            break;
+        if (counter == 25) {
+            
         }
     }
     
-    mut u8 item_count = 0 as u8;
-    while (item_count < (20 as u8)) {
-        item_count = (item_count + 1 as u8) as u8;
+    mut i64 item_count = 0;
+    while (item_count < 20) {
+        item_count = item_count + 1;
         
-        if ((item_count % 2 as u8) as u8 == 0 as u8) {
-            continue;
+        if (item_count % 2 == 0) {
+            
         }
         
-        i32 odd_value = (item_count as i32 * 10 as i32) as i32;
+        i64 odd_value = item_count * 10;
     }
     
-    mut u8 i = 0 as u8;
-    while (i < (5 as u8)) {
-        i = (i + 1 as u8) as u8;
-        mut u8 j = 0 as u8;
+    mut i64 i = 0;
+    while (i < 5) {
+        i = i + 1;
+        mut i64 j = 0;
         
         while (j < (5 as u8)) {
             j = (j + 1 as u8) as u8;
             
-            if (i == 2 as u8 && j == 2 as u8) {
-                continue;
+            if (i == 2 && j == 2) {
+                
             }
             
             counter = counter + (1 as u16);
             
-            if (j == 3 as u8) {
-                break;
+            if (j == 3) {
+                
             }
         }
         
-        if (i == 4 as u8) {
-            continue;
+        if (i == 4) {
+            
         }
     }
     
@@ -129,18 +130,13 @@ Void main() {
     Point endpoint = Point { x: 100 as i32, y: 100 as i32 };
 
     Person person = Person {
-        first_name: "Jim",
-        last_name: "Pickens",
-        age: 66 as u8,
+        first_name: "Christoffer",
+        last_name: "Johansen",
+        age: 20,
         is_dork: true,
-        location: origin
-    };
+        location: Point {x: 50, y: 50}
+    };   
 
-    Circle circle = Circle {
-        center: endpoint,
-        radius: 42.0 as f32
-    };
-    
     String full_name = person.first_name + " " + person.last_name;
     
     bool and_result = is_true && !is_false;
@@ -148,13 +144,18 @@ Void main() {
     
     bool complex_condition = ((counter > (10 as u16) && value < (0 as i32)) || (counter == (0 as u16)));
     
-    bool is_equal = counter == (value as u16);
-    bool not_equal = counter != (value as u16);
-    bool is_greater = counter > (value as u16);
-    bool is_less = counter < (value as u16);
-    bool greater_equal = counter >= (value as u16);
-    bool less_equal = counter <= (value as u16);
-    
+    bool is_equal = counter == value;
+    bool not_equal = counter != value;
+    bool is_greater = counter > value;
+    bool is_less = counter < value;
+    bool greater_equal = counter >= value;
+    bool less_equal = counter <= value;
+
+    Circle circle = Circle {
+        center: Point {x: 50, y: 50},
+        radius: 10.0
+    };
+
     bool is_same_x = person.location.x == circle.center.x;
 }
 

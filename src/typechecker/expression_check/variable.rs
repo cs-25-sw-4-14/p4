@@ -12,8 +12,11 @@ pub fn check(name: &str, vtable: &VTable) -> Result<Type> {
 #[cfg(test)]
 pub mod variable_tests {
     use super::*;
-    use crate::{ast::{Expression, Literal, VariableDeclaration}, typechecker::{function_table::FTable, struct_table::STable}};
     use crate::typechecker::expression_check;
+    use crate::{
+        ast::{Expression, Literal, VariableDeclaration},
+        typechecker::{function_table::FTable, struct_table::STable},
+    };
 
     #[test]
     fn check_variable_should_return_type() {
@@ -38,5 +41,4 @@ pub mod variable_tests {
 
         expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
     }
-
 }
