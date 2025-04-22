@@ -43,7 +43,7 @@ pub struct StructField {
 pub enum Statement {
     VariableDeclaration(VariableDeclaration, Span),
     Assignment(VariableAssignment, Span),
-    ArrayAssignment(ArrayAssignment),
+    ArrayAssignment(ArrayAssignment, Span),
     If(IfStatement, Span),
     While(WhileStatement, Span),
     Break(Span),
@@ -67,7 +67,7 @@ pub struct ArrayAssignment {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,

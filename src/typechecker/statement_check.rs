@@ -37,8 +37,8 @@ pub fn check(
                 l,
             )?;
         } //check if the variable is declared and if the type matches
-        Statement::ArrayAssignment(_array_assignment) => {
-            array_assignment::check(_array_assignment, v_table, f_table, s_table)?;
+        Statement::ArrayAssignment(_array_assignment, l) => {
+            array_assignment::check(_array_assignment, v_table, f_table, s_table, l)?;
         } // check if the struct is declared
         Statement::If(if_else, _) => {
             if_else::check(if_else, v_table, f_table, s_table, debugger)?;
