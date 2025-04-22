@@ -1,7 +1,24 @@
 use crate::{
-    ast::{ArrayAccess, ArrayLiteral, Expression, Literal, StructFieldAccess, Type, TypeCast},
+    ast::{
+        ArrayAccess, ArrayLiteral, Expression, Literal, StructFieldAccess, StructFieldInit,
+        StructInit, Type, TypeCast,
+    },
     lossy,
 };
+
+#[test]
+fn test_struct_init() {
+    assert_eq!(
+        Expression::StructInit(StructInit {
+            name: "test".to_string(),
+            fields: vec![StructFieldInit {
+                name: "field".to_string(),
+                value: Expression::Literal(Literal::Int(32)),
+            }],
+        }),
+        lossy::ExpressionParser::new().parse("test.field").unwrap()
+    );
+}
 
 #[test]
 fn test_struct_field_init() {
