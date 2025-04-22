@@ -2,10 +2,10 @@ use super::{function_table::FTable, struct_table::STable, variable_table::VTable
 use crate::ast::Statement;
 use anyhow::Result;
 
-mod variable_assignment;
-
+mod array_assignment;
 mod function_call;
 mod if_else;
+mod variable_assignment;
 mod variable_declaration;
 mod while_statement;
 
@@ -37,9 +37,12 @@ pub fn check(
                 l,
             )?;
         } //check if the variable is declared and if the type matches
+        Statement::ArrayAssignment(_array_assignment) => {
+            array_assignment::check(_array_assignment, v_table, f_table, s_table)?;
+        } // check if the struct is declared
         Statement::If(if_else, _) => {
             if_else::check(if_else, v_table, f_table, s_table, debugger)?;
-        } // check if condition is bool, and there is no break or continue
+        }
         Statement::While(while_statement, _) => {
             while_statement::check(while_statement, v_table, f_table, s_table, debugger)?;
         } // check if condition is bool

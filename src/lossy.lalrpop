@@ -97,6 +97,13 @@ Assignment: VariableAssignment = {
         value: v,
     }
 };
+ArrayAssignment: ArrayAssignment = {
+    <t:ArrayAccess> "=" <v:Expression> ";" => ArrayAssignment {
+        target: t,
+        value: v,
+    }
+};
+
 ElseIf: ElseIf = {
     "else if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
         condition: c,
