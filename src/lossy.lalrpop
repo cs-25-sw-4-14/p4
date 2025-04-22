@@ -65,6 +65,7 @@ pub StructField: StructField = {
 
 pub Statement: Statement = {
     <t:VariableDeclaration> => Statement::VariableDeclaration(t),
+    <t:ArrayAssignment> => Statement::ArrayAssignment(t),
     <t:Assignment> => Statement::Assignment(t),
     <t:If> => Statement::If(t),
     <t:While> => Statement::While(t),
@@ -98,7 +99,14 @@ pub Assignment: VariableAssignment = {
         value: v,
     }
 };
-pub ElseIf: ElseIf = {
+ArrayAssignment: ArrayAssignment = {
+    <t:ArrayAccess> "=" <v:Expression> ";" => ArrayAssignment {
+        target: t,
+        value: v,
+    }
+};
+
+ElseIf: ElseIf = {
     "else if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
         condition: c,
         body: b,
@@ -314,7 +322,7 @@ pub Type: Type = {
     "char" => Type::Char,
     "bool" => Type::Bool,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
-    "Array" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
+    "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
     <i:ID> => Type::Struct(i.to_string()),
 };
 

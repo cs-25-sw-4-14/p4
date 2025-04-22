@@ -157,6 +157,9 @@ void main() {
         radius: 10.0
     };
 
+    arr i64[1] aba = [1];
+    aba[0] = 2;
+
     bool is_same_x = person.location.x == circle.center.x;
 }
 
