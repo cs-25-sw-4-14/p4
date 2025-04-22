@@ -72,7 +72,7 @@ pub fn semantic_check_array_index<'a>(
     match expression_check::check(array_index, v_table, f_table, s_table)? {
         Type::I64 => match array_index {
             Expression::Literal(Literal::Int(index)) => {
-                if 0 >= *index || *index >= *array_length {
+                if *index < 0 || *index >= *array_length {
                     return Err(anyhow::anyhow!(
                         "Array access index out of bounds: {}",
                         index
