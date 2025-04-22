@@ -118,7 +118,7 @@ pub enum Expression {
     TypeCast(TypeCast),
 }
 
-#[derive(Debug, Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     Int(i64),
     Float(f64),

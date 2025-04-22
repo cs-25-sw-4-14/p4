@@ -1,13 +1,13 @@
+use crate::ast::Expression;
+use crate::ast::Literal;
 use crate::ast::Type;
+use crate::ast::VariableDeclaration;
 use crate::{
     ast::ArrayAssignment,
     typechecker::expression_check,
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
 use anyhow::Result;
-use crate::ast::Expression;
-use crate::ast::VariableDeclaration;
-use crate::ast::Literal;
 
 pub fn check(
     array_assignment: &ArrayAssignment,
@@ -24,7 +24,6 @@ pub fn check(
 
     // check value type in array assignment
     let value_type = expression_check::check(&array_assignment.value, v_table, f_table, s_table)?;
-    
 
     match &array.var_type {
         Type::Array(ty, _) => {
