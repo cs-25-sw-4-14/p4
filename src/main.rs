@@ -8,6 +8,9 @@ lalrpop_mod!(
 pub mod ast;
 pub mod typechecker;
 
+#[cfg(test)]
+pub mod grammar_test;
+
 fn main() {
     let huttel = include_str!("huttel.txt");
     let file = include_str!("test.ss");

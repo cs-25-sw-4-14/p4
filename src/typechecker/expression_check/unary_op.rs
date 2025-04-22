@@ -18,7 +18,6 @@ pub fn check(
             | Type::I16
             | Type::I32
             | Type::I64
-            | Type::FP8
             | Type::FP16
             | Type::FP32
             | Type::FP64 => Ok(operand_type),
