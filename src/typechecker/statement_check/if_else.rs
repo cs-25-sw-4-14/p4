@@ -1,5 +1,4 @@
 use crate::typechecker::expression_check;
-use crate::typechecker::statement_check::Statement;
 use crate::{
     ast::{IfStatement, Type},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
@@ -8,7 +7,7 @@ use anyhow::Result;
 
 pub fn check(
     declaration: &IfStatement,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {

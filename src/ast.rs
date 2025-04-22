@@ -1,21 +1,4 @@
-// Line tracking
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Span {
-    pub start: usize,
-    pub end: usize,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Location {
-    pub line: usize,
-    pub char: usize,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SourceSpan {
-    pub start: Location,
-    pub end: Location,
-}
+use crate::debugger::Span;
 
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone)]
@@ -152,21 +135,21 @@ pub struct UnaryOperation {
     pub operand: Box<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
-    Multiply,           // 1
-    Divide,             // 1
-    Modulus,            // 1
-    Add,                // 2
-    Subtract,           // 2
-    LessThan,           // 3
-    GreaterThan,        // 3
-    LessThanOrEqual,    // 3
-    GreaterThanOrEqual, // 3
-    Equal,              // 4
-    NotEqual,           // 4
-    And,                // 5
-    Or,                 // 6
+    Multiply,
+    Divide,
+    Modulus,
+    Add,
+    Subtract,
+    LessThan,
+    GreaterThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+    And,
+    Or,
 }
 
 #[derive(Debug, Clone)]

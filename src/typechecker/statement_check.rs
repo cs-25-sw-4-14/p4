@@ -1,5 +1,5 @@
 use super::{function_table::FTable, struct_table::STable, variable_table::VTable};
-use crate::ast::{Statement, Type};
+use crate::ast::Statement;
 use anyhow::Result;
 
 mod variable_assignment;
@@ -11,14 +11,14 @@ mod while_statement;
 
 pub fn check(
     expression: &Statement,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {
     match expression {
-        Statement::VariableDeclaration(_variable_declaration) => {
-            variable_declaration::check(_variable_declaration, v_table, f_table, s_table)?;
-        }
+        Statement::VariableDeclaration(variable_declaration) => {
+            variable_declaration::check(variable_declaration, v_table, f_table, s_table)?;
+        } // check if the variable is declared and if the type matches
         Statement::Assignment(variable_assignment) => {
             variable_assignment::check(variable_assignment, v_table, f_table, s_table)?;
         } //check if the variable is declared and if the type matches
@@ -34,7 +34,7 @@ pub fn check(
         Statement::FunctionCall(function_call) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         } // check if function is defined, type is void
-    };
+    }
 
     Ok(())
 }

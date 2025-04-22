@@ -1,8 +1,9 @@
 use crate::ast::Program;
-use crate::ast::Statement;
-use crate::ast::span_to_location;
+use anyhow::Result;
+use crate::debugger::Debugger;
 
 pub mod expression_check;
+pub mod function_check;
 pub mod function_table;
 pub mod statement_check;
 pub mod struct_table;
@@ -21,55 +22,23 @@ impl Typechecker {
         }
     }
 
-    pub fn walk(&mut self, program: Program) {
+    pub fn walk(&mut self, program: Program, debugger: Debugger) -> Result<()> {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
 
+        for def in program.definitions {
+            match def {
+                crate::ast::TopLevelDefinition::Function(func_def) => {
+                    function_check::check(&func_def, &mut self.ftable, &self.stable, &debugger)?;
+                }
+                _ => {}
+            }
+        }
+
         println!("Function Table: {:#?}", self.ftable.functions);
         println!("Struct Table: {:#?}", self.stable.structs);
+
+        Ok(())
     }
 
-    pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, source_file: &str) -> Result<(), String> {
-        match stmt {
-            Statement::Break(l) => {
-                if in_loop {
-                    Ok(())
-                } else {
-                    let start = span_to_location(source_file, l).start;
-                    Err(format!("`break` used outside of loop on line {} char {}", start.line, start.char).into())
-                }
-            }
-            Statement::Continue(l) => {
-                if in_loop {
-                    Ok(())
-                } else {
-                    let start = span_to_location(source_file, l).start;
-                    Err(format!("`continue` used outside of loop on line {} char {}", start.line, start.char).into())
-                }
-            }
-            Statement::While(while_stmt) => {
-                for stmt in &while_stmt.body {
-                    Self::check_breaks_continues(stmt, true, source_file)?
-                }
-                Ok(())
-            }
-            Statement::If(if_stmt) => {
-                for stmt in &if_stmt.then_block {
-                    Self::check_breaks_continues(stmt, in_loop, source_file)?
-                }
-                for else_if in &if_stmt.else_if_blocks {
-                    for stmt in &else_if.body {
-                Self::check_breaks_continues(stmt, in_loop, source_file)?
-                    }
-                }
-                if let Some(else_block) = &if_stmt.else_block {
-                    for stmt in else_block {
-                Self::check_breaks_continues(stmt, in_loop, source_file)?
-                    }
-                }
-                Ok(())
-            }
-            _ => Ok(())
-        }
-    }
 }

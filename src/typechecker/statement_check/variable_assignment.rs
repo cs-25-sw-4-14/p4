@@ -1,13 +1,13 @@
 use crate::typechecker::expression_check;
 use crate::{
-    ast::{Type, VariableAssignment},
+    ast::VariableAssignment,
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
 use anyhow::Result;
 
 pub fn check(
     declaration: &VariableAssignment,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<()> {

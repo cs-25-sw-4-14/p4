@@ -1,3 +1,4 @@
+use crate::ast::BinaryOperator::*;
 use crate::typechecker::expression_check;
 use crate::{
     ast::{BinaryOperation, Type},
@@ -27,7 +28,30 @@ pub fn semantic_check_binary_op<'a>(
     let right_type = expression_check::check(&binary_operation.right, v_table, f_table, s_table)?;
 
     if left_type == right_type {
-        Ok(left_type)
+        if binary_operation.operator == Equal
+            || binary_operation.operator == NotEqual
+            || binary_operation.operator == LessThan
+            || binary_operation.operator == GreaterThan
+            || binary_operation.operator == LessThanOrEqual
+            || binary_operation.operator == GreaterThanOrEqual
+            || binary_operation.operator == And
+            || binary_operation.operator == Or
+        {
+            return Ok(Type::Bool);
+        } else if binary_operation.operator == Multiply
+            || binary_operation.operator == Divide
+            || binary_operation.operator == Modulus
+            || binary_operation.operator == Add
+            || binary_operation.operator == Subtract
+        {
+            return Ok(left_type.clone());
+        }
+        Err(anyhow::anyhow!(
+            "Invalid binary operation: {:?} {:?} {:?}",
+            left_type,
+            binary_operation.operator,
+            right_type
+        ))
     } else {
         Err(anyhow::anyhow!(
             "Type mismatch: {:?} {:?} {:?}",
