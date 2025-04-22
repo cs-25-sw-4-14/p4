@@ -1,4 +1,5 @@
 use lalrpop_util::lalrpop_mod;
+use anyhow::anyhow;
 
 lalrpop_mod!(
     #[allow(clippy::ptr_arg)]
@@ -14,14 +15,30 @@ fn main() {
     let file = include_str!("test.ss");
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let expr = lossy::ProgramParser::new()
-        .parse(file)
-        .expect(&format!("{}\nFailed to parse: ", &huttel));
+    let ast = lossy::ProgramParser::new().parse(file).map_err(|err| {
+        match err {
+            lalrpop_util::ParseError::InvalidToken { location } => {
+                anyhow!("Invalid token at {:?}", location)
+            }
+            lalrpop_util::ParseError::UnrecognizedEof { location, expected } => {
+                anyhow!("Unrecognized EOF at {:?}, expected {:?}", location, expected)
+            }
+            lalrpop_util::ParseError::UnrecognizedToken { token, expected } => {
+                anyhow!("Unrecognized token {:?}, expected {:?}", token, expected)
+            }
+            lalrpop_util::ParseError::ExtraToken { token } => {
+                anyhow!("Extra token {:?}", token)
+            }
+            lalrpop_util::ParseError::User { error } => {
+                anyhow!("User error {:?}", error)
+            }
+        }
+    }).expect("Failed to parse:");
 
     let mut typechecker = typechecker::Typechecker::new();
-
-    typechecker.walk(expr.clone(), debugger).expect(&format!(
+    typechecker.walk(ast.clone(), debugger).expect(&format!(
         "{}\nSemantic check failed!!! You dork!!!: ",
         &huttel
     ));
 }
+
