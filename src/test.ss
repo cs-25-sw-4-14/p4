@@ -130,7 +130,14 @@ void main() {
     Point origin = Point {x: 0, y: 0};
     Point endpoint = Point {x: 100, y: 100};
 
-    
+    Person person = Person {
+        first_name: "Christoffer",
+        last_name: "Johansen",
+        age: 20,
+        is_dork: true,
+        location: Point {x: 50, y: 50}
+    };   
+
     String full_name = person.first_name + " " + person.last_name;
     
     bool and_result = is_true && !is_false;
@@ -144,7 +151,12 @@ void main() {
     bool is_less = counter < value;
     bool greater_equal = counter >= value;
     bool less_equal = counter <= value;
-    
+
+    Circle circle = Circle {
+        center: Point {x: 50, y: 50},
+        radius: 10.0
+    };
+
     bool is_same_x = person.location.x == circle.center.x;
 }
 
