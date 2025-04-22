@@ -14,14 +14,28 @@ pub fn check(
     v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
-    debugger: &crate::debugger::Debugger
+    debugger: &crate::debugger::Debugger,
 ) -> Result<()> {
     match expression {
         Statement::VariableDeclaration(variable_declaration, l) => {
-            variable_declaration::check(variable_declaration, v_table, f_table, s_table, debugger, l)?;
+            variable_declaration::check(
+                variable_declaration,
+                v_table,
+                f_table,
+                s_table,
+                debugger,
+                l,
+            )?;
         } // check if the variable is declared and if the type matches
         Statement::Assignment(variable_assignment, l) => {
-            variable_assignment::check(variable_assignment, v_table, f_table, s_table, debugger, l)?;
+            variable_assignment::check(
+                variable_assignment,
+                v_table,
+                f_table,
+                s_table,
+                debugger,
+                l,
+            )?;
         } //check if the variable is declared and if the type matches
         Statement::If(if_else, _) => {
             if_else::check(if_else, v_table, f_table, s_table, debugger)?;

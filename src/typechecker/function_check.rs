@@ -6,7 +6,12 @@ use crate::debugger::Debugger;
 use anyhow::{Result, anyhow};
 use std::collections::HashSet;
 
-pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable, debugger: &Debugger) -> Result<()> {
+pub fn check(
+    function: &FunctionDef,
+    f_table: &mut FTable,
+    s_table: &STable,
+    debugger: &Debugger,
+) -> Result<()> {
     // check if function exists in the function table
     if f_table.get(&function.name).is_none() {
         return Err(anyhow!(
@@ -141,11 +146,7 @@ fn check_return_type(
     }
 }
 
-pub fn check_breaks_continues(
-    stmt: &Statement,
-    in_loop: bool,
-    debugger: &Debugger,
-) -> Result<()> {
+pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, debugger: &Debugger) -> Result<()> {
     match stmt {
         Statement::Break(l) => {
             if in_loop {

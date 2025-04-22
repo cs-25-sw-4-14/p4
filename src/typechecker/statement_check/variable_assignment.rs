@@ -11,7 +11,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,
     debugger: &crate::debugger::Debugger,
-    l: &crate::debugger::Span
+    l: &crate::debugger::Span,
 ) -> Result<()> {
     let expression_type = expression_check::check(&declaration.value, v_table, f_table, s_table)?;
 
