@@ -1,18 +1,18 @@
 use crate::debugger::Span;
 
 // NOTE: ENTRY POINT
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     pub definitions: Vec<TopLevelDefinition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TopLevelDefinition {
     Function(FunctionDef),
     Struct(StructDef),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDef {
     pub return_type: Option<Type>,
     pub name: String,
@@ -20,26 +20,26 @@ pub struct FunctionDef {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Param {
     pub name: String,
     pub param_type: Type,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructDef {
     pub name: String,
     pub fields: Vec<StructField>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructField {
     pub name: String,
     pub field_type: Type,
 }
 
 // NOTE: STATEMENTS
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     VariableDeclaration(VariableDeclaration, Span),
     Assignment(VariableAssignment, Span),
@@ -52,7 +52,7 @@ pub enum Statement {
     FunctionCall(FunctionCall, Span),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
     pub trivial: Option<()>,
     pub mutable: Option<()>,
@@ -61,7 +61,7 @@ pub struct VariableDeclaration {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArrayAssignment {
     pub target: ArrayAccess,
     pub value: Expression,
@@ -73,7 +73,7 @@ pub struct VariableAssignment {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfStatement {
     pub condition: Expression,
     pub then_block: Vec<Statement>,
@@ -81,19 +81,19 @@ pub struct IfStatement {
     pub else_block: Option<Vec<Statement>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ElseIf {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WhileStatement {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReturnStatement {
     pub value: Option<Expression>,
 }
@@ -210,7 +210,6 @@ pub enum Type {
     I16,
     I32,
     I64,
-    FP8,
     FP16,
     FP32,
     FP64,

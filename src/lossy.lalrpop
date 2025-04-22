@@ -14,12 +14,12 @@ pub Program: Program = {
     TopLevelDefinition+ => Program { definitions: <> }
 };
 
-TopLevelDefinition: TopLevelDefinition = {
+pub TopLevelDefinition: TopLevelDefinition = {
     FunctionDef  => TopLevelDefinition::Function(<>),
     StructDef    => TopLevelDefinition::Struct(<>),
 };
 
-FunctionDef: FunctionDef = {
+pub FunctionDef: FunctionDef = {
     <r:ReturnOpt> <n:ID> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
          return_type: r,
          name: n,
@@ -28,12 +28,12 @@ FunctionDef: FunctionDef = {
     }
 };
 
-ReturnOpt: Option<Type> = {
+pub ReturnOpt: Option<Type> = {
     <t:Type> => Some(t),
     "void" => None
 };
 
-ParamList: Vec<Param> = {
+pub ParamList: Vec<Param> = {
     <p:Param> <pn:("," Param)*> => {
         let mut params = vec![p];
         params.extend(pn.into_iter().map(|x| x.1));
@@ -41,21 +41,21 @@ ParamList: Vec<Param> = {
     }
 };
 
-Param: Param = {
+pub Param: Param = {
     <t:Type> <n:ID> => Param {
         param_type: t,
         name: n,
     }
 };
 
-StructDef: StructDef = {
+pub StructDef: StructDef = {
     "struct" <n:ID> "{" <f:StructField*> "}" => StructDef {
         name: n,
         fields: f,
     }
 };
 
-StructField: StructField = {
+pub StructField: StructField = {
     <t:Type> <n:ID> ";" => StructField {
         field_type: t,
         name: n,
@@ -65,6 +65,7 @@ StructField: StructField = {
 Statement: Statement = {
     <l:@L> <t:VariableDeclaration> <r:@R> => Statement::VariableDeclaration(t, Span { start: l, end: r }),
     <l:@L> <t:Assignment> <r:@R> => Statement::Assignment(t, Span { start: l, end: r }),
+    <l:@L> <t:ArrayAssignment> <r:@R> => Statement::ArrayAssignment(t, Span { start: l, end: r}),
     <l:@L> <t:If> <r:@R> => Statement::If(t, Span { start: l, end: r }),
     <l:@L> <t:While> <r:@R> => Statement::While(t, Span { start: l, end: r }),
     <l:@L> "break" ";" <r:@R> => Statement::Break(Span { start: l, end: r }),
@@ -73,7 +74,7 @@ Statement: Statement = {
     <l:@L> <t:FunctionCall> ";" <r:@R> => Statement::FunctionCall(t, Span { start: l, end: r }),
 };
 
-VariableDeclaration: VariableDeclaration = {
+pub VariableDeclaration: VariableDeclaration = {
     <tr:Trivial?> <mu:Mutable?> <t:Type> <n:ID> "=" <v:Expression> ";" => VariableDeclaration {
         trivial: tr,
         mutable: mu,
@@ -83,15 +84,15 @@ VariableDeclaration: VariableDeclaration = {
     }
 };
 
-Trivial: () = {
+pub Trivial: () = {
     "triv" => (),
 };
 
-Mutable: () = {
+pub Mutable: () = {
     "mut" => (),
 };
 
-Assignment: VariableAssignment = {
+pub Assignment: VariableAssignment = {
     <t:ID> "=" <v:Expression> ";" => VariableAssignment {
         target: t,
         value: v,
@@ -111,7 +112,7 @@ ElseIf: ElseIf = {
     }
 };
 
-If: IfStatement = {
+pub If: IfStatement = {
     "if" "(" <c:Expression> ")" "{" <t:Statement*> "}" <ei:ElseIf*> <e:Else?> => IfStatement {
         condition: c,
         then_block: t,
@@ -120,32 +121,30 @@ If: IfStatement = {
     }
 };
 
-
-
-Else: Vec<Statement> = {
+pub Else: Vec<Statement> = {
     "else" "{" <b:Statement*> "}" => b,
 };
 
-While: WhileStatement = {
+pub While: WhileStatement = {
     "while" "(" <c:Expression> ")" "{" <b:Statement*> "}" => WhileStatement {
         condition: c,
         body: b,
     }
 };
 
-Return: ReturnStatement = {
+pub Return: ReturnStatement = {
     "return" <e:Expression> ";" => ReturnStatement { value: Some(e) },
     "return" ";" => ReturnStatement { value: None },
 };
 
-FunctionCall: FunctionCall = {
+pub FunctionCall: FunctionCall = {
     <n:ID> "(" <a:ArgumentList?> ")"=> FunctionCall {
         name: n,
         args: a.unwrap_or(vec![]),
     }
 };
 
-ArgumentList: Vec<Expression> = {
+pub ArgumentList: Vec<Expression> = {
     <e:Expression> <en:("," Expression)*> => {
         let mut args = vec![e];
         args.extend(en.into_iter().map(|x| x.1));
@@ -153,7 +152,7 @@ ArgumentList: Vec<Expression> = {
     }
 };
 
-Term: Expression = {
+pub Term: Expression = {
     "(" <e:Expression> ")" => e,
     <e:Literal> => Expression::Literal(e),
     <e:ID> => Expression::Variable(e),
@@ -266,7 +265,7 @@ pub Expression: Expression = {
     };
 
 
-ArrayLiteral: ArrayLiteral = {
+pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
         elements: {
             let mut elements = vec![e];
@@ -276,7 +275,7 @@ ArrayLiteral: ArrayLiteral = {
     }
 };
 
-Literal: Literal = {
+pub Literal: Literal = {
     <l:StringLiteral> => Literal::String(l),
     <l:IntLiteral> => Literal::Int(l),
     <l:FloatLiteral> => Literal::Float(l),
@@ -284,21 +283,21 @@ Literal: Literal = {
     <l:BoolLiteral> => Literal::Bool(l),
 };
 
-StructInit: StructInit = {
+pub StructInit: StructInit = {
     <n:ID> "{" <f:StructFieldInit*> "}" => StructInit {
         name: n,
         fields: f,
     }
 };
 
-StructFieldInit: StructFieldInit = {
+pub StructFieldInit: StructFieldInit = {
     <n:ID> ":" <v:Expression> ","? => StructFieldInit {
         name: n,
         value: v,
     }
 };
 
-ArrayAccess: ArrayAccess = {
+pub ArrayAccess: ArrayAccess = {
     <n:ID> "[" <i:Expression> "]" => ArrayAccess {
         array_name: n,
         index: i,
@@ -306,7 +305,7 @@ ArrayAccess: ArrayAccess = {
 };
 
 // Type - all possible data types in the language
-Type: Type = {
+pub Type: Type = {
     "u8" => Type::U8,
     "u16" => Type::U16,
     "u32" => Type::U32,
@@ -315,12 +314,12 @@ Type: Type = {
     "i16" => Type::I16,
     "i32" => Type::I32,
     "i64" => Type::I64,
-    "fp8" => Type::FP8,
     "fp16" => Type::FP16,
     "fp32" => Type::FP32,
     "fp64" => Type::FP64,
-    "bool" => Type::Bool,
     "String" => Type::String,
+    "char" => Type::Char,
+    "bool" => Type::Bool,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
     <i:ID> => Type::Struct(i.to_string()),
@@ -328,33 +327,33 @@ Type: Type = {
 
 
 // String literals with escape support (e.g., "hello\nworld")
-StringLiteral: String = {
+pub StringLiteral: String = {
     <s:r#""([^"\\\r\n]|\\.)*""#> => s.to_string()
 };
 
 // Integer literals (e.g., 0, 42)
-IntLiteral: i64 = {
+pub IntLiteral: i64 = {
     <s:r"0|[1-9][0-9]*"> => s.parse().unwrap()
 };
 
 // Floating-point literals (e.g., 3.14, 0.001)
-FloatLiteral: f64 = {
+pub FloatLiteral: f64 = {
     <s:r"[0-9]+\.[0-9]+"> => s.parse().unwrap()
 };
 
 // Character literals with escape support (e.g., 'a', '\n')
-CharLiteral: char = {
+pub CharLiteral: char = {
     <s:r#"'([^'\\\r\n]|\\.)'"#> => s.chars().nth(1).unwrap()
 };
 
 // Boolean literals (true / false)
-BoolLiteral: bool = {
+pub BoolLiteral: bool = {
     "true" => true,
     "false" => false,
 };
 
 // Identifiers (variable and function names)
-  ID: String = {
+pub ID: String = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string()
 };
 
