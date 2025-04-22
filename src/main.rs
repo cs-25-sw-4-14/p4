@@ -6,8 +6,8 @@ lalrpop_mod!(
     pub lossy
 );
 pub mod ast;
-pub mod typechecker;
 pub mod debugger;
+pub mod typechecker;
 
 fn main() {
     let huttel = include_str!("huttel.txt");

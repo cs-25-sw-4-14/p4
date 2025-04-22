@@ -1,6 +1,6 @@
 use crate::ast::Program;
-use anyhow::Result;
 use crate::debugger::Debugger;
+use anyhow::Result;
 
 pub mod expression_check;
 pub mod function_check;
@@ -40,5 +40,4 @@ impl Typechecker {
 
         Ok(())
     }
-
 }
