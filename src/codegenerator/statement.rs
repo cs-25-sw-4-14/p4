@@ -2,6 +2,8 @@ use super::CodeGenerator;
 use crate::ast::Statement;
 use anyhow::Result;
 
+pub mod variable_declaration;
+
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
         match stmt {
