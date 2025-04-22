@@ -19,20 +19,45 @@ fn main() {
         .parse(file)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
-                anyhow!("Invalid token at {:?}", location)
-            }
-            lalrpop_util::ParseError::UnrecognizedEof { location, expected } => {
                 anyhow!(
-                    "Unrecognized EOF at {:?}, expected {:?}",
-                    location,
-                    expected
+                    "Invalid token at {}",
+                    debugger.display(&debugger::Span {
+                        start: location,
+                        end: 0
+                    })
                 )
             }
-            lalrpop_util::ParseError::UnrecognizedToken { token, expected } => {
-                anyhow!("Unrecognized token {:?}, expected {:?}", token, expected)
+            lalrpop_util::ParseError::UnrecognizedEof {
+                location,
+                expected: _,
+            } => {
+                anyhow!(
+                    "Unrecognized EOF at {}",
+                    debugger.display(&debugger::Span {
+                        start: location,
+                        end: 0
+                    })
+                )
+            }
+            lalrpop_util::ParseError::UnrecognizedToken { token, expected: _ } => {
+                anyhow!(
+                    "Unrecognized token at {}: '{}'",
+                    debugger.display(&debugger::Span {
+                        start: token.0,
+                        end: 0
+                    }),
+                    token.1
+                )
             }
             lalrpop_util::ParseError::ExtraToken { token } => {
-                anyhow!("Extra token {:?}", token)
+                anyhow!(
+                    "Extra token at {}: '{}'",
+                    debugger.display(&debugger::Span {
+                        start: token.0,
+                        end: 0
+                    }),
+                    token.1
+                )
             }
             lalrpop_util::ParseError::User { error } => {
                 anyhow!("User error {:?}", error)

@@ -41,14 +41,14 @@ pub struct StructField {
 // NOTE: STATEMENTS
 #[derive(Debug, Clone)]
 pub enum Statement {
-    VariableDeclaration(VariableDeclaration),
-    Assignment(VariableAssignment),
-    If(IfStatement),
-    While(WhileStatement),
+    VariableDeclaration(VariableDeclaration, Span),
+    Assignment(VariableAssignment, Span),
+    If(IfStatement, Span),
+    While(WhileStatement, Span),
     Break(Span),
     Continue(Span),
-    Return(ReturnStatement),
-    FunctionCall(FunctionCall),
+    Return(ReturnStatement, Span),
+    FunctionCall(FunctionCall, Span),
 }
 
 #[derive(Debug, Clone)]

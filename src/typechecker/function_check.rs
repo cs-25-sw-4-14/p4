@@ -6,12 +6,7 @@ use crate::debugger::Debugger;
 use anyhow::{Result, anyhow};
 use std::collections::HashSet;
 
-pub fn check(
-    function: &FunctionDef,
-    f_table: &mut FTable,
-    s_table: &STable,
-    debugger: &Debugger,
-) -> Result<()> {
+pub fn check(function: &FunctionDef, f_table: &mut FTable, s_table: &STable, debugger: &Debugger) -> Result<()> {
     // check if function exists in the function table
     if f_table.get(&function.name).is_none() {
         return Err(anyhow!(
@@ -40,7 +35,7 @@ pub fn check(
     }
 
     // type-check the function body
-    check_function_body(function, &mut v_table, f_table, s_table)?;
+    check_function_body(function, &mut v_table, f_table, s_table, debugger)?;
 
     // check return statements
     check_return_statements(function, &v_table, f_table, s_table)?;
@@ -73,9 +68,10 @@ fn check_function_body(
     v_table: &mut VTable,
     f_table: &mut FTable,
     s_table: &STable,
+    debugger: &Debugger,
 ) -> Result<()> {
     for statement in &function.body {
-        statement_check::check(statement, v_table, f_table, s_table)?;
+        statement_check::check(statement, v_table, f_table, s_table, debugger)?;
     }
 
     Ok(())
@@ -91,7 +87,7 @@ fn check_return_statements(
     let mut has_return = false;
 
     for statement in &function.body {
-        if let Statement::Return(ret) = statement {
+        if let Statement::Return(ret, _) = statement {
             has_return = true;
             check_return_type(ret, return_type, v_table, f_table, s_table)?;
         }
@@ -145,7 +141,11 @@ fn check_return_type(
     }
 }
 
-pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, debugger: &Debugger) -> Result<()> {
+pub fn check_breaks_continues(
+    stmt: &Statement,
+    in_loop: bool,
+    debugger: &Debugger,
+) -> Result<()> {
     match stmt {
         Statement::Break(l) => {
             if in_loop {
@@ -167,13 +167,13 @@ pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, debugger: &Debugg
                 ))
             }
         }
-        Statement::While(while_stmt) => {
+        Statement::While(while_stmt, _) => {
             for stmt in &while_stmt.body {
                 check_breaks_continues(stmt, true, debugger)?
             }
             Ok(())
         }
-        Statement::If(if_stmt) => {
+        Statement::If(if_stmt, _) => {
             for stmt in &if_stmt.then_block {
                 check_breaks_continues(stmt, in_loop, debugger)?
             }
