@@ -1,7 +1,4 @@
-use crate::ast::Expression;
-use crate::ast::Literal;
 use crate::ast::Type;
-use crate::ast::VariableDeclaration;
 use crate::{
     ast::ArrayAssignment,
     typechecker::expression_check,
@@ -14,6 +11,7 @@ pub fn check(
     v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
+    l: &crate::debugger::Span,
 ) -> Result<()> {
     // Check if the array is declared
     let array = v_table

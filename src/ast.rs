@@ -1,3 +1,5 @@
+use crate::debugger::Span;
+
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
@@ -39,15 +41,15 @@ pub struct StructField {
 // NOTE: STATEMENTS
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    VariableDeclaration(VariableDeclaration),
-    Assignment(VariableAssignment),
-    ArrayAssignment(ArrayAssignment),
-    If(IfStatement),
-    While(WhileStatement),
-    Break,
-    Continue,
-    Return(ReturnStatement),
-    FunctionCall(FunctionCall),
+    VariableDeclaration(VariableDeclaration, Span),
+    Assignment(VariableAssignment, Span),
+    ArrayAssignment(ArrayAssignment, Span),
+    If(IfStatement, Span),
+    While(WhileStatement, Span),
+    Break(Span),
+    Continue(Span),
+    Return(ReturnStatement, Span),
+    FunctionCall(FunctionCall, Span),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -65,7 +67,7 @@ pub struct ArrayAssignment {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,

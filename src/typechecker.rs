@@ -1,4 +1,5 @@
 use crate::ast::Program;
+use crate::debugger::Debugger;
 use anyhow::Result;
 
 pub mod expression_check;
@@ -21,14 +22,14 @@ impl Typechecker {
         }
     }
 
-    pub fn walk(&mut self, program: Program) -> Result<()> {
+    pub fn walk(&mut self, program: Program, debugger: Debugger) -> Result<()> {
         self.ftable.walk(program.clone());
         self.stable.walk(program.clone());
 
         for def in program.definitions {
             match def {
                 crate::ast::TopLevelDefinition::Function(func_def) => {
-                    function_check::check(&func_def, &mut self.ftable, &self.stable)?;
+                    function_check::check(&func_def, &mut self.ftable, &self.stable, &debugger)?;
                 }
                 _ => {}
             }

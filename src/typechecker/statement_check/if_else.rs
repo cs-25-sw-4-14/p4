@@ -1,5 +1,4 @@
 use crate::typechecker::expression_check;
-use crate::typechecker::statement_check::Statement;
 use crate::{
     ast::{IfStatement, Type},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
@@ -11,6 +10,7 @@ pub fn check(
     v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
+    debugger: &crate::debugger::Debugger,
 ) -> Result<()> {
     let condition_type =
         expression_check::check(&declaration.condition, v_table, f_table, s_table)?;
@@ -22,7 +22,7 @@ pub fn check(
     }
     // Check the body of the if statement
     for statement in &declaration.then_block {
-        super::check(statement, v_table, f_table, s_table)?;
+        super::check(statement, v_table, f_table, s_table, debugger)?;
     }
     // Check the else if blocks
     for else_if in &declaration.else_if_blocks {
@@ -35,13 +35,13 @@ pub fn check(
             ));
         }
         for statement in &else_if.body {
-            super::check(statement, v_table, f_table, s_table)?;
+            super::check(statement, v_table, f_table, s_table, debugger)?;
         }
     }
     // Check the else block if it exists
     if let Some(else_block) = &declaration.else_block {
         for statement in else_block {
-            super::check(statement, v_table, f_table, s_table)?;
+            super::check(statement, v_table, f_table, s_table, debugger)?;
         }
     }
 

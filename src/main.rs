@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use lalrpop_util::lalrpop_mod;
 
 lalrpop_mod!(
@@ -6,6 +7,7 @@ lalrpop_mod!(
     pub lossy
 );
 pub mod ast;
+pub mod debugger;
 pub mod typechecker;
 
 #[cfg(test)]
@@ -14,20 +16,61 @@ pub mod grammar_test;
 fn main() {
     let huttel = include_str!("huttel.txt");
     let file = include_str!("test.ss");
-    let expr = lossy::ProgramParser::new()
+    let debugger = debugger::Debugger::new(file.to_string());
+
+    let ast = lossy::ProgramParser::new()
         .parse(file)
-        .expect(&format!("{}\nFailed to parse: ", &huttel));
+        .map_err(|err| match err {
+            lalrpop_util::ParseError::InvalidToken { location } => {
+                anyhow!(
+                    "Invalid token at {}",
+                    debugger.display(&debugger::Span {
+                        start: location,
+                        end: 0
+                    })
+                )
+            }
+            lalrpop_util::ParseError::UnrecognizedEof {
+                location,
+                expected: _,
+            } => {
+                anyhow!(
+                    "Unrecognized EOF at {}",
+                    debugger.display(&debugger::Span {
+                        start: location,
+                        end: 0
+                    })
+                )
+            }
+            lalrpop_util::ParseError::UnrecognizedToken { token, expected: _ } => {
+                anyhow!(
+                    "Unrecognized token at {}: '{}'",
+                    debugger.display(&debugger::Span {
+                        start: token.0,
+                        end: 0
+                    }),
+                    token.1
+                )
+            }
+            lalrpop_util::ParseError::ExtraToken { token } => {
+                anyhow!(
+                    "Extra token at {}: '{}'",
+                    debugger.display(&debugger::Span {
+                        start: token.0,
+                        end: 0
+                    }),
+                    token.1
+                )
+            }
+            lalrpop_util::ParseError::User { error } => {
+                anyhow!("User error {:?}", error)
+            }
+        })
+        .expect("Failed to parse:");
 
     let mut typechecker = typechecker::Typechecker::new();
-
-    typechecker.walk(expr.clone()).expect(&format!(
+    typechecker.walk(ast.clone(), debugger).expect(&format!(
         "{}\nSemantic check failed!!! You dork!!!: ",
         &huttel
     ));
-
-    /*
-    println!("{:#?}", expr);
-    println!("Function Table: {:#?}", typechecker.ftable.functions);
-    println!("Struct Table: {:#?}", typechecker.stable.structs);
-    */
 }
