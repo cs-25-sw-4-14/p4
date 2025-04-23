@@ -21,10 +21,9 @@ pub struct CodeGenerator<'ctx> {
     pub context: &'ctx Context,
     pub module: Module<'ctx>,
     pub builder: Builder<'ctx>,
-    pub variables: HashMap<String, (PointerValue<'ctx>, bool)>,
+    pub variables: HashMap<String, PointerValue<'ctx>>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
     pub program: Option<Program>,
-    pub function: Option<FunctionValue<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
