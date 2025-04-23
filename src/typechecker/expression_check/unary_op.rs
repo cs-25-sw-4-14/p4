@@ -14,13 +14,9 @@ pub fn check(
     let operand_type = expression_check::check(&unary_operation.operand, vtable, ftable, stable)?;
     match unary_operation.operator {
         UnaryOperator::Negate => match operand_type {
-            Type::I8
-            | Type::I16
-            | Type::I32
-            | Type::I64
-            | Type::FP16
-            | Type::FP32
-            | Type::FP64 => Ok(operand_type),
+            Type::I8 | Type::I16 | Type::I32 | Type::I64 | Type::FP16 | Type::FP32 | Type::FP64 => {
+                Ok(operand_type)
+            }
             _ => Err(anyhow::anyhow!(
                 "Unary '-' not supported for type {:?}",
                 operand_type
