@@ -17,12 +17,14 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::Variable(variable) => self.compile_variable(variable),
             Expression::BinaryOp(binary_operation) => self.compile_binary_op(binary_operation),
             Expression::UnaryOp(unary_operation) => self.compile_unary_op(unary_operation),
-            Expression::FunctionCall(function_call) => self.compile_function_call(function_call),
+            Expression::FunctionCall(function_call) => {
+                self.compile_function_call_expr(function_call)
+            }
             Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
-            Expression::StructFieldAccess(struct_field_access) => todo!(),
-            Expression::ArrayAccess(array_access) => todo!(),
-            Expression::ArrayLiteral(array_literal) => todo!(),
-            Expression::TypeCast(type_cast) => todo!(),
+            Expression::StructFieldAccess(_struct_field_access) => todo!(),
+            Expression::ArrayAccess(_array_access) => todo!(),
+            Expression::ArrayLiteral(_array_literal) => todo!(),
+            Expression::TypeCast(_type_cast) => todo!(),
         }
     }
 }

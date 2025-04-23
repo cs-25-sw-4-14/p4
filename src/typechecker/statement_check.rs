@@ -1,5 +1,5 @@
 use super::{function_table::FTable, struct_table::STable, variable_table::VTable};
-use crate::ast::{Statement, Type};
+use crate::ast::Statement;
 use anyhow::Result;
 
 mod variable_assignment;

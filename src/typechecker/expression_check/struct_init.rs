@@ -20,8 +20,8 @@ pub fn check(
 
 pub fn semantic_check_struct_defined<'a>(
     struct_init: &'a StructInit,
-    v_table: &'a VTable,
-    f_table: &'a FTable,
+    _v_table: &'a VTable,
+    _f_table: &'a FTable,
     s_table: &'a STable,
 ) -> Result<&'a StructDef> {
     let struct_definition = s_table

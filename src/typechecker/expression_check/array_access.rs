@@ -1,6 +1,5 @@
-use crate::typechecker::expression_check;
 use crate::{
-    ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration},
+    ast::{ArrayAccess, Expression, Type, VariableDeclaration},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
 use anyhow::Result;
@@ -49,46 +48,48 @@ pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&
     Ok(array_type)
 }
 
-pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a i64> {
-    let array_length = match &array.var_type {
-        Type::Array(_, length) => length,
-        _ => {
-            return Err(anyhow::anyhow!(
-                "Array access on non-array type: {:?}",
-                array.var_type
-            ));
-        }
-    };
-    Ok(array_length)
+pub fn semantic_check_array_length<'a>(_array: &'a VariableDeclaration) -> Result<&'a i64> {
+    todo!()
+    // let array_length = match &array.var_type {
+    //     Type::Array(_, length) => length,
+    //     _ => {
+    //         return Err(anyhow::anyhow!(
+    //             "Array access on non-array type: {:?}",
+    //             array.var_type
+    //         ));
+    //     }
+    // };
+    // Ok(array_length)
 }
 
 pub fn semantic_check_array_index<'a>(
-    array_index: &'a Expression,
-    array_length: &'a i64,
-    v_table: &'a VTable,
-    f_table: &'a FTable,
-    s_table: &'a STable,
+    _array_index: &'a Expression,
+    _array_length: &'a i64,
+    _v_table: &'a VTable,
+    _f_table: &'a FTable,
+    _s_table: &'a STable,
 ) -> Result<()> {
-    match expression_check::check(array_index, v_table, f_table, s_table)? {
-        Type::I64 => match array_index {
-            Expression::Literal(Literal::Int(index)) => {
-                if 0 <= *index && *index < *array_length {
-                    return Err(anyhow::anyhow!(
-                        "Array access index out of bounds: {}",
-                        index
-                    ));
-                }
-            }
-            _ => {}
-        },
-        _ => {
-            return Err(anyhow::anyhow!(
-                "Array access by non-integer expression: {:?}",
-                array_index
-            ));
-        }
-    }
-    Ok(())
+    todo!()
+    // match expression_check::check(array_index, v_table, f_table, s_table)? {
+    //     Type::I64 => match array_index {
+    //         Expression::Literal(Literal::Int(index)) => {
+    //             if 0 <= *index && *index < *array_length {
+    //                 return Err(anyhow::anyhow!(
+    //                     "Array access index out of bounds: {}",
+    //                     index
+    //                 ));
+    //             }
+    //         }
+    //         _ => {}
+    //     },
+    //     _ => {
+    //         return Err(anyhow::anyhow!(
+    //             "Array access by non-integer expression: {:?}",
+    //             array_index
+    //         ));
+    //     }
+    // }
+    // Ok(())
 }
 
 #[cfg(test)]

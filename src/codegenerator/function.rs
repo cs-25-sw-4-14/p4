@@ -1,5 +1,4 @@
-use anyhow::{Result, anyhow};
-use inkwell::values::FunctionValue;
+use anyhow::Result;
 
 use super::CodeGenerator;
 use crate::ast::FunctionDef;

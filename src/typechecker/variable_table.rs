@@ -19,7 +19,7 @@ impl VTable {
         for s in statements {
             match s {
                 Statement::VariableDeclaration(var_decl) => {
-                    if (self.variables.contains_key(&var_decl.name)) {
+                    if self.variables.contains_key(&var_decl.name) {
                         return Err(anyhow::anyhow!(
                             "Variable {} already declared",
                             var_decl.name

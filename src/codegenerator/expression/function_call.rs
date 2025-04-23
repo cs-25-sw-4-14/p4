@@ -4,7 +4,7 @@ use anyhow::Result;
 use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
-    pub fn compile_function_call(
+    pub fn compile_function_call_expr(
         &mut self,
         function_call: &FunctionCall,
     ) -> Result<BasicValueEnum<'ctx>> {

@@ -1,6 +1,5 @@
-use crate::ast::{Expression, VariableAssignment};
+use crate::{ast::VariableAssignment, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
-use inkwell::values::PointerValue;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_variable_assignment(&mut self, assign: &VariableAssignment) -> Result<()> {
@@ -13,9 +12,11 @@ impl<'ctx> CodeGenerator<'ctx> {
                 anyhow!("Compiler Bug: Variable '{}' not found in symbol table during assignment compilation.", variable_name)
             })?;
 
-        self.builder.build_store(ptr, new_value).
-            map_err(|e| anyhow!("Failed to store new value in '{}': {}", variable_name, e))?;;
+        self.builder
+            .build_store(ptr, new_value)
+            .map_err(|e| anyhow!("Failed to store new value in '{}': {}", variable_name, e))?;
 
         Ok(())
     }
 }
+

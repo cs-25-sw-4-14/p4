@@ -6,20 +6,21 @@ use crate::{
 use anyhow::Result;
 
 pub fn check(
-    array_literal: &Box<ArrayLiteral>,
-    v_table: &VTable,
-    f_table: &FTable,
-    s_table: &STable,
+    _array_literal: &Box<ArrayLiteral>,
+    _v_table: &VTable,
+    _f_table: &FTable,
+    _s_table: &STable,
 ) -> Result<Type> {
-    semantic_check_literal_not_empty(array_literal)?;
-
-    let array_type =
-        semantic_check_all_elements_same_type(array_literal, v_table, f_table, s_table)?;
-
-    Ok(Type::Array(
-        Box::new(array_type.clone()),
-        array_literal.elements.len() as i64,
-    ))
+    // semantic_check_literal_not_empty(array_literal)?;
+    //
+    // let array_type =
+    //     semantic_check_all_elements_same_type(array_literal, v_table, f_table, s_table)?;
+    //
+    // Ok(Type::Array(
+    //     Box::new(array_type.clone()),
+    //     array_literal.elements.len() as i64,
+    // ))
+    todo!()
 }
 
 pub fn semantic_check_literal_not_empty<'a>(array_literal: &'a Box<ArrayLiteral>) -> Result<()> {
