@@ -62,7 +62,7 @@ pub StructField: StructField = {
     }
 };
 
-Statement: Statement = {
+pub Statement: Statement = {
     <l:@L> <t:VariableDeclaration> <r:@R> => Statement::VariableDeclaration(t, Span { start: l, end: r }),
     <l:@L> <t:Assignment> <r:@R> => Statement::Assignment(t, Span { start: l, end: r }),
     <l:@L> <t:ArrayAssignment> <r:@R> => Statement::ArrayAssignment(t, Span { start: l, end: r}),

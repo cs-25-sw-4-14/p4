@@ -1,4 +1,6 @@
 use crate::debugger::Span;
+#[cfg(test)]
+pub mod tests;
 
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone, PartialEq)]
