@@ -6,6 +6,7 @@ use crate::{
         TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator, VariableAssignment,
         VariableDeclaration, WhileStatement,
     },
+    debugger::Span,
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
 };
 
@@ -99,10 +100,13 @@ fn test_struct_definition() {
 #[test]
 fn test_variable_assignment() {
     assert_eq!(
-        Statement::Assignment(VariableAssignment {
-            target: "test".to_string(),
-            value: Expression::Literal(Literal::Int(32)),
-        }),
+        Statement::Assignment(
+            VariableAssignment {
+                target: "test".to_string(),
+                value: Expression::Literal(Literal::Int(32)),
+            },
+            Span { start: 0, end: 10 }
+        ),
         StatementParser::new().parse("test = 32;").unwrap()
     );
 }
@@ -110,13 +114,16 @@ fn test_variable_assignment() {
 #[test]
 fn test_variable_declaration() {
     assert_eq!(
-        Statement::VariableDeclaration(VariableDeclaration {
-            trivial: None,
-            mutable: None,
-            var_type: Type::U8,
-            name: "test".to_string(),
-            value: Expression::Literal(Literal::Int(32)),
-        }),
+        Statement::VariableDeclaration(
+            VariableDeclaration {
+                trivial: None,
+                mutable: None,
+                var_type: Type::U8,
+                name: "test".to_string(),
+                value: Expression::Literal(Literal::Int(32)),
+            },
+            Span { start: 0, end: 13 }
+        ),
         StatementParser::new().parse("u8 test = 32;").unwrap()
     );
 }
@@ -124,13 +131,16 @@ fn test_variable_declaration() {
 #[test]
 fn test_mut_variable_declaration() {
     assert_eq!(
-        Statement::VariableDeclaration(VariableDeclaration {
-            trivial: Some(()),
-            mutable: Some(()),
-            var_type: Type::U8,
-            name: "test".to_string(),
-            value: Expression::Literal(Literal::Int(32)),
-        }),
+        Statement::VariableDeclaration(
+            VariableDeclaration {
+                trivial: Some(()),
+                mutable: Some(()),
+                var_type: Type::U8,
+                name: "test".to_string(),
+                value: Expression::Literal(Literal::Int(32)),
+            },
+            Span { start: 0, end: 22 }
+        ),
         StatementParser::new()
             .parse("triv mut u8 test = 32;")
             .unwrap()
@@ -140,23 +150,26 @@ fn test_mut_variable_declaration() {
 #[test]
 fn test_if_statement() {
     assert_eq!(
-        Statement::If(IfStatement {
-            condition: Expression::BinaryOp(BinaryOperation {
-                operator: BinaryOperator::GreaterThan,
-                left: Box::new(Expression::Literal(Literal::Int(2))),
-                right: Box::new(Expression::Literal(Literal::Int(3))),
-            }),
-            then_block: vec![],
-            else_if_blocks: vec![ElseIf {
+        Statement::If(
+            IfStatement {
                 condition: Expression::BinaryOp(BinaryOperation {
-                    operator: BinaryOperator::LessThan,
+                    operator: BinaryOperator::GreaterThan,
                     left: Box::new(Expression::Literal(Literal::Int(2))),
                     right: Box::new(Expression::Literal(Literal::Int(3))),
                 }),
-                body: vec![],
-            },],
-            else_block: Some(vec![]),
-        }),
+                then_block: vec![],
+                else_if_blocks: vec![ElseIf {
+                    condition: Expression::BinaryOp(BinaryOperation {
+                        operator: BinaryOperator::LessThan,
+                        left: Box::new(Expression::Literal(Literal::Int(2))),
+                        right: Box::new(Expression::Literal(Literal::Int(3))),
+                    }),
+                    body: vec![],
+                },],
+                else_block: Some(vec![]),
+            },
+            Span { start: 0, end: 40 }
+        ),
         StatementParser::new()
             .parse("if (2 > 3) {} else if (2 < 3) {} else {}")
             .unwrap()
@@ -166,10 +179,13 @@ fn test_if_statement() {
 #[test]
 fn test_while_statement() {
     assert_eq!(
-        Statement::While(WhileStatement {
-            condition: Expression::Literal(Literal::Bool(true)),
-            body: vec![],
-        }),
+        Statement::While(
+            WhileStatement {
+                condition: Expression::Literal(Literal::Bool(true)),
+                body: vec![],
+            },
+            Span { start: 0, end: 15 }
+        ),
         StatementParser::new().parse("while (true) {}").unwrap()
     );
 }
@@ -177,7 +193,7 @@ fn test_while_statement() {
 #[test]
 fn test_break_statement() {
     assert_eq!(
-        Statement::Break,
+        Statement::Break(Span { start: 0, end: 6 }),
         StatementParser::new().parse("break;").unwrap()
     );
 }
@@ -185,7 +201,7 @@ fn test_break_statement() {
 #[test]
 fn test_continue_statement() {
     assert_eq!(
-        Statement::Continue,
+        Statement::Continue(Span { start: 0, end: 9 }),
         StatementParser::new().parse("continue;").unwrap()
     );
 }
@@ -193,9 +209,12 @@ fn test_continue_statement() {
 #[test]
 fn test_return_statement() {
     assert_eq!(
-        Statement::Return(ReturnStatement {
-            value: Some(Expression::Literal(Literal::Int(32))),
-        }),
+        Statement::Return(
+            ReturnStatement {
+                value: Some(Expression::Literal(Literal::Int(32))),
+            },
+            Span { start: 0, end: 10 }
+        ),
         StatementParser::new().parse("return 32;").unwrap()
     );
 }
@@ -203,7 +222,7 @@ fn test_return_statement() {
 #[test]
 fn test_empty_return_statement() {
     assert_eq!(
-        Statement::Return(ReturnStatement { value: None }),
+        Statement::Return(ReturnStatement { value: None }, Span { start: 0, end: 7 }),
         StatementParser::new().parse("return;").unwrap()
     );
 }
