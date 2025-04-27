@@ -154,7 +154,7 @@ pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, debugger: &Debugg
             } else {
                 Err(anyhow!(
                     "`break` used outside of loop on {}",
-                    debugger.display(l),
+                    debugger.display(*l),
                 ))
             }
         }
@@ -164,7 +164,7 @@ pub fn check_breaks_continues(stmt: &Statement, in_loop: bool, debugger: &Debugg
             } else {
                 Err(anyhow!(
                     "`continue` used outside of loop on {}",
-                    debugger.display(l)
+                    debugger.display(*l)
                 ))
             }
         }

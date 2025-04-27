@@ -11,7 +11,7 @@ pub fn check(
     v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
-    l: &crate::debugger::Span,
+    _l: usize,
 ) -> Result<()> {
     // Check if the array is declared
     let array = v_table

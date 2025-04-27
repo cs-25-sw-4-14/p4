@@ -19,43 +19,25 @@ fn main() {
         .parse(file)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
-                anyhow!(
-                    "Invalid token at {}",
-                    debugger.display(&debugger::Span {
-                        start: location,
-                        end: 0
-                    })
-                )
+                anyhow!("Invalid token at {}", debugger.display(location))
             }
             lalrpop_util::ParseError::UnrecognizedEof {
                 location,
                 expected: _,
             } => {
-                anyhow!(
-                    "Unrecognized EOF at {}",
-                    debugger.display(&debugger::Span {
-                        start: location,
-                        end: 0
-                    })
-                )
+                anyhow!("Unrecognized EOF at {}", debugger.display(location))
             }
             lalrpop_util::ParseError::UnrecognizedToken { token, expected: _ } => {
                 anyhow!(
                     "Unrecognized token at {}: '{}'",
-                    debugger.display(&debugger::Span {
-                        start: token.0,
-                        end: 0
-                    }),
+                    debugger.display(token.0),
                     token.1
                 )
             }
             lalrpop_util::ParseError::ExtraToken { token } => {
                 anyhow!(
                     "Extra token at {}: '{}'",
-                    debugger.display(&debugger::Span {
-                        start: token.0,
-                        end: 0
-                    }),
+                    debugger.display(token.0),
                     token.1
                 )
             }
