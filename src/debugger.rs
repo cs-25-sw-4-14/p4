@@ -1,19 +1,7 @@
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Span {
-    pub start: usize,
-    pub end: usize,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Location {
     pub line: usize,
     pub char: usize,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SourceSpan {
-    pub start: Location,
-    pub end: Location,
 }
 
 pub struct Debugger {
@@ -45,15 +33,8 @@ impl Debugger {
         Location { line, char }
     }
 
-    pub fn get_location(&self, span: &Span) -> SourceSpan {
-        SourceSpan {
-            start: self.byte_pos_to_location(span.start),
-            end: self.byte_pos_to_location(span.end),
-        }
-    }
-
-    pub fn display(&self, span: &Span) -> String {
-        let loc = self.get_location(span);
-        format!("Line: {}, Char: {}", loc.start.line, loc.start.char)
+    pub fn display(&self, span: usize) -> String {
+        let loc = self.byte_pos_to_location(span);
+        format!("Line: {}, Char: {}", loc.line, loc.char)
     }
 }

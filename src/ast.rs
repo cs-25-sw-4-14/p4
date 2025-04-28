@@ -1,4 +1,3 @@
-use crate::debugger::Span;
 #[cfg(test)]
 pub mod tests;
 
@@ -43,15 +42,15 @@ pub struct StructField {
 // NOTE: STATEMENTS
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    VariableDeclaration(VariableDeclaration, Span),
-    Assignment(VariableAssignment, Span),
-    ArrayAssignment(ArrayAssignment, Span),
-    If(IfStatement, Span),
-    While(WhileStatement, Span),
-    Break(Span),
-    Continue(Span),
-    Return(ReturnStatement, Span),
-    FunctionCall(FunctionCall, Span),
+    VariableDeclaration(VariableDeclaration, usize),
+    Assignment(VariableAssignment, usize),
+    ArrayAssignment(ArrayAssignment, usize),
+    If(IfStatement, usize),
+    While(WhileStatement, usize),
+    Break(usize),
+    Continue(usize),
+    Return(ReturnStatement, usize),
+    FunctionCall(FunctionCall, usize),
 }
 
 #[derive(Debug, Clone, PartialEq)]
