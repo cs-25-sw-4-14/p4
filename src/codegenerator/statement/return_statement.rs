@@ -4,16 +4,15 @@ use anyhow::Result;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_ret_stmt(&mut self, ret_stmt: &ReturnStatement) -> Result<()> {
-        match &ret_stmt.value {
-            None => {
-                self.builder.build_return(None)?;
-            }
-            Some(expr) => {
-                // First, compile the expression to get the LLVM value to return.
-                let compiled_value = self.compile_expression(expr)?;
-                self.builder.build_return(Some(&compiled_value))?;
-            }
+        if let Some(expr) = &ret_stmt.value {
+            // If there's a value to return, compile the expression
+            let return_value = self.compile_expression(expr)?;
+            self.builder.build_return(Some(&return_value));
+        } else {
+            // No return value (for void functions)
+            self.builder.build_return(None);
         }
+        
         Ok(())
     }
 }

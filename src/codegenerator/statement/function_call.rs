@@ -30,11 +30,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // 3. Build the LLVM 'call' instruction.
         let call_site = self
             .builder
-            .build_call(
-                function,
-                &compiled_args,
-                &(function_name.to_string() + "_call_ret"),
-            )
+            .build_call(function, &compiled_args,&(function_name.to_string() + "_call_ret"),)
             .map_err(|e| anyhow!("Failed to build function call '{}': {}", function_name, e))?;
 
         Ok(call_site)

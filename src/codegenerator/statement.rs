@@ -6,6 +6,10 @@ pub mod assignment;
 pub mod function_call;
 pub mod return_statement;
 pub mod variable_declaration;
+pub mod if_else;
+pub mod while_statement;
+pub mod break_statement;
+pub mod continue_statement;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
@@ -22,10 +26,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             Statement::FunctionCall(func_call) => {
                 self.compile_function_call_stmt(func_call)?;
             }
-            Statement::If(_if_statement) => todo!(),
-            Statement::While(_while_statement) => todo!(),
-            Statement::Break => todo!(),
-            Statement::Continue => todo!(),
+            Statement::If(if_stmt) => self.compile_if_else(if_stmt)?,
+            Statement::While(while_stmt) => self.compile_while_statement(while_stmt)?,
+            Statement::Break => self.compile_break()?,
+            Statement::Continue => self.compile_continue()?,
         };
         Ok(())
     }

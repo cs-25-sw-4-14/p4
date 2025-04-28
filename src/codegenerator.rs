@@ -21,6 +21,8 @@ pub struct CodeGenerator<'ctx> {
     pub variables: HashMap<String, PointerValue<'ctx>>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
     pub program: Option<Program>,
+    pub loop_cond_block: Option<inkwell::basic_block::BasicBlock<'ctx>>,
+    pub loop_end_block: Option<inkwell::basic_block::BasicBlock<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
