@@ -120,6 +120,8 @@ pub enum Expression {
     ArrayAccess(Box<ArrayAccess>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
+    Reference(Box<Expression>, bool), // (expression, is_mutable)
+    Dereference(Box<Expression>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -221,6 +223,7 @@ pub enum Type {
     Struct(String),
     Array(Box<Type>, i64),
     Vector(Box<Type>),
+    Reference(Box<Type>, bool), // (type, is_mutable)
 }
 
 impl From<Literal> for Type {
