@@ -62,6 +62,7 @@ pub StructField: StructField = {
 };
 
 pub Statement: Statement = {
+    <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
     <l:@L> <t:ArrayAssignment> => Statement::ArrayAssignment(t, l),
@@ -71,6 +72,12 @@ pub Statement: Statement = {
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
+};
+
+pub Throwaway: Throwaway = {
+    "_" "=" <e:Expression> ";" => Throwaway {
+        expression: e,
+    }
 };
 
 pub VariableDeclaration: VariableDeclaration = {

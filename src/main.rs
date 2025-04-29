@@ -12,7 +12,7 @@ pub mod typechecker;
 
 fn main() {
     let huttel = include_str!("huttel.txt");
-    let file = include_str!("test.ss");
+    let file = include_str!("test2.ss");
     let debugger = debugger::Debugger::new(file.to_string());
 
     let ast = lossy::ProgramParser::new()
