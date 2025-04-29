@@ -9,6 +9,11 @@ pub mod literal;
 pub mod struct_init;
 pub mod unary_op;
 pub mod variable;
+pub mod array_access;
+pub mod array_literal;
+pub mod type_cast;
+pub mod struct_field_access;
+
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
@@ -19,10 +24,15 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::UnaryOp(unary_operation) => self.compile_unary_op(unary_operation),
             Expression::FunctionCall(function_call) => self.compile_function_call(function_call),
             Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
-            Expression::StructFieldAccess(struct_field_access) => todo!(),
-            Expression::ArrayAccess(array_access) => todo!(),
-            Expression::ArrayLiteral(array_literal) => todo!(),
-            Expression::TypeCast(type_cast) => todo!(),
+            Expression::StructFieldAccess(struct_field_access) => self.compile_struct_field_access(struct_field_access),
+            Expression::ArrayAccess(array_access) => self.compile_array_access(array_access),
+            Expression::ArrayLiteral(array_literal) => self.compile_array_literal(array_literal),
+            Expression::TypeCast(type_cast) => {
+                let value = self.compile_type_cast(type_cast)?;
+                self.last_value = Some(value);
+                Ok(value)
+            }
+            
         }
     }
 }

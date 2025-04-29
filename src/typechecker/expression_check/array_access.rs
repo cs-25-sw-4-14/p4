@@ -64,7 +64,7 @@ pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result
 
 pub fn semantic_check_array_index<'a>(
     array_index: &'a Expression,
-    array_length: &u64,
+    array_length: &'a u64,
     v_table: &'a VTable,
     f_table: &'a FTable,
     s_table: &'a STable,
