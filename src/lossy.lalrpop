@@ -159,6 +159,9 @@ pub Term: Expression = {
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
+    "&" <e:Term> => Expression::Reference(Box::new(e), false),
+    "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
+    "*" <e:Term> => Expression::Dereference(Box::new(e)),
 };
 
 pub Expression: Expression = {
@@ -324,6 +327,8 @@ pub Type: Type = {
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
     <i:ID> => Type::Struct(i.to_string()),
+    "&" <t:Type> => Type::Reference(Box::new(t), false),
+    "&mut" <t:Type> => Type::Reference(Box::new(t), true),
 };
 
 
@@ -357,4 +362,3 @@ pub BoolLiteral: bool = {
 pub ID: String = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string()
 };
-
