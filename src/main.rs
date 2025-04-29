@@ -15,7 +15,7 @@ pub mod typechecker;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Filename to parse
+    /// File to compile
     input: String,
 }
 
