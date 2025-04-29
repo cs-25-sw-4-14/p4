@@ -86,18 +86,18 @@ impl<'ctx> CodeGenerator<'ctx> {
             //         .expect(&format!("Struct type '{}' not found", name));
             //     struct_type.into()
             // }
-            // Type::Array(element_type, size) => {
-            //     let llvm_element_type = self.get_basic_type(element_type);
-            //     // Handle array size overflow
-            //     if *size > u32::MAX as u64 {
-            //         panic!(
-            //             "Array size {} exceeds maximum supported size {}",
-            //             size,
-            //             u32::MAX
-            //         );
-            //     }
-            //     llvm_element_type.array_type(*size as u32).into()
-            // }
+            Type::Array(element_type, size) => {
+                let llvm_element_type = self.get_basic_type(element_type);
+                 // Handle array size overflow
+                 if *size > u32::MAX as u64 {
+                     panic!(
+                         "Array size {} exceeds maximum supported size {}",
+                         size,
+                         u32::MAX
+                     );
+                 }
+                 llvm_element_type.array_type(*size as u32).into()
+             }
             // Type::Vector(element_type) => {
             //     let llvm_element_type = self.get_basic_type(element_type);
             //     // If the vector length is dynamic, pass that as a parameter

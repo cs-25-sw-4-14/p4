@@ -116,5 +116,8 @@ fn main() {
         .status()
         .expect("Failed to delete object file");
 
-    println!("Program successfully compiled and saved as '{}'", &output_file);
+    println!(
+        "Program succesfully compiled and saved as '{}'",
+        &output_file
+    );
 }

@@ -24,8 +24,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             Statement::Write(_, _) => {
                 // Handle write statement
             }
-            Statement::Print(stmt, _) => {
-                self.compile_print_stmt(stmt)?;
+            Statement::Print(expr, _) => {
+                self.compile_print_stmt(expr)?;
             }
             Statement::VariableDeclaration(decl, _) => {
                 self.compile_variable_declaration(decl)?;
