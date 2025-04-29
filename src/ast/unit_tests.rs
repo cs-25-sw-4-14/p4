@@ -498,9 +498,11 @@ fn test_type_cast() {
     assert_eq!(
         Expression::TypeCast(TypeCast {
             expression: Box::new(Expression::Variable("test".to_string())),
-            target_type: Type::U8
+            target_type: Type::Bool
         }),
-        lossy::ExpressionParser::new().parse("bool").unwrap()
+        lossy::ExpressionParser::new()
+            .parse("test as bool")
+            .unwrap()
     );
 }
 

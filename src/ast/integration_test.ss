@@ -126,8 +126,8 @@ void main() {
         }
     }
     
-    Point origin = Point {x: 0, y: 0};
-    Point endpoint = Point {x: 100, y: 100};
+    Point origin = Point { x: 0, y: 0 };
+    Point endpoint = Point { x: 100, y: 100 };
 
     Person person = Person {
         first_name: "Christoffer",
