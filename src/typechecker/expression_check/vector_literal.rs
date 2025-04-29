@@ -13,7 +13,8 @@ pub fn check(
     s_table: &STable,) 
     -> Result<Type> {
 
-
+        //TODO: if vector literal is empty, return type. 
+        
         let vector_type = semantic_check_all_elements_same_type(
             vector_literal,
             v_table,
