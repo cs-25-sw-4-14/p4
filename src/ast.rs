@@ -150,7 +150,7 @@ pub enum Expression {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
-    Int(u64),
+    Int(i64),
     Float(f64),
     String(String),
     Char(char),
@@ -245,7 +245,7 @@ pub enum Type {
     Char,
     Bool,
     Struct(String),
-    Array(Box<Type>, u64),
+    Array(Box<Type>, i64),
     Vector(Box<Type>),
     Reference(Box<Type>, bool), // (type, is_mutable)
 }
@@ -253,7 +253,7 @@ pub enum Type {
 impl From<Literal> for Type {
     fn from(literal: Literal) -> Self {
         match literal {
-            Literal::Int(_) => Type::U64,
+            Literal::Int(_) => Type::I64,
             Literal::Float(_) => Type::FP64,
             Literal::String(_) => Type::String,
             Literal::Char(_) => Type::Char,

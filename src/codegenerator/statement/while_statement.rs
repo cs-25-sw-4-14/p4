@@ -1,7 +1,7 @@
 use crate::{ast::WhileStatement, codegenerator::CodeGenerator};
 use anyhow::Result;
 impl<'ctx> CodeGenerator<'ctx> {
-    pub fn compile_while_statement(&mut self, while_stmt: &WhileStatement) -> Result<()> {
+    pub fn compile_while_statement(&mut self, _while_stmt: &WhileStatement) -> Result<()> {
         //     let cond_bb = self
         //         .context
         //         .append_basic_block(self.current_function.unwrap(), "loop_cond");

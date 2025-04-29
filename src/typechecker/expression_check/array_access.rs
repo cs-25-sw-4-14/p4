@@ -1,6 +1,8 @@
 use crate::{
-    ast::{ArrayAccess, Expression, Type, VariableDeclaration},
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
+    ast::{ArrayAccess, Expression, Type, VariableDeclaration, Literal},
+    typechecker::{
+        expression_check, function_table::FTable, struct_table::STable, variable_table::VTable,
+    },
 };
 use anyhow::Result;
 
@@ -48,7 +50,7 @@ pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&
     Ok(array_type)
 }
 
-pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a u64> {
+pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a i64> {
     let array_length = match &array.var_type {
         Type::Array(_, length) => length,
         _ => {
@@ -63,7 +65,7 @@ pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result
 
 pub fn semantic_check_array_index<'a>(
     array_index: &'a Expression,
-    array_length: &'a u64,
+    array_length: &'a i64,
     v_table: &'a VTable,
     f_table: &'a FTable,
     s_table: &'a STable,

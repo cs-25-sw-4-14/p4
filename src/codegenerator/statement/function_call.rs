@@ -3,24 +3,17 @@ use anyhow::{Result, anyhow};
 use inkwell::values::{BasicMetadataValueEnum, CallSiteValue, FunctionValue};
 
 impl<'ctx> CodeGenerator<'ctx> {
-    pub fn compile_function_call_stmt(
-        &mut self,
-        func_call: &FunctionCall,
-    ) -> Result<CallSiteValue<'ctx>> {
+    pub fn compile_function_call_stmt(&mut self, func_call: &FunctionCall) -> Result<CallSiteValue<'ctx>> {
         let function_name = &func_call.name;
 
         // Looks up the function in the LLVM module.
-        let function: FunctionValue<'ctx> =
-            self.module.get_function(function_name).ok_or_else(|| {
-                anyhow!(
-                    "Compiler Bug: Function '{}' not found in LLVM module during call compilation.",
-                    function_name
-                )
-            })?;
+        let function: FunctionValue<'ctx> = self
+            .module
+            .get_function(function_name)
+            .ok_or_else(|| anyhow!("Compiler Bug: Function '{}' not found in LLVM module during call compilation.", function_name))?;
 
         // Compiles all argument expressions.
-        let mut compiled_args: Vec<BasicMetadataValueEnum<'ctx>> =
-            Vec::with_capacity(func_call.args.len());
+        let mut compiled_args: Vec<BasicMetadataValueEnum<'ctx>> = Vec::with_capacity(func_call.args.len());
 
         for arg_expr in &func_call.args {
             // Recursively compile each argument expression.

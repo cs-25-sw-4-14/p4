@@ -41,8 +41,8 @@ impl Typechecker {
         // borrow checker!!!...
         self.borrow_checker.check_program(&program)?;
 
-        println!("Function Table: {:#?}", self.ftable.functions);
-        println!("Struct Table: {:#?}", self.stable.structs);
+        // println!("Function Table: {:#?}", self.ftable.functions);
+        // println!("Struct Table: {:#?}", self.stable.structs);
 
         Ok(())
     }
