@@ -95,7 +95,7 @@ fn main() {
         )
         .unwrap();
 
-    let filename = args.input.split('.').next().unwrap();
+    let filename = args.input.split('.').next().unwrap_or(&args.input);
     let object_file = format!("{}.o", filename);
     let output_file = format!("{}.out", filename);
 
@@ -116,5 +116,5 @@ fn main() {
         .status()
         .expect("Failed to delete object file");
 
-    println!("Program succesfully compiled and saved as '{}'", &output_file);
+    println!("Program successfully compiled and saved as '{}'", &output_file);
 }
