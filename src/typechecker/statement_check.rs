@@ -5,6 +5,7 @@ use anyhow::Result;
 mod array_assignment;
 mod function_call;
 mod if_else;
+mod throwaway;
 mod variable_assignment;
 mod variable_declaration;
 mod while_statement;
@@ -17,6 +18,12 @@ pub fn check(
     debugger: &crate::debugger::Debugger,
 ) -> Result<()> {
     match expression {
+        Statement::Throwaway(expression, l) => {
+            throwaway::check(
+                expression,
+                v_table, f_table, s_table, debugger, *l,
+            )?;
+        }
         Statement::VariableDeclaration(variable_declaration, l) => {
             variable_declaration::check(
                 variable_declaration,

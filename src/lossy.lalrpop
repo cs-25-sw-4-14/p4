@@ -63,6 +63,7 @@ pub StructField: StructField = {
 };
 
 pub Statement: Statement = {
+    <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
     <l:@L> <t:ArrayAssignment> => Statement::ArrayAssignment(t, l),
@@ -74,6 +75,12 @@ pub Statement: Statement = {
     <l:@L> <t:Print> => Statement::Print(t, l),
     <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
+};
+
+pub Throwaway: Throwaway = {
+    "_" "=" <e:Expression> ";" => Throwaway {
+        expression: e,
+    }
 };
 
 pub VariableDeclaration: VariableDeclaration = {
@@ -182,110 +189,115 @@ pub Term: Expression = {
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
+    "&" <e:Term> => Expression::Reference(Box::new(e), false),
+    "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
+    "*" <e:Term> => Expression::Dereference(Box::new(e)),
 };
 
 pub Expression: Expression = {
     #[precedence(level="0")]
     Term,
-    #[precedence(level="1")] #[assoc(side="right")]
+    #[precedence(level="1")]
+    <e:Expression> "as" <t:Type> => Expression::TypeCast(TypeCast {
+        target_type: t,
+        expression: Box::new(e),
+    }),
+    #[precedence(level="2")] #[assoc(side="right")]
     "-" <o:Expression> => Expression::UnaryOp(UnaryOperation {
         operator: UnaryOperator::Negate,
         operand: Box::new(o),
     }),
-    #[precedence(level="1")] #[assoc(side="right")]
+    #[precedence(level="3")] #[assoc(side="right")]
     "!" <o:Expression> => Expression::UnaryOp(UnaryOperation {
         operator: UnaryOperator::Not,
         operand: Box::new(o),
     }),
-
     // TODO: Fix struct field access so it is recursive
-    #[precedence(level="2")] #[assoc(side="left")]
+    #[precedence(level="4")] #[assoc(side="left")]
     <e:Expression> "." <f:ID> => Expression::StructFieldAccess(StructFieldAccess {
         struct_expr: Box::new(e),
         field_name: f,
     }),
         
-    #[precedence(level="3")] #[assoc(side="left")]
+    #[precedence(level="5")] #[assoc(side="left")]
     <l:Expression> "/" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Divide,
         right: Box::new(r),
     }), 
-    #[precedence(level="3")] #[assoc(side="left")]
+    #[precedence(level="6")] #[assoc(side="left")]
     <l:Expression> "*" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Multiply,
         right: Box::new(r),
     }),
-    #[precedence(level="3")] #[assoc(side="left")]
+    #[precedence(level="7")] #[assoc(side="left")]
     <l:Expression> "%" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Modulus,
         right: Box::new(r),
     }),
-    #[precedence(level="4")] #[assoc(side="left")]
+    #[precedence(level="8")] #[assoc(side="left")]
     <l:Expression> "+" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Add,
         right: Box::new(r),
     }),
-    #[precedence(level="4")] #[assoc(side="left")]
+    #[precedence(level="9")] #[assoc(side="left")]
     <l:Expression> "-" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Subtract,
         right: Box::new(r),
     }),
-    #[precedence(level="5")] #[assoc(side="left")]
+    #[precedence(level="10")] #[assoc(side="left")]
     <l:Expression> "<" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::LessThan,
         right: Box::new(r),
     }),
-    #[precedence(level="5")] #[assoc(side="left")]
+    #[precedence(level="11")] #[assoc(side="left")]
     <l:Expression> ">" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThan,
         right: Box::new(r),
     }),
-    #[precedence(level="5")] #[assoc(side="left")]
+    #[precedence(level="12")] #[assoc(side="left")]
     <l:Expression> "<=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::LessThanOrEqual,
         right: Box::new(r),
     }),
-    #[precedence(level="5")] #[assoc(side="left")]
+    #[precedence(level="13")] #[assoc(side="left")]
     <l:Expression> ">=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::GreaterThanOrEqual,
         right: Box::new(r),
     }),
-    #[precedence(level="6")] #[assoc(side="left")]
+    #[precedence(level="14")] #[assoc(side="left")]
     <l:Expression> "==" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Equal,
         right: Box::new(r),
     }),
-    #[precedence(level="6")] #[assoc(side="left")]
+    #[precedence(level="15")] #[assoc(side="left")]
     <l:Expression> "!=" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::NotEqual,
         right: Box::new(r),
     }),
-    #[precedence(level="7")] #[assoc(side="left")]
+    #[precedence(level="16")] #[assoc(side="left")]
     <l:Expression> "&&" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::And,
         right: Box::new(r),
     }),
-    #[precedence(level="7")] #[assoc(side="left")]
+    #[precedence(level="17")] #[assoc(side="left")]
     <l:Expression> "||" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
         operator: BinaryOperator::Or,
         right: Box::new(r),
     }),
-    
-    };
-
+        };
 
 pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
@@ -345,6 +357,8 @@ pub Type: Type = {
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
     <i:ID> => Type::Struct(i.to_string()),
+    "&" <t:Type> => Type::Reference(Box::new(t), false),
+    "&mut" <t:Type> => Type::Reference(Box::new(t), true),
 };
 
 
@@ -386,4 +400,3 @@ pub ID: String = {
 pub KeyWordIdentifier: String = {
     <s:r"write|read|print"> => s.to_string()
 };
-

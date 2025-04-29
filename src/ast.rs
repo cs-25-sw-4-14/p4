@@ -1,5 +1,7 @@
 #[cfg(test)]
-pub mod tests;
+pub mod integration_tests;
+#[cfg(test)]
+pub mod unit_tests;
 
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone, PartialEq)]
@@ -42,6 +44,7 @@ pub struct StructField {
 // NOTE: STATEMENTS
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
+    Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
     Assignment(VariableAssignment, usize),
     ArrayAssignment(ArrayAssignment, usize),
@@ -51,9 +54,13 @@ pub enum Statement {
     Continue(usize),
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
-    Print(Print,usize),
-    Write(Write,usize),
-    
+    Print(Print, usize),
+    Write(Write, usize),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Throwaway {
+    pub expression: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -137,6 +144,8 @@ pub enum Expression {
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Read(Box<Read>),
+    Reference(Box<Expression>, bool), // (expression, is_mutable)
+    Dereference(Box<Expression>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -238,6 +247,7 @@ pub enum Type {
     Struct(String),
     Array(Box<Type>, i64),
     Vector(Box<Type>),
+    Reference(Box<Type>, bool), // (type, is_mutable)
 }
 
 impl From<Literal> for Type {
