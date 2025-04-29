@@ -1,16 +1,19 @@
+#[cfg(test)]
+pub mod tests;
+
 // NOTE: ENTRY POINT
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     pub definitions: Vec<TopLevelDefinition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TopLevelDefinition {
     Function(FunctionDef),
     Struct(StructDef),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDef {
     pub return_type: Option<Type>,
     pub name: String,
@@ -18,38 +21,39 @@ pub struct FunctionDef {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Param {
     pub name: String,
     pub param_type: Type,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructDef {
     pub name: String,
     pub fields: Vec<StructField>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructField {
     pub name: String,
     pub field_type: Type,
 }
 
 // NOTE: STATEMENTS
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    VariableDeclaration(VariableDeclaration),
-    Assignment(VariableAssignment),
-    If(IfStatement),
-    While(WhileStatement),
-    Break,
-    Continue,
-    Return(ReturnStatement),
-    FunctionCall(FunctionCall),
+    VariableDeclaration(VariableDeclaration, usize),
+    Assignment(VariableAssignment, usize),
+    ArrayAssignment(ArrayAssignment, usize),
+    If(IfStatement, usize),
+    While(WhileStatement, usize),
+    Break(usize),
+    Continue(usize),
+    Return(ReturnStatement, usize),
+    FunctionCall(FunctionCall, usize),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
     pub trivial: Option<()>,
     pub mutable: Option<()>,
@@ -58,13 +62,19 @@ pub struct VariableDeclaration {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArrayAssignment {
+    pub target: ArrayAccess,
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfStatement {
     pub condition: Expression,
     pub then_block: Vec<Statement>,
@@ -72,24 +82,24 @@ pub struct IfStatement {
     pub else_block: Option<Vec<Statement>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ElseIf {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WhileStatement {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReturnStatement {
     pub value: Option<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionCall {
     pub name: String,
     pub args: Vec<Expression>,
@@ -97,7 +107,7 @@ pub struct FunctionCall {
 
 // INFO: EXPRESSIONS
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Literal(Literal),
     Variable(String),
@@ -111,7 +121,7 @@ pub enum Expression {
     TypeCast(TypeCast),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     Int(i64),
     Float(f64),
@@ -120,14 +130,14 @@ pub enum Literal {
     Bool(bool),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryOperation {
     pub left: Box<Expression>,
     pub operator: BinaryOperator,
     pub right: Box<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnaryOperation {
     pub operator: UnaryOperator,
     pub operand: Box<Expression>,
@@ -150,42 +160,42 @@ pub enum BinaryOperator {
     Or,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UnaryOperator {
     Negate,
     Not,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructInit {
     pub name: String,
     pub fields: Vec<StructFieldInit>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldInit {
     pub name: String,
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldAccess {
     pub struct_expr: Box<Expression>,
     pub field_name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TypeCast {
     pub expression: Box<Expression>,
     pub target_type: Type,
@@ -201,7 +211,6 @@ pub enum Type {
     I16,
     I32,
     I64,
-    FP8,
     FP16,
     FP32,
     FP64,

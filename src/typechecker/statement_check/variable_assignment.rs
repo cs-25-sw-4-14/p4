@@ -10,6 +10,8 @@ pub fn check(
     v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
+    debugger: &crate::debugger::Debugger,
+    l: usize,
 ) -> Result<()> {
     let expression_type = expression_check::check(&declaration.value, v_table, f_table, s_table)?;
 
@@ -17,7 +19,8 @@ pub fn check(
         let var_type = &var.var_type;
         if var_type != &expression_type {
             return Err(anyhow::anyhow!(
-                "Type mismatch: expected {:?}, found {:?}",
+                "{}: Type mismatch: expected {:?}, found {:?}",
+                debugger.display(l),
                 var_type,
                 expression_type
             ));

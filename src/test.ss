@@ -21,8 +21,8 @@ struct Person {
     bool is_dork;
     Point location;
 }
+
 void main() {
-    
     triv i64 const_value = 10;
     mut i64 counter = 0;              
     triv mut i64 value = -100;        
@@ -158,4 +158,3 @@ void main() {
 
     bool is_same_x = person.location.x == circle.center.x;
 }
-
