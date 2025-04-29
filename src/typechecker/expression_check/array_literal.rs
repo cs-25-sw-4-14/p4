@@ -6,10 +6,10 @@ use crate::{
 use anyhow::Result;
 
 pub fn check(
-    _array_literal: &Box<ArrayLiteral>,
-    _v_table: &VTable,
-    _f_table: &FTable,
-    _s_table: &STable,
+    array_literal: &Box<ArrayLiteral>,
+    v_table: &VTable,
+    f_table: &FTable,
+    s_table: &STable,
 ) -> Result<Type> {
     semantic_check_literal_not_empty(array_literal)?;
 

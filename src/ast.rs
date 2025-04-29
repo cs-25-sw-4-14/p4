@@ -58,7 +58,13 @@ pub struct VariableDeclaration {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArrayAssignment {
+    pub target: ArrayAccess,
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     pub target: String,
     pub value: Expression,
@@ -89,7 +95,7 @@ pub struct ReturnStatement {
     pub value: Option<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionCall {
     pub name: String,
     pub args: Vec<Expression>,
@@ -97,7 +103,7 @@ pub struct FunctionCall {
 
 // INFO: EXPRESSIONS
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Literal(Literal),
     Variable(String),
@@ -111,7 +117,7 @@ pub enum Expression {
     TypeCast(TypeCast),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     Int(u64),
     Float(f64),
@@ -120,20 +126,20 @@ pub enum Literal {
     Bool(bool),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryOperation {
     pub left: Box<Expression>,
     pub operator: BinaryOperator,
     pub right: Box<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnaryOperation {
     pub operator: UnaryOperator,
     pub operand: Box<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
     Multiply,           // 1
     Divide,             // 1
@@ -150,42 +156,42 @@ pub enum BinaryOperator {
     Or,                 // 6
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UnaryOperator {
     Negate,
     Not,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructInit {
     pub name: String,
     pub fields: Vec<StructFieldInit>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldInit {
     pub name: String,
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldAccess {
     pub struct_expr: Box<Expression>,
     pub field_name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TypeCast {
     pub expression: Box<Expression>,
     pub target_type: Type,

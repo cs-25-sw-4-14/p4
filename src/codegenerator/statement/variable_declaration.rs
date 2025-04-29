@@ -21,10 +21,11 @@ impl<'ctx> CodeGenerator<'ctx> {
             .build_store(ptr, value)
             .map_err(|e| anyhow!("Failed to store value in variable '{}': {}", decl.name, e))?;
 
+        let llvm_type = self.get_basic_type(&decl.var_type);
+
         // Registers the variable
-        self.variables.insert(decl.name.clone(), ptr);
+        self.variables.insert(decl.name.clone(), (llvm_type, ptr));
 
         Ok(())
     }
 }
-

@@ -2,7 +2,7 @@ use inkwell::AddressSpace;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
-use inkwell::types::{BasicTypeEnum, BasicType};
+use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::values::{BasicValueEnum, PointerValue};
 
 use anyhow::Result;
@@ -19,7 +19,7 @@ pub struct CodeGenerator<'ctx> {
     pub context: &'ctx Context,
     pub module: Module<'ctx>,
     pub builder: Builder<'ctx>,
-    pub variables: HashMap<String, PointerValue<'ctx>>,
+    pub variables: HashMap<String, (BasicTypeEnum<'ctx>, PointerValue<'ctx>)>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
     pub program: Option<Program>,
 }
@@ -101,7 +101,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
-    
+
     // Comprehensive helper method to get an LLVM type from an AST type, with error handling
     pub fn get_llvm_type(&self, ast_type: &Type) -> Result<BasicTypeEnum<'ctx>> {
         match ast_type {
@@ -117,23 +117,32 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::FP32 => Ok(self.context.f32_type().as_basic_type_enum()),
             Type::FP64 => Ok(self.context.f64_type().as_basic_type_enum()),
             Type::Bool => Ok(self.context.bool_type().as_basic_type_enum()),
-            Type::String => Ok(self.context.ptr_type(AddressSpace::default()).as_basic_type_enum()),
-            Type::Struct(name) => {
-                match self.module.get_struct_type(name) {
-                    Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
-                    None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
-                }
+            Type::String => Ok(self
+                .context
+                .ptr_type(AddressSpace::default())
+                .as_basic_type_enum()),
+            Type::Struct(name) => match self.module.get_struct_type(name) {
+                Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
+                None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
             },
             Type::Array(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
                 match elem_llvm_type {
-                    BasicTypeEnum::FloatType(ft) => Ok(ft.array_type(*size as u32).as_basic_type_enum()),
-                    BasicTypeEnum::IntType(it) => Ok(it.array_type(*size as u32).as_basic_type_enum()),
-                    BasicTypeEnum::PointerType(pt) => Ok(pt.array_type(*size as u32).as_basic_type_enum()),
-                    BasicTypeEnum::StructType(st) => Ok(st.array_type(*size as u32).as_basic_type_enum()),
+                    BasicTypeEnum::FloatType(ft) => {
+                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::IntType(it) => {
+                        Ok(it.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::PointerType(pt) => {
+                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::StructType(st) => {
+                        Ok(st.array_type(*size as u32).as_basic_type_enum())
+                    }
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
-            },
+            }
             Type::Vector(_) => Err(anyhow::anyhow!("Vector types not supported yet")),
         }
     }

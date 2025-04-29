@@ -13,10 +13,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             })?;
 
         self.builder
-            .build_store(ptr, new_value)
+            .build_store(ptr.1, new_value)
             .map_err(|e| anyhow!("Failed to store new value in '{}': {}", variable_name, e))?;
 
         Ok(())
     }
 }
-
