@@ -1,5 +1,7 @@
 #[cfg(test)]
-pub mod tests;
+pub mod integration_tests;
+#[cfg(test)]
+pub mod unit_tests;
 
 // NOTE: ENTRY POINT
 #[derive(Debug, Clone, PartialEq)]
