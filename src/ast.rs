@@ -136,7 +136,7 @@ pub enum Expression {
     ArrayAccess(Box<ArrayAccess>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
-    Read(Read),
+    Read(Box<Read>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
