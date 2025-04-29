@@ -209,46 +209,6 @@ impl BorrowChecker {
         }
     }
 
-    // release an immutable borrow
-    pub fn release_shared(&mut self, name: &str) -> Result<()> {
-        match self.borrows.get_mut(name) {
-            Some(BorrowState::Shared(1)) => {
-                self.borrows
-                    .insert(name.to_string(), BorrowState::Unborrowed);
-                Ok(())
-            }
-            Some(BorrowState::Shared(count)) => {
-                *count -= 1;
-                Ok(())
-            }
-            _ => Ok(()),
-        }
-    }
-
-    // release a mutable borrow
-    pub fn release_exclusive(&mut self, name: &str) -> Result<()> {
-        match self.borrows.get(name) {
-            Some(BorrowState::Exclusive) => {
-                self.borrows
-                    .insert(name.to_string(), BorrowState::Unborrowed);
-                Ok(())
-            }
-            _ => Ok(()),
-        }
-    }
-
-    // release a function borrow
-    pub fn release_function_borrow(&mut self, name: &str, func_name: &str) -> Result<()> {
-        match self.borrows.get(name) {
-            Some(BorrowState::FunctionBorrowed(borrowed_func)) if borrowed_func == func_name => {
-                self.borrows
-                    .insert(name.to_string(), BorrowState::Unborrowed);
-                Ok(())
-            }
-            _ => Ok(()),
-        }
-    }
-
     // check if a variable can be modified
     pub fn can_modify(&self, name: &str) -> Result<()> {
         match self.borrows.get(name) {
