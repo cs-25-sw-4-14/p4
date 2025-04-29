@@ -125,6 +125,7 @@ pub enum Expression {
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
+    VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Reference(Box<Expression>, bool), // (expression, is_mutable)

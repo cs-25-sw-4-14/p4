@@ -41,6 +41,7 @@ pub fn check(
         Expression::ArrayLiteral(array_literal) => {
             array_literal::check(array_literal, v_table, f_table, s_table)
         }
+        Expression::VectorLiteral(vector_literal) => todo!(),
         Expression::TypeCast(type_cast) => type_cast::check(type_cast, v_table, f_table, s_table),
         Expression::Reference(expr, is_mutable) => {
             let inner_type = check(expr, v_table, f_table, s_table)?;

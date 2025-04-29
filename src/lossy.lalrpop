@@ -164,6 +164,7 @@ pub Term: Expression = {
     <e:ID> => Expression::Variable(e),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
+    <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
@@ -275,6 +276,17 @@ pub Expression: Expression = {
         right: Box::new(r),
     }),
         };
+
+pub VectorLiteral: VectorLiteral = {
+    "[" <e:Expression> <en:("," Expression)*> "]" => VectorLiteral {
+        element_type: t,
+        elements: {
+            let mut elements = vec![e];
+            elements.extend(en.into_iter().map(|x| x.1));
+            elements
+        },
+    }
+};
 
 pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {

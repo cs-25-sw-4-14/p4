@@ -1,7 +1,7 @@
 i64 main() {
    
-   Vec<i64> a = [2];
-
+   arr i64[1] a = [2];
+   return 2; 
 }
 
 void borrow_1(&String in) {
