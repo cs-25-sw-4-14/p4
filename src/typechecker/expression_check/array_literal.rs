@@ -18,7 +18,7 @@ pub fn check(
 
     Ok(Type::Array(
         Box::new(array_type.clone()),
-        array_literal.elements.len() as i64,
+        array_literal.elements.len() as u64,
     ))
 }
 
