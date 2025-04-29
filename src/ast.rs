@@ -54,11 +54,13 @@ pub enum Statement {
     Continue(usize),
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
+    Print(Print, usize),
+    Write(Write, usize),
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Throwaway {
-    pub expression: Expression
+    pub expression: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -112,6 +114,20 @@ pub struct FunctionCall {
     pub name: String,
     pub args: Vec<Expression>,
 }
+#[derive(Debug, Clone, PartialEq)]
+pub struct Write {
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Read {
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Print {
+    pub value: Expression,
+}
 
 // INFO: EXPRESSIONS
 
@@ -127,6 +143,7 @@ pub enum Expression {
     ArrayAccess(Box<ArrayAccess>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
+    Read(Box<Read>),
     Reference(Box<Expression>, bool), // (expression, is_mutable)
     Dereference(Box<Expression>),
 }
