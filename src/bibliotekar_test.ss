@@ -1,11 +1,7 @@
 i64 main() {
-    String a = "abc";
-    
-    borrow_2(a);
-    borrow_1(&a);
-    borrow_1(&a);
+   
+   Vec<i64> a = [2];
 
-    return 0;
 }
 
 void borrow_1(&String in) {
