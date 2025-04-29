@@ -9,7 +9,7 @@ impl<'ctx> CodeGenerator<'ctx> {
     ) -> Result<CallSiteValue<'ctx>> {
         let function_name = &func_call.name;
 
-        // 1. Look up the function in the LLVM module.
+        // Looks up the function in the LLVM module.
         let function: FunctionValue<'ctx> =
             self.module.get_function(function_name).ok_or_else(|| {
                 anyhow!(
@@ -18,7 +18,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 )
             })?;
 
-        // 2. Compile all argument expressions.
+        // Compiles all argument expressions.
         let mut compiled_args: Vec<BasicMetadataValueEnum<'ctx>> =
             Vec::with_capacity(func_call.args.len());
         for arg_expr in &func_call.args {
@@ -27,7 +27,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             compiled_args.push(arg_value.into()); // Convert BasicValueEnum into BasicMetadataValueEnum for the call instruction
         }
 
-        // 3. Build the LLVM 'call' instruction.
+        // Build the LLVM 'call' instruction.
         let call_site = self
             .builder
             .build_call(function, &compiled_args,&(function_name.to_string() + "_call_ret"),)

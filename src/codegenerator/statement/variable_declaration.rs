@@ -21,7 +21,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             .build_store(ptr, value)
             .map_err(|e| anyhow!("Failed to store value in variable '{}': {}", decl.name, e))?;
 
-        // Register the variable in the symbol table with its mutability flag
+        // Registers the variable
         self.variables.insert(decl.name.clone(), ptr);
 
         Ok(())
