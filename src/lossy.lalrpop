@@ -364,7 +364,7 @@ pub Type: Type = {
 
 // String literals with escape support (e.g., "hello\nworld")
 pub StringLiteral: String = {
-    <s:r#""([^"\\\r\n]|\\.)*""#> => s.to_string()
+    <s:r#""([^"\\\r\n]|\\.)*""#> => s[1..s.len() - 1].to_string()
 };
 
 // Integer literals (e.g., 0, 42)
@@ -396,7 +396,4 @@ pub ID: String = {
         _ => s.to_string(),
     }
 
-};
-pub KeyWordIdentifier: String = {
-    <s:r"write|read|print"> => s.to_string()
 };
