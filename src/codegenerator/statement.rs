@@ -28,8 +28,14 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
             Statement::If(if_stmt) => self.compile_if_else(if_stmt)?,
             Statement::While(while_stmt) => self.compile_while_statement(while_stmt)?,
-            Statement::Break => self.compile_break()?,
-            Statement::Continue => self.compile_continue()?,
+            Statement::Break => {
+                let break_target = *self.break_target_stack.last().unwrap();
+                self.builder.build_unconditional_branch(break_target);
+            }
+            Statement::Continue => {
+                let continue_target = *self.continue_target_stack.last().unwrap();
+                self.builder.build_unconditional_branch(continue_target);
+            }
         };
         Ok(())
     }

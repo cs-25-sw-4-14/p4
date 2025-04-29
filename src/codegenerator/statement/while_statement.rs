@@ -7,12 +7,16 @@ impl<'ctx> CodeGenerator<'ctx> {
         let cond_bb = self.context.append_basic_block(self.current_function.unwrap(), "loop_cond");
         let body_bb = self.context.append_basic_block(self.current_function.unwrap(), "loop_body");
         let after_bb = self.context.append_basic_block(self.current_function.unwrap(), "after_loop");
-    
-        // Start the loop by creating a new basic block and jump there
+
+        // Push loop control targets
+        self.break_target_stack.push(after_bb);
+        self.continue_target_stack.push(cond_bb);
+
+        // Start loop: jump to condition check
         self.builder.build_unconditional_branch(cond_bb);
         self.builder.position_at_end(cond_bb);
-    
-        // Condition check
+
+        // Compile loop condition
         let condition_value = self.compile_expression(&while_stmt.condition)?;
         let condition = self.builder.build_int_compare(
             inkwell::IntPredicate::NE,
@@ -20,27 +24,29 @@ impl<'ctx> CodeGenerator<'ctx> {
             self.context.i32_type().const_zero(),
             "loop_cond",
         );
+
+        // Branch based on condition
         self.builder.build_conditional_branch(condition, body_bb, after_bb);
         self.builder.position_at_end(body_bb);
-    
-        // Compile the body of the loop
+
+        // Compile loop body
         for stmt in &while_stmt.body {
             self.compile_statement(stmt)?;
         }
-    
-        // Check for `continue` or `break` in the loop body.
-        // If a `continue` or `break` statement is encountered, we handle jumping to the right place.
-    
-        // Continue: jump back to the condition
-        self.builder.build_unconditional_branch(cond_bb);
-    
-        // Break: jump to the end of the loop
-        self.builder.build_unconditional_branch(after_bb);
-    
-        // Finally, after loop execution, jump to `after_bb`.
+
+        // Check if the body ended with a terminator (e.g., return, break)
+        // If not, jump back to loop condition
+        if self.builder.get_insert_block().unwrap().get_terminator().is_none() {
+            self.builder.build_unconditional_branch(cond_bb);
+        }
+
+        // Pop loop control targets
+        self.break_target_stack.pop();
+        self.continue_target_stack.pop();
+
+        // Set insertion point after the loop
         self.builder.position_at_end(after_bb);
-    
+
         Ok(())
     }
-    
 }
