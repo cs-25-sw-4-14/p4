@@ -200,6 +200,10 @@ pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorLiteral {
+    pub elements: Vec<Expression>,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {

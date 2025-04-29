@@ -278,8 +278,7 @@ pub Expression: Expression = {
         };
 
 pub VectorLiteral: VectorLiteral = {
-    "[" <e:Expression> <en:("," Expression)*> "]" => VectorLiteral {
-        element_type: t,
+    "{" <e:Expression> <en:("," Expression)*> "}" => VectorLiteral {
         elements: {
             let mut elements = vec![e];
             elements.extend(en.into_iter().map(|x| x.1));

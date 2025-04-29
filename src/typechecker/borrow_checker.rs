@@ -488,6 +488,12 @@ impl BorrowChecker {
                 }
                 Ok(())
             }
+            Expression::VectorLiteral(vector_literal) => {
+                for elem in &vector_literal.elements {
+                    self.check_expression(elem)?;
+                }
+                Ok(())
+            }
             Expression::TypeCast(type_cast) => {
                 self.check_expression(&type_cast.expression)?;
                 Ok(())
