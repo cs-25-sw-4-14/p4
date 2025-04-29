@@ -5,6 +5,7 @@ struct Point {
 
 void main() {
     arr i64[1] aba = [1];
+    write();
     aba[1] = 2;
     triv i64 const_value = 10;
     mut i64 counter = 0;              
