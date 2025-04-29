@@ -7,9 +7,10 @@ use anyhow::Result;
 
 pub fn check(
     declaration: &WhileStatement,
-    v_table: &VTable,
+    v_table: &mut VTable,
     f_table: &FTable,
     s_table: &STable,
+    debugger: &crate::debugger::Debugger,
 ) -> Result<()> {
     let condition_type =
         expression_check::check(&declaration.condition, v_table, f_table, s_table)?;
@@ -21,7 +22,7 @@ pub fn check(
     }
     // Check the body of the while statement
     for statement in &declaration.body {
-        super::check(statement, v_table, f_table, s_table)?;
+        super::check(statement, v_table, f_table, s_table, debugger)?;
     }
 
     Ok(())

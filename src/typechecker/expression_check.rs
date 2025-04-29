@@ -42,5 +42,19 @@ pub fn check(
             array_literal::check(array_literal, v_table, f_table, s_table)
         }
         Expression::TypeCast(type_cast) => type_cast::check(type_cast, v_table, f_table, s_table),
+        Expression::Reference(expr, is_mutable) => {
+            let inner_type = check(expr, v_table, f_table, s_table)?;
+            Ok(Type::Reference(Box::new(inner_type), *is_mutable))
+        }
+        Expression::Dereference(expr) => {
+            let expr_type = check(expr, v_table, f_table, s_table)?;
+            match expr_type {
+                Type::Reference(inner_type, _) => Ok(*inner_type),
+                _ => Err(anyhow::anyhow!(
+                    "Cannot dereference non-reference type: {:?}",
+                    expr_type
+                )),
+            }
+        }
     }
 }

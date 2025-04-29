@@ -1,16 +1,21 @@
+#[cfg(test)]
+pub mod integration_tests;
+#[cfg(test)]
+pub mod unit_tests;
+
 // NOTE: ENTRY POINT
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     pub definitions: Vec<TopLevelDefinition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TopLevelDefinition {
     Function(FunctionDef),
     Struct(StructDef),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDef {
     pub return_type: Option<Type>,
     pub name: String,
@@ -18,38 +23,45 @@ pub struct FunctionDef {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Param {
     pub name: String,
     pub param_type: Type,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructDef {
     pub name: String,
     pub fields: Vec<StructField>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StructField {
     pub name: String,
     pub field_type: Type,
 }
 
 // NOTE: STATEMENTS
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    VariableDeclaration(VariableDeclaration),
-    Assignment(VariableAssignment),
-    If(IfStatement),
-    While(WhileStatement),
-    Break,
-    Continue,
-    Return(ReturnStatement),
-    FunctionCall(FunctionCall),
+    Throwaway(Throwaway, usize),
+    VariableDeclaration(VariableDeclaration, usize),
+    Assignment(VariableAssignment, usize),
+    ArrayAssignment(ArrayAssignment, usize),
+    If(IfStatement, usize),
+    While(WhileStatement, usize),
+    Break(usize),
+    Continue(usize),
+    Return(ReturnStatement, usize),
+    FunctionCall(FunctionCall, usize),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Throwaway {
+    pub expression: Expression
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VariableDeclaration {
     pub trivial: Option<()>,
     pub mutable: Option<()>,
@@ -70,7 +82,7 @@ pub struct VariableAssignment {
     pub value: Expression,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfStatement {
     pub condition: Expression,
     pub then_block: Vec<Statement>,
@@ -78,19 +90,19 @@ pub struct IfStatement {
     pub else_block: Option<Vec<Statement>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ElseIf {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WhileStatement {
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReturnStatement {
     pub value: Option<Expression>,
 }
@@ -115,6 +127,8 @@ pub enum Expression {
     ArrayAccess(Box<ArrayAccess>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
+    Reference(Box<Expression>, bool), // (expression, is_mutable)
+    Dereference(Box<Expression>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -141,19 +155,19 @@ pub struct UnaryOperation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
-    Multiply,           // 1
-    Divide,             // 1
-    Modulus,            // 1
-    Add,                // 2
-    Subtract,           // 2
-    LessThan,           // 3
-    GreaterThan,        // 3
-    LessThanOrEqual,    // 3
-    GreaterThanOrEqual, // 3
-    Equal,              // 4
-    NotEqual,           // 4
-    And,                // 5
-    Or,                 // 6
+    Multiply,
+    Divide,
+    Modulus,
+    Add,
+    Subtract,
+    LessThan,
+    GreaterThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+    And,
+    Or,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -207,7 +221,6 @@ pub enum Type {
     I16,
     I32,
     I64,
-    FP8,
     FP16,
     FP32,
     FP64,
@@ -217,6 +230,7 @@ pub enum Type {
     Struct(String),
     Array(Box<Type>, u64),
     Vector(Box<Type>),
+    Reference(Box<Type>, bool), // (type, is_mutable)
 }
 
 impl From<Literal> for Type {

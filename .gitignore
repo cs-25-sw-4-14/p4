@@ -1,1 +1,3 @@
 /target
+.DS_Store # macOS SHIT!!!
+test.ss
