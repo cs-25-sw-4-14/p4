@@ -21,6 +21,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Compiles all argument expressions.
         let mut compiled_args: Vec<BasicMetadataValueEnum<'ctx>> =
             Vec::with_capacity(func_call.args.len());
+
         for arg_expr in &func_call.args {
             // Recursively compile each argument expression.
             let arg_value = self.compile_expression(arg_expr)?;
@@ -30,10 +31,9 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Build the LLVM 'call' instruction.
         let call_site = self
             .builder
-            .build_call(function, &compiled_args,&(function_name.to_string() + "_call_ret"),)
+            .build_call(function, &compiled_args, function_name)
             .map_err(|e| anyhow!("Failed to build function call '{}': {}", function_name, e))?;
 
         Ok(call_site)
     }
 }
-
