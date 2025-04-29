@@ -44,6 +44,7 @@ pub struct StructField {
 // NOTE: STATEMENTS
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
+    Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
     Assignment(VariableAssignment, usize),
     ArrayAssignment(ArrayAssignment, usize),
@@ -53,6 +54,11 @@ pub enum Statement {
     Continue(usize),
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Throwaway {
+    pub expression: Expression
 }
 
 #[derive(Debug, Clone, PartialEq)]

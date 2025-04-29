@@ -290,6 +290,7 @@ impl BorrowChecker {
     // check a statement for borrow checker violations
     pub fn check_statement(&mut self, stmt: &Statement) -> Result<()> {
         match stmt {
+            Statement::Throwaway(_, _) => {}
             Statement::VariableDeclaration(decl, _) => {
                 // check initialization expression
                 self.check_expression(&decl.value)?;
