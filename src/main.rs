@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use clap::Parser;
 use lalrpop_util::lalrpop_mod;
 
 lalrpop_mod!(
@@ -10,13 +11,24 @@ pub mod ast;
 pub mod debugger;
 pub mod typechecker;
 
+/// The Lossy compiler
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Filename to parse
+    input: String,
+}
+
 fn main() {
     let huttel = include_str!("huttel.txt");
-    let file = include_str!("test.ss");
+    let args = Args::parse();
+    let file = std::fs::read_to_string(&args.input).unwrap_or_else(|_| {
+        panic!("Failed to read file: {}", &args.input);
+    });
     let debugger = debugger::Debugger::new(file.to_string());
 
     let ast = lossy::ProgramParser::new()
-        .parse(file)
+        .parse(&file)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
                 anyhow!("Invalid token at {}", debugger.display(location))
