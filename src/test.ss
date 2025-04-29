@@ -48,43 +48,43 @@ void main() {
     i64 negated = -value;
     bool inverted = !is_true;
     
-    if (counter < (5 as u16)) {
-        counter = (counter + 1 as u16) as u16;
+    if (counter < 5) {
+        counter = counter + 1;
     }
     
-    if (value > (0 as i32)) {
-        value = (value + 10 as i32) as i32;
+    if (value > 0) {
+        value = value + 10;
     } else {
-        value = 0 as i32;
+        value = 0;
     }
     
-    if (counter > (100 as u16)) {
-        counter = 100 as u16;
-    } else if (counter > (50 as u16)) {
-        counter = 50 as u16;
-    } else if (counter > (10 as u16)) {
-        counter = 10 as u16;
+    if (counter > 100) {
+        counter = 100;
+    } else if (counter > 50) {
+        counter = 50;
+    } else if (counter > 10) {
+        counter = 10;
     } else {
-        counter = 0 as u16;
+        counter = 0;
     }
     
     if (is_true) {
-        if (counter > (0 as u16)) {
-            counter = (counter - 1 as u16) as u16;
+        if (counter > 0) {
+            counter = counter - 1;
         }
     }
 
-    while (counter < (10 as u16)) {
-        counter = (counter + 1 as u16) as u16;
+    while (counter < 10) {
+        counter = counter + 1;
     }
     
-    while (counter < (20 as u16) && value < (0 as i32)) {
-        counter = (counter + 1 as u16) as u16;
-        value = (value + 10 as i32) as i32;
+    while (counter < 20 && value < 0) {
+        counter = counter + 1;
+        value = value + 10;
     }
     
-    while (counter < (30 as u16)) {
-        counter = (counter + 1 as u16) as u16;
+    while (counter < 30) {
+        counter = counter + 1;
         
         if (counter == 25) {
             
@@ -107,14 +107,14 @@ void main() {
         i = i + 1;
         mut i64 j = 0;
         
-        while (j < (5 as u8)) {
-            j = (j + 1 as u8) as u8;
+        while (j < 5) {
+            j = j + 1;
             
             if (i == 2 && j == 2) {
                 
             }
             
-            counter = counter + (1 as u16);
+            counter = counter + 1;
             
             if (j == 3) {
                 
@@ -126,8 +126,8 @@ void main() {
         }
     }
     
-    Point origin = Point { x: 0 as i32, y: 0 as i32 };
-    Point endpoint = Point { x: 100 as i32, y: 100 as i32 };
+    Point origin = Point { x: 0, y: 0 };
+    Point endpoint = Point { x: 100, y: 100 };
 
     Person person = Person {
         first_name: "Christoffer",
@@ -142,7 +142,7 @@ void main() {
     bool and_result = is_true && !is_false;
     bool or_result = is_true || is_false;
     
-    bool complex_condition = ((counter > (10 as u16) && value < (0 as i32)) || (counter == (0 as u16)));
+    bool complex_condition = (counter > 10 && value < 0) || (counter == 0);
     
     bool is_equal = counter == value;
     bool not_equal = counter != value;
