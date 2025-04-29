@@ -19,7 +19,7 @@ pub struct CodeGenerator<'ctx> {
     pub context: &'ctx Context,
     pub module: Module<'ctx>,
     pub builder: Builder<'ctx>,
-    pub variables: HashMap<String, (BasicTypeEnum<'ctx>, PointerValue<'ctx>)>,
+    pub variables: HashMap<String, PointerValue<'ctx>>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
     pub program: Option<Program>,
 }
@@ -68,7 +68,37 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::FP32 => self.context.f32_type().into(),
             Type::FP64 => self.context.f64_type().into(),
             Type::Char => self.context.i8_type().into(),
-            _ => panic!("Unsupported type: {:?}", ast_type),
+            // Type::String => self
+            //     .context
+            //     .i8_type()
+            //     .ptr_type(AddressSpace::Generic)
+            //     .into(), // Pointer to i8 (C-style string)
+            // Type::Struct(name) => {
+            //     // Ensure struct type exists
+            //     let struct_type = self
+            //         .module
+            //         .get_struct_type(name)
+            //         .expect(&format!("Struct type '{}' not found", name));
+            //     struct_type.into()
+            // }
+            // Type::Array(element_type, size) => {
+            //     let llvm_element_type = self.get_basic_type(element_type);
+            //     // Handle array size overflow
+            //     if *size > u32::MAX as u64 {
+            //         panic!(
+            //             "Array size {} exceeds maximum supported size {}",
+            //             size,
+            //             u32::MAX
+            //         );
+            //     }
+            //     llvm_element_type.array_type(*size as u32).into()
+            // }
+            // Type::Vector(element_type) => {
+            //     let llvm_element_type = self.get_basic_type(element_type);
+            //     // If the vector length is dynamic, pass that as a parameter
+            //     llvm_element_type.array_type(4).into() // Example: Fixed length of 4, adjust dynamically if needed
+            // }
+            _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
     

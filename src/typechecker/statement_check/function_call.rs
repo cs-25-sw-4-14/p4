@@ -1,6 +1,6 @@
 use crate::typechecker::expression_check;
 use crate::{
-    ast::{FunctionCall, Type},
+    ast::FunctionCall,
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
 use anyhow::Result;

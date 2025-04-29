@@ -22,7 +22,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::Variable(variable) => self.compile_variable(variable),
             Expression::BinaryOp(binary_operation) => self.compile_binary_op(binary_operation),
             Expression::UnaryOp(unary_operation) => self.compile_unary_op(unary_operation),
-            Expression::FunctionCall(function_call) => self.compile_function_call(function_call),
+            Expression::FunctionCall(function_call) => {
+                self.compile_function_call_expr(function_call)
+            }
             Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
             Expression::StructFieldAccess(struct_field_access) => self.compile_struct_field_access(struct_field_access),
             Expression::ArrayAccess(array_access) => self.compile_array_access(array_access),
