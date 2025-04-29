@@ -1,6 +1,6 @@
 i64 main() {
    
-   arr i64[1] a = [2];
+   Vec<i64> a = {2};
    return 2; 
 }
 
