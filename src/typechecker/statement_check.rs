@@ -19,10 +19,7 @@ pub fn check(
 ) -> Result<()> {
     match expression {
         Statement::Throwaway(expression, l) => {
-            throwaway::check(
-                expression,
-                v_table, f_table, s_table, debugger, *l,
-            )?;
+            throwaway::check(expression, v_table, f_table, s_table, debugger, *l)?;
         }
         Statement::VariableDeclaration(variable_declaration, l) => {
             variable_declaration::check(
