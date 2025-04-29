@@ -52,6 +52,8 @@ pub fn check(
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         } // check if function is defined, type is void
+        Statement::Print(_, _) => {}
+        Statement::Write(_, _) => {}
     }
 
     Ok(())

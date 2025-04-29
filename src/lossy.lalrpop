@@ -18,6 +18,7 @@ pub TopLevelDefinition: TopLevelDefinition = {
     StructDef    => TopLevelDefinition::Struct(<>),
 };
 
+
 pub FunctionDef: FunctionDef = {
     <r:ReturnOpt> <n:ID> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
          return_type: r,
@@ -70,6 +71,8 @@ pub Statement: Statement = {
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
+    <l:@L> <t:Print> => Statement::Print(t, l),
+    <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
 
@@ -136,6 +139,25 @@ pub Return: ReturnStatement = {
     "return" ";" => ReturnStatement { value: None },
 };
 
+pub Print: Print = {
+    "print" "(" <e:Expression> ")" ";" => Print {
+        value: e,
+    }
+};
+
+pub Write: Write = {
+    "write" "(" <e:Expression> ")" ";" => Write {
+        value: e,
+    }
+};
+
+pub Read: Read = {
+    "read" "(" <e:Expression> ")" ";" => Read {
+        value: e,
+    }
+};
+
+
 pub FunctionCall: FunctionCall = {
     <n:ID> "(" <a:ArgumentList?> ")"=> FunctionCall {
         name: n,
@@ -155,6 +177,7 @@ pub Term: Expression = {
     "(" <e:Expression> ")" => e,
     <e:Literal> => Expression::Literal(e),
     <e:ID> => Expression::Variable(e),
+    <e:Read> => Expression::Read(e),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
