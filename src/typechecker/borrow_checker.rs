@@ -10,17 +10,57 @@ pub enum BorrowState {
     Shared(usize),
     // mutably borrowed
     Exclusive,
+    // borrowed by a function call (add this new state)
+    FunctionBorrowed(String), // Function name that borrowed it
 }
 
 pub struct BorrowChecker {
     borrows: HashMap<String, BorrowState>, // <var_name, borrow_state>
+    current_function: Option<String>,      // keep track of current function being analyzed
+    debug: bool,                           // debug mode flag
 }
 
 impl BorrowChecker {
     pub fn new() -> Self {
         Self {
             borrows: HashMap::new(),
+            current_function: None,
+            debug: false,
         }
+    }
+
+    // enable or disable debug mode
+    pub fn set_debug_mode(&mut self, enable: bool) {
+        self.debug = enable;
+    }
+
+    // print the current borrow state (useful for debugging)
+    pub fn print_borrow_state(&self) {
+        if !self.debug {
+            return;
+        }
+
+        println!("Current Borrow State:");
+        if self.borrows.is_empty() {
+            println!("  [Empty]");
+            return;
+        }
+
+        for (name, state) in &self.borrows {
+            match state {
+                BorrowState::Unborrowed => println!("  {} - Unborrowed", name),
+                BorrowState::Shared(count) => println!("  {} - Shared {} times", name, count),
+                BorrowState::Exclusive => println!("  {} - Exclusively borrowed", name),
+                BorrowState::FunctionBorrowed(func) => {
+                    println!("  {} - Borrowed by function {}", name, func)
+                }
+            }
+        }
+    }
+
+    // set current function name
+    pub fn set_current_function(&mut self, name: Option<String>) {
+        self.current_function = name;
     }
 
     // check that structs don't have reference fields
@@ -50,6 +90,10 @@ impl BorrowChecker {
 
     // borrow a variable immutably
     pub fn borrow_shared(&mut self, name: &str) -> Result<()> {
+        if self.debug {
+            println!("Trying to borrow {} immutably", name);
+        }
+
         match self.borrows.get_mut(name) {
             // if unborrowed, mark as shared with count 1
             Some(BorrowState::Unborrowed) => {
@@ -66,6 +110,12 @@ impl BorrowChecker {
                 "Cannot borrow {} as immutable because it's already borrowed as mutable",
                 name
             )),
+            // if borrowed by a function, fail!
+            Some(BorrowState::FunctionBorrowed(func)) => Err(anyhow!(
+                "Cannot borrow {} as immutable because it's already borrowed by function {}",
+                name,
+                func
+            )),
             // if not in map yet, add it as shared
             None => {
                 self.borrows
@@ -77,6 +127,10 @@ impl BorrowChecker {
 
     // borrow a variable mutably
     pub fn borrow_exclusive(&mut self, name: &str) -> Result<()> {
+        if self.debug {
+            println!("Trying to borrow {} mutably", name);
+        }
+
         match self.borrows.get(name) {
             // if unborrowed, mark as exclusive
             Some(BorrowState::Unborrowed) => {
@@ -93,10 +147,59 @@ impl BorrowChecker {
                 "Cannot borrow {} as mutable because it's already borrowed as mutable",
                 name
             )),
+            // if borrowed by a function, fail!
+            Some(BorrowState::FunctionBorrowed(func)) => Err(anyhow!(
+                "Cannot borrow {} as mutable because it's already borrowed by function {}",
+                name,
+                func
+            )),
             // if not in map yet, add it as exclusive
             None => {
                 self.borrows
                     .insert(name.to_string(), BorrowState::Exclusive);
+                Ok(())
+            }
+        }
+    }
+
+    // borrow a variable for a function
+    pub fn borrow_for_function(&mut self, name: &str, func_name: &str) -> Result<()> {
+        if self.debug {
+            println!("Trying to borrow {} for function {}", name, func_name);
+        }
+
+        match self.borrows.get(name) {
+            // if unborrowed, mark as function borrowed
+            Some(BorrowState::Unborrowed) => {
+                self.borrows.insert(
+                    name.to_string(),
+                    BorrowState::FunctionBorrowed(func_name.to_string()),
+                );
+                Ok(())
+            }
+            // if already borrowed by any, fail!
+            Some(BorrowState::Shared(_)) => Err(anyhow!(
+                "Cannot borrow {} for function {} because it's already borrowed immutably",
+                name,
+                func_name
+            )),
+            Some(BorrowState::Exclusive) => Err(anyhow!(
+                "Cannot borrow {} for function {} because it's already borrowed mutably",
+                name,
+                func_name
+            )),
+            Some(BorrowState::FunctionBorrowed(other_func)) => Err(anyhow!(
+                "Cannot borrow {} for function {} because it's already borrowed by function {}",
+                name,
+                func_name,
+                other_func
+            )),
+            // if not in map yet, add it as function borrowed
+            None => {
+                self.borrows.insert(
+                    name.to_string(),
+                    BorrowState::FunctionBorrowed(func_name.to_string()),
+                );
                 Ok(())
             }
         }
@@ -130,6 +233,18 @@ impl BorrowChecker {
         }
     }
 
+    // release a function borrow
+    pub fn release_function_borrow(&mut self, name: &str, func_name: &str) -> Result<()> {
+        match self.borrows.get(name) {
+            Some(BorrowState::FunctionBorrowed(borrowed_func)) if borrowed_func == func_name => {
+                self.borrows
+                    .insert(name.to_string(), BorrowState::Unborrowed);
+                Ok(())
+            }
+            _ => Ok(()),
+        }
+    }
+
     // check if a variable can be modified
     pub fn can_modify(&self, name: &str) -> Result<()> {
         match self.borrows.get(name) {
@@ -140,6 +255,11 @@ impl BorrowChecker {
             Some(BorrowState::Exclusive) => Err(anyhow!(
                 "Cannot modify {} while it is mutably borrowed by something else",
                 name
+            )),
+            Some(BorrowState::FunctionBorrowed(func)) => Err(anyhow!(
+                "Cannot modify {} while it is borrowed by function {}",
+                name,
+                func
             )),
             // otherwise OK!
             _ => Ok(()),
@@ -176,13 +296,27 @@ impl BorrowChecker {
             if let TopLevelDefinition::Function(func) = def {
                 self.check_function_return(func)?;
 
+                // set current function for context
+                self.set_current_function(Some(func.name.clone()));
+
+                if self.debug {
+                    println!("\nChecking function: {}", func.name);
+                }
+
                 // reset borrow state for each function
                 self.borrows.clear();
 
                 // check function body
                 for stmt in &func.body {
                     self.check_statement(stmt)?;
+
+                    if self.debug {
+                        self.print_borrow_state();
+                    }
                 }
+
+                // clear current function
+                self.set_current_function(None);
             }
         }
 
@@ -259,9 +393,23 @@ impl BorrowChecker {
                 }
             }
             Statement::FunctionCall(func_call, _) => {
-                // check arguments
+                if self.debug {
+                    println!("Checking function call to {}", func_call.name);
+                }
+
+                // for each variable argument, mark it as borrowed by this function
                 for arg in &func_call.args {
-                    self.check_expression(arg)?;
+                    if let Expression::Variable(name) = arg {
+                        // Borrow the variable for this function call
+                        self.borrow_for_function(name, &func_call.name)?;
+                    } else {
+                        // For non-variable arguments, check them normally
+                        self.check_expression(arg)?;
+                    }
+                }
+
+                if self.debug {
+                    println!("Completed function call to {}", func_call.name);
                 }
             }
             Statement::Return(ret_stmt, _) => {
@@ -287,6 +435,19 @@ impl BorrowChecker {
                     Some(BorrowState::Exclusive) => {
                         Err(anyhow!("Cannot use {} while it is mutably borrowed", name))
                     }
+                    Some(BorrowState::FunctionBorrowed(func)) => {
+                        // if we're in the function that borrowed it, allow access
+                        if let Some(current_func) = &self.current_function {
+                            if current_func == func {
+                                return Ok(());
+                            }
+                        }
+                        Err(anyhow!(
+                            "Cannot use {} while it is borrowed by function {}",
+                            name,
+                            func
+                        ))
+                    }
                     _ => Ok(()),
                 }
             }
@@ -300,9 +461,24 @@ impl BorrowChecker {
                 Ok(())
             }
             Expression::FunctionCall(func_call) => {
-                for arg in &func_call.args {
-                    self.check_expression(arg)?;
+                // handle function call expression similar to function call statement
+                if self.debug {
+                    println!("Checking function call expression to {}", func_call.name);
                 }
+
+                for arg in &func_call.args {
+                    if let Expression::Variable(name) = arg {
+                        self.borrow_for_function(name, &func_call.name)?;
+                    } else {
+                        self.check_expression(arg)?;
+                    }
+                }
+
+                // similar simplification as in check_statement
+                if self.debug {
+                    println!("Completed function call expression to {}", func_call.name);
+                }
+
                 Ok(())
             }
             Expression::StructInit(struct_init) => {
@@ -322,6 +498,19 @@ impl BorrowChecker {
                         "Cannot access {} while it is mutably borrowed",
                         array_access.array_name
                     )),
+                    Some(BorrowState::FunctionBorrowed(func)) => {
+                        // if we're in the function that borrowed it, allow access
+                        if let Some(current_func) = &self.current_function {
+                            if current_func == func {
+                                return Ok(());
+                            }
+                        }
+                        Err(anyhow!(
+                            "Cannot access {} while it is borrowed by function {}",
+                            array_access.array_name,
+                            func
+                        ))
+                    }
                     _ => {
                         self.check_expression(&array_access.index)?;
                         Ok(())
@@ -343,7 +532,7 @@ impl BorrowChecker {
                 Ok(())
             }
             Expression::Dereference(expr) => {
-                // Check the underlying expression
+                // check the underlying expression
                 self.check_expression(expr)?;
                 Ok(())
             }
