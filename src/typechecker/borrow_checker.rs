@@ -1,3 +1,6 @@
+#[cfg(test)]
+pub mod tests;
+
 use crate::ast::*;
 use anyhow::{Result, anyhow};
 use std::collections::HashMap;
@@ -178,11 +181,11 @@ impl BorrowChecker {
                 Ok(())
             }
             // if already borrowed by any, fail!
-            Some(BorrowState::Shared(_)) => Err(anyhow!(
-                "Cannot borrow {} for function {} because it's already borrowed immutably",
-                name,
-                func_name
-            )),
+            // Some(BorrowState::Shared(_)) => Err(anyhow!(
+            //     "Cannot borrow {} for function {} because it's already borrowed immutably",
+            //     name,
+            //     func_name
+            // )),
             Some(BorrowState::Exclusive) => Err(anyhow!(
                 "Cannot borrow {} for function {} because it's already borrowed mutably",
                 name,
@@ -202,6 +205,7 @@ impl BorrowChecker {
                 );
                 Ok(())
             }
+            _ => Ok(()),
         }
     }
 
