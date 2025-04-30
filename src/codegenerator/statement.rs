@@ -7,10 +7,10 @@ pub mod break_statement;
 pub mod continue_statement;
 pub mod function_call;
 pub mod if_else;
+pub mod print;
 pub mod return_statement;
 pub mod variable_declaration;
 pub mod while_statement;
-pub mod print;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
@@ -42,12 +42,12 @@ impl<'ctx> CodeGenerator<'ctx> {
             Statement::If(if_stmt, _) => self.compile_if_else(if_stmt)?,
             Statement::While(while_stmt, _) => self.compile_while_statement(while_stmt)?,
             Statement::Break(_) => {
-                // let break_target = *self.break_target_stack.last().unwrap();
-                // self.builder.build_unconditional_branch(break_target);
+                let break_target = *self.break_target_stack.last().unwrap();
+                _ = self.builder.build_unconditional_branch(break_target);
             }
             Statement::Continue(_) => {
-                // let continue_target = *self.continue_target_stack.last().unwrap();
-                // self.builder.build_unconditional_branch(continue_target);
+                let continue_target = *self.continue_target_stack.last().unwrap();
+                _ = self.builder.build_unconditional_branch(continue_target);
             }
         };
         Ok(())

@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::{FunctionDef, ReturnStatement, Statement, Type};
 use anyhow::Result;
-use inkwell::types::{BasicType, BasicTypeEnum, BasicMetadataTypeEnum};
+use inkwell::types::{BasicMetadataTypeEnum, BasicType, BasicTypeEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_function(&mut self, function_def: &FunctionDef) -> Result<()> {
@@ -16,18 +16,18 @@ impl<'ctx> CodeGenerator<'ctx> {
         let return_type = match &function_def.return_type {
             Some(ret_type) => {
                 if let Type::Struct(_) = ret_type {
-                    return Err(anyhow::anyhow!("Returning struct by value not supported yet"));
+                    return Err(anyhow::anyhow!(
+                        "Returning struct by value not supported yet"
+                    ));
                 }
                 Some(self.get_llvm_type(ret_type)?)
             }
             None => None, // Void return type
         };
 
-// Convert to BasicMetadataTypeEnum for fn_type
-        let param_types_meta: Vec<BasicMetadataTypeEnum<'ctx>> = param_types
-            .iter()
-            .map(|ty| (*ty).into())
-            .collect();
+        // Convert to BasicMetadataTypeEnum for fn_type
+        let param_types_meta: Vec<BasicMetadataTypeEnum<'ctx>> =
+            param_types.iter().map(|ty| (*ty).into()).collect();
 
         // Create function type
         let fn_type = match return_type {
@@ -35,10 +35,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             None => self.context.void_type().fn_type(&param_types_meta, false),
         };
 
-        // Create the function
         let function = self.module.add_function(&function_def.name, fn_type, None);
 
-        // Create a new basic block for the function
+        self.enter_function(function);
+
         let basic_block = self.context.append_basic_block(function, "entry");
         self.builder.position_at_end(basic_block);
 
@@ -55,12 +55,13 @@ impl<'ctx> CodeGenerator<'ctx> {
             // Allocate space for the parameter
             let param_type = self.get_llvm_type(&param.param_type)?;
             let alloca = self.builder.build_alloca(param_type, &param.name)?;
-            
+
             // Store the parameter value
             self.builder.build_store(alloca, param_value)?;
-            
+
             // Add to variables map
-            self.variables.insert(param.name.clone(), (param_type, alloca));
+            self.variables
+                .insert(param.name.clone(), (param_type, alloca));
         }
 
         // Compile the function body
@@ -71,14 +72,17 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Add a return statement if the function doesn't have one and has void return type
         if function_def.return_type.is_none() {
             // Check if the function ends with a return statement
-            let has_return = function_def.body.last().map_or(false, |stmt| {
-                matches!(stmt, Statement::Return(_, _))
-            });
+            let has_return = function_def
+                .body
+                .last()
+                .map_or(false, |stmt| matches!(stmt, Statement::Return(_, _)));
 
             if !has_return {
                 self.builder.build_return(None)?;
             }
         }
+
+        self.exit_function();
 
         // Verify the function
         if function.verify(true) {
@@ -88,9 +92,11 @@ impl<'ctx> CodeGenerator<'ctx> {
         } else {
             // Restore the previous state
             self.variables = prev_variables;
-            
+
             // Delete the invalid function
-            unsafe { function.delete(); }
+            unsafe {
+                function.delete();
+            }
             Err(anyhow::anyhow!("Invalid function: {}", function_def.name))
         }
     }
