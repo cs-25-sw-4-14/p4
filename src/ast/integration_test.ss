@@ -157,4 +157,9 @@ void main() {
     };
 
     bool is_same_x = person.location.x == circle.center.x;
+
+    write("a");
+    String aaaaa = read(" a" );
+    print("a");
+
 }

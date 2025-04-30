@@ -1,10 +1,10 @@
 use crate::{
     ast::{
         ArrayAccess, ArrayLiteral, BinaryOperation, BinaryOperator, ElseIf, Expression,
-        FunctionCall, FunctionDef, IfStatement, Literal, Param, Program, ReturnStatement,
-        Statement, StructDef, StructField, StructFieldAccess, StructFieldInit, StructInit,
-        TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator, VariableAssignment,
-        VariableDeclaration, WhileStatement,
+        FunctionCall, FunctionDef, IfStatement, Literal, Param, Print, Program, Read,
+        ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
+        StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
+        VariableAssignment, VariableDeclaration, WhileStatement, Write,
     },
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
 };
@@ -482,6 +482,48 @@ fn test_array_literal() {
             ],
         },
         lossy::ArrayLiteralParser::new().parse("[1,2,3]").unwrap()
+    );
+}
+
+#[test]
+fn test_print() {
+    assert_eq!(
+        Statement::Print(
+            Print {
+                value: Expression::Literal(Literal::String("hi".to_string())),
+            },
+            0
+        ),
+        lossy::StatementParser::new()
+            .parse(r#"print("hi");"#)
+            .unwrap()
+    );
+}
+
+#[test]
+fn test_write() {
+    assert_eq!(
+        Statement::Write(
+            Write {
+                value: Expression::Literal(Literal::String("hi".to_string())),
+            },
+            0
+        ),
+        lossy::StatementParser::new()
+            .parse(r#"write("hi");"#)
+            .unwrap()
+    );
+}
+
+#[test]
+fn test_read() {
+    assert_eq!(
+        Expression::Read(Box::new(Read {
+            value: Expression::Literal(Literal::String("hi".to_string())),
+        },)),
+        lossy::ExpressionParser::new()
+            .parse(r#"read("hi");"#)
+            .unwrap()
     );
 }
 

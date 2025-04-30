@@ -72,7 +72,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         if function_def.return_type.is_none() {
             // Check if the function ends with a return statement
             let has_return = function_def.body.last().map_or(false, |stmt| {
-                matches!(stmt, Statement::Return(_))
+                matches!(stmt, Statement::Return(_, _))
             });
 
             if !has_return {

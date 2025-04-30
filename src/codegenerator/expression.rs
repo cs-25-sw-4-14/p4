@@ -18,6 +18,9 @@ pub mod struct_field_access;
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
         match expr {
+            Expression::Read(_) => todo!(),
+            Expression::Dereference(_) => todo!(),
+            Expression::Reference(_, _) => todo!(),
             Expression::Literal(literal) => self.compile_literal(literal),
             Expression::Variable(variable) => self.compile_variable(variable),
             Expression::BinaryOp(binary_operation) => self.compile_binary_op(binary_operation),

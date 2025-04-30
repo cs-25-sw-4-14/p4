@@ -27,6 +27,11 @@ pub struct CodeGenerator<'ctx> {
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn new(context: &'ctx Context, module: Module<'ctx>) -> Self {
         let builder = context.create_builder();
+
+        let i8_ptr_type = context.ptr_type(inkwell::AddressSpace::default());
+        let printf_type = context.i32_type().fn_type(&[i8_ptr_type.into()], true);
+        module.add_function("printf", printf_type, None);
+
         CodeGenerator {
             context,
             module,
@@ -81,18 +86,18 @@ impl<'ctx> CodeGenerator<'ctx> {
             //         .expect(&format!("Struct type '{}' not found", name));
             //     struct_type.into()
             // }
-            // Type::Array(element_type, size) => {
-            //     let llvm_element_type = self.get_basic_type(element_type);
-            //     // Handle array size overflow
-            //     if *size > u32::MAX as u64 {
-            //         panic!(
-            //             "Array size {} exceeds maximum supported size {}",
-            //             size,
-            //             u32::MAX
-            //         );
-            //     }
-            //     llvm_element_type.array_type(*size as u32).into()
-            // }
+            Type::Array(element_type, size) => {
+                let llvm_element_type = self.get_basic_type(element_type);
+                 // Handle array size overflow
+                 if *size > u32::MAX as u64 {
+                     panic!(
+                         "Array size {} exceeds maximum supported size {}",
+                         size,
+                         u32::MAX
+                     );
+                 }
+                 llvm_element_type.array_type(*size as u32).into()
+             }
             // Type::Vector(element_type) => {
             //     let llvm_element_type = self.get_basic_type(element_type);
             //     // If the vector length is dynamic, pass that as a parameter
@@ -113,14 +118,12 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::I16 => Ok(self.context.i16_type().as_basic_type_enum()),
             Type::I32 => Ok(self.context.i32_type().as_basic_type_enum()),
             Type::I64 => Ok(self.context.i64_type().as_basic_type_enum()),
-            Type::FP8 | Type::FP16 => Ok(self.context.f16_type().as_basic_type_enum()),
+            Type::FP16 => Ok(self.context.f16_type().as_basic_type_enum()),
             Type::FP32 => Ok(self.context.f32_type().as_basic_type_enum()),
             Type::FP64 => Ok(self.context.f64_type().as_basic_type_enum()),
             Type::Bool => Ok(self.context.bool_type().as_basic_type_enum()),
-            Type::String => Ok(self
-                .context
-                .ptr_type(AddressSpace::default())
-                .as_basic_type_enum()),
+            Type::Reference(_, _) => todo!(),
+            Type::String => Ok(self.context.ptr_type(AddressSpace::default()).as_basic_type_enum()),
             Type::Struct(name) => match self.module.get_struct_type(name) {
                 Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
                 None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
@@ -128,18 +131,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::Array(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
                 match elem_llvm_type {
-                    BasicTypeEnum::FloatType(ft) => {
-                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::IntType(it) => {
-                        Ok(it.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::PointerType(pt) => {
-                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::StructType(st) => {
-                        Ok(st.array_type(*size as u32).as_basic_type_enum())
-                    }
+                    BasicTypeEnum::FloatType(ft) => Ok(ft.array_type(*size as u32).as_basic_type_enum()),
+                    BasicTypeEnum::IntType(it) => Ok(it.array_type(*size as u32).as_basic_type_enum()),
+                    BasicTypeEnum::PointerType(pt) => Ok(pt.array_type(*size as u32).as_basic_type_enum()),
+                    BasicTypeEnum::StructType(st) => Ok(st.array_type(*size as u32).as_basic_type_enum()),
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }

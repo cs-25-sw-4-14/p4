@@ -1,6 +1,8 @@
 use crate::{
-    ast::{ArrayAccess, Expression, Type, VariableDeclaration},
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
+    ast::{ArrayAccess, Expression, Type, VariableDeclaration, Literal},
+    typechecker::{
+        expression_check, function_table::FTable, struct_table::STable, variable_table::VTable,
+    },
 };
 use anyhow::Result;
 
@@ -71,7 +73,7 @@ pub fn semantic_check_array_index<'a>(
     match expression_check::check(array_index, v_table, f_table, s_table)? {
         Type::I64 => match array_index {
             Expression::Literal(Literal::Int(index)) => {
-                if *index < 0 || *index >= *array_length {
+                if *index >= *array_length {
                     return Err(anyhow::anyhow!(
                         "Array access index out of bounds: {}",
                         index

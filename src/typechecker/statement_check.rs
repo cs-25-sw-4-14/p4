@@ -1,4 +1,4 @@
-use super::{function_table::FTable, struct_table::STable, variable_table::VTable};
+use super::{expression_check, function_table::FTable, struct_table::STable, variable_table::VTable};
 use crate::ast::Statement;
 use anyhow::Result;
 
@@ -19,10 +19,7 @@ pub fn check(
 ) -> Result<()> {
     match expression {
         Statement::Throwaway(expression, l) => {
-            throwaway::check(
-                expression,
-                v_table, f_table, s_table, debugger, *l,
-            )?;
+            throwaway::check(expression, v_table, f_table, s_table, debugger, *l)?;
         }
         Statement::VariableDeclaration(variable_declaration, l) => {
             variable_declaration::check(
@@ -59,6 +56,8 @@ pub fn check(
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         } // check if function is defined, type is void
+        Statement::Print(print, _) => {expression_check::check(&print.expression, v_table, f_table, s_table)?;}
+        Statement::Write(_, _) => {}
     }
 
     Ok(())

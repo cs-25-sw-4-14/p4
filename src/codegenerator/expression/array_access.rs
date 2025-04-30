@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::ArrayAccess;
 use anyhow::Result;
-use inkwell::values::BasicValueEnum;
+use inkwell::{types::BasicTypeEnum, values::BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_access(
@@ -36,9 +36,19 @@ impl<'ctx> CodeGenerator<'ctx> {
             )
         }?;
 
+        let element_type = match array_type {
+            BasicTypeEnum::ArrayType(array_ty) => array_ty.get_element_type(),
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Expected an array type for variable '{}'",
+                    array_name
+                ));
+            }
+        };
+
         // Load the value from the calculated address
         let element_value = self.builder.build_load(
-            *array_type,                              // First parameter is the type
+            element_type,                // First parameter is the type
             element_ptr,                              // Second parameter is the pointer
             &format!("array_element_{}", array_name), // Third parameter is the name
         )?;
@@ -46,4 +56,3 @@ impl<'ctx> CodeGenerator<'ctx> {
         Ok(element_value)
     }
 }
-

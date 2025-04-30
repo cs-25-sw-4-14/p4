@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::ast::VariableDeclaration;
+use crate::ast::{Statement, VariableDeclaration};
 
 #[derive(Debug)]
 pub struct VTable {
@@ -14,10 +14,10 @@ impl VTable {
         }
     }
 
-    pub fn walk(&mut self, statements: Vec<Statement>) -> Result<()> {
+    pub fn walk(&mut self, statements: Vec<Statement>) -> Result<(), anyhow::Error> {
         for s in statements {
             match s {
-                Statement::VariableDeclaration(var_decl) => {
+                Statement::VariableDeclaration(var_decl, _) => {
                     if self.variables.contains_key(&var_decl.name) {
                         return Err(anyhow::anyhow!(
                             "Variable {} already declared",

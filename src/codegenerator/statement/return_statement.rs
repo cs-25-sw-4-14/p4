@@ -7,10 +7,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         if let Some(expr) = &ret_stmt.value {
             // If there's a value to return, compile the expression
             let return_value = self.compile_expression(expr)?;
-            self.builder.build_return(Some(&return_value));
+            _ = self.builder.build_return(Some(&return_value));
         } else {
             // No return value (for void functions)
-            self.builder.build_return(None);
+            _ = self.builder.build_return(None);
         }
         
         Ok(())
