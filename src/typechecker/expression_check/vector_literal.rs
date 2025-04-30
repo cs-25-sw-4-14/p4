@@ -12,15 +12,17 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,) 
     -> Result<Type> {
+        // Check if the vector literal is empty, then type
 
-        //TODO: if vector literal is empty, return type. 
-        
+        //check if elements are same type
         let vector_type = semantic_check_all_elements_same_type(
             vector_literal,
             v_table,
             f_table,
             s_table,
         )?;
+
+
         Ok(vector_type)
 
     
@@ -46,11 +48,11 @@ pub fn semantic_check_all_elements_same_type<'a>(
             ));
         }
     }
-    Ok(first_type)
+    Ok(Type::Vector(Box::new(first_type)))
 }
 
 #[cfg(test)]
-pub fn tests() {
+pub mod vector_literal_tests {
     use super::*;
     use crate::ast::{Expression, Literal};
     use crate::typechecker::expression_check;
@@ -71,7 +73,7 @@ pub fn tests() {
         let f_table = FTable::new();
         let s_table = STable::new();
 
-        let result = check(&expression, &v_table, &f_table, &s_table);
+        let result = expression_check::check(&expression, &v_table, &f_table, &s_table);
         assert!(result.is_ok());
     }
 }

@@ -111,6 +111,7 @@ ArrayAssignment: ArrayAssignment = {
     }
 };
 
+
 ElseIf: ElseIf = {
     "else if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
         condition: c,
@@ -164,9 +165,10 @@ pub Term: Expression = {
     <e:ID> => Expression::Variable(e),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
-    <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
-    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
+    <e:VectorAccess> => Expression::VectorAccess(Box::new(e)),
+    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
+     <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
     "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
     "*" <e:Term> => Expression::Dereference(Box::new(e)),
@@ -322,6 +324,13 @@ pub StructFieldInit: StructFieldInit = {
 pub ArrayAccess: ArrayAccess = {
     <n:ID> "[" <i:Expression> "]" => ArrayAccess {
         array_name: n,
+        index: i,
+    }
+};
+
+pub VectorAccess: VectorAccess = {
+    <n:ID> ".get(" <i:Expression> ")" => VectorAccess {
+        vector_name: n,
         index: i,
     }
 };

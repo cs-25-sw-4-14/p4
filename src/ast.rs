@@ -76,6 +76,7 @@ pub struct ArrayAssignment {
     pub value: Expression,
 }
 
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     pub target: String,
@@ -125,6 +126,7 @@ pub enum Expression {
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
+    VectorAccess(Box<VectorAccess>),
     VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
@@ -200,14 +202,20 @@ pub struct ArrayAccess {
     pub array_name: String,
     pub index: Expression,
 }
-#[derive(Debug, Clone, PartialEq)]
-pub struct VectorLiteral {
-    pub elements: Vec<Expression>,
-}
+
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorLiteral {
+    pub elements: Vec<Expression>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorAccess {
+    pub vector_name: String,
+    pub index: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
