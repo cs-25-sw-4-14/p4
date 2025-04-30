@@ -7,13 +7,9 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BorrowState {
-    // not borrowed
     Unborrowed,
-    // immutably borrowed with count
     Shared(usize),
-    // mutably borrowed
     Exclusive,
-    // borrowed by a function call (add this new state)
     FunctionBorrowed(String), // Function name that borrowed it
 }
 

@@ -18,8 +18,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             Statement::ArrayAssignment(_, _) => {
                 // Handle array assignment
             }
-            Statement::Throwaway(_, _) => {
-                // This is a throwaway statement, do nothing
+            Statement::Throwaway(throwaway, _) => {
+                self.compile_expression(&throwaway.expression)?;
             }
             Statement::Write(_, _) => {
                 // Handle write statement
