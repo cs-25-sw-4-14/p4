@@ -300,7 +300,7 @@ pub Expression: Expression = {
         };
 
 pub ArrayLiteral: ArrayLiteral = {
-    "{" <e:Expression> <en:("," Expression)*> "}" => ArrayLiteral {
+    "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
         elements: {
             let mut elements = vec![e];
             elements.extend(en.into_iter().map(|x| x.1));

@@ -5,7 +5,6 @@ use anyhow::{Result, anyhow};
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
         let value = self.compile_expression(&decl.value)?;
-        let array_literal_ptr = self.compile_expression(&decl.value)?.into_pointer_value();
 
         let var_type = &decl.var_type;
         let var_name = &decl.name;
@@ -25,6 +24,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         match var_type {
             Type::Array(elem_type, size) => {
+                let array_literal_ptr = self.compile_expression(&decl.value)?.into_pointer_value();
                 let llvm_elem_type = self.get_llvm_type(elem_type)?;
                 let array_llvm_type = llvm_var_type.into_array_type();
 

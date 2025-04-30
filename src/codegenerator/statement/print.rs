@@ -13,8 +13,27 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let call_args = match value {
             BasicValueEnum::IntValue(int_val) => {
-                let fmt_str = self.builder.build_global_string_ptr("%lld\n", "fmt")?;
-                vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                match int_val.get_type().get_bit_width() {
+                    8 => {
+                        let fmt_str = self.builder.build_global_string_ptr("%hhi\n", "fmt_i8")?;
+                        vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                    }
+                    16 => {
+                        let fmt_str = self.builder.build_global_string_ptr("%hi\n", "fmt_i16")?;
+                        vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                    }
+                    32 => {
+                        let fmt_str = self.builder.build_global_string_ptr("%d\n", "fmt_i32")?;
+                        vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                    }
+                    64 => {
+                        let fmt_str = self.builder.build_global_string_ptr("%lld\n", "fmt_i64")?;
+                        vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                    }
+                    other => {
+                        return Err(anyhow!("Unsupported integer bit width: {}", other));
+                    }
+                }
             }
             BasicValueEnum::FloatValue(float_val) => {
                 let fmt_str = self.builder.build_global_string_ptr("%lf\n", "fmt")?;
