@@ -404,6 +404,7 @@ impl BorrowChecker {
             }
             // these don't involve expressions or variables
             Statement::Break(_) | Statement::Continue(_) => {}
+            _ => {}
         }
 
         Ok(())
@@ -552,6 +553,7 @@ impl BorrowChecker {
                 self.check_expression(expr)?;
                 Ok(())
             }
+            _ => Ok(()),
         }
     }
 }

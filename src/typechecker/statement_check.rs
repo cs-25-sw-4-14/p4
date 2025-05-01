@@ -21,10 +21,7 @@ pub fn check(
 ) -> Result<()> {
     match expression {
         Statement::Throwaway(expression, l) => {
-            throwaway::check(
-                expression,
-                v_table, f_table, s_table, debugger, *l,
-            )?;
+            throwaway::check(expression, v_table, f_table, s_table, debugger, *l)?;
         }
         Statement::VariableDeclaration(variable_declaration, l) => {
             variable_declaration::check(
@@ -69,6 +66,8 @@ pub fn check(
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         } // check if function is defined, type is void
+        Statement::Print(_, _) => {}
+        Statement::Write(_, _) => {}
     }
 
     Ok(())

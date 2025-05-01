@@ -51,6 +51,7 @@ pub fn check(
             vector_access::check(vector_access, v_table, f_table, s_table)
         }
         Expression::TypeCast(type_cast) => type_cast::check(type_cast, v_table, f_table, s_table),
+        Expression::Read(_) => todo!("Read expression not implemented"),
         Expression::Reference(expr, is_mutable) => {
             let inner_type = check(expr, v_table, f_table, s_table)?;
             Ok(Type::Reference(Box::new(inner_type), *is_mutable))
