@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, ElseIf, Expression,
-        FunctionCall, FunctionDef, IfStatement, Literal, Param, Print, Program, Read,
+        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, Debug, ElseIf,
+        Expression, FunctionCall, FunctionDef, IfStatement, Literal, Param, Program, Read,
         ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
         StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
         VariableDeclaration, WhileStatement, Write,
@@ -502,8 +502,8 @@ fn test_array_literal() {
 #[test]
 fn test_print() {
     assert_eq!(
-        Statement::Print(
-            Print {
+        Statement::Debug(
+            Debug {
                 expression: Expression::Literal(Literal::String("hi".to_string())),
             },
             0

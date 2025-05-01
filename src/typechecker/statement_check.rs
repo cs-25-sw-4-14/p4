@@ -47,7 +47,7 @@ pub fn check(
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         }
-        Statement::Print(print, _) => {
+        Statement::Debug(print, _) => {
             expression_check::check(&print.expression, v_table, f_table, s_table)?;
         }
         Statement::Write(_, _) => {}

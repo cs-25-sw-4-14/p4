@@ -1,9 +1,9 @@
-use crate::{ast::Print, codegenerator::CodeGenerator};
+use crate::{ast::Debug, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
 use inkwell::values::BasicValueEnum;
 
 impl CodeGenerator<'_> {
-    pub fn compile_print_stmt(&mut self, stmt: &Print) -> Result<()> {
+    pub fn compile_print_stmt(&mut self, stmt: &Debug) -> Result<()> {
         let value = self.compile_expression(&stmt.expression)?;
 
         let printf = self

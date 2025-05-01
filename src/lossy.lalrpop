@@ -71,7 +71,7 @@ pub Statement: Statement = {
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
-    <l:@L> <t:Print> => Statement::Print(t, l),
+    <l:@L> <t:Debug> => Statement::Debug(t, l),
     <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
@@ -139,8 +139,8 @@ pub Return: ReturnStatement = {
     "return" ";" => ReturnStatement { value: None },
 };
 
-pub Print: Print = {
-    "debug" "(" <e:Expression> ")" ";" => Print {
+pub Debug: Debug = {
+    "debug" "(" <e:Expression> ")" ";" => Debug {
         expression: e,
     }
 };
@@ -385,7 +385,7 @@ pub BoolLiteral: bool = {
 // Identifiers (variable and function names)
 pub ID: String = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => match s {
-        "write" | "read" | "print" => panic!("Reserved keyword used as identifier: {}", s),
+        "write" | "read" | "debug" => panic!("Reserved keyword used as identifier: {}", s),
         _ => s.to_string(),
     }
 

@@ -53,7 +53,7 @@ pub enum Statement {
     Continue(usize),
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
-    Print(Print, usize),
+    Debug(Debug, usize),
     Write(Write, usize),
 }
 
@@ -118,7 +118,7 @@ pub struct Read {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Print {
+pub struct Debug {
     pub expression: Expression,
 }
 
