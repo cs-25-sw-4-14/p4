@@ -573,6 +573,6 @@ fn test_type() {
     );
     assert_eq!(
         Type::Array(Box::new(Type::U8), 32),
-        lossy::TypeParser::new().parse("Array u8[32]").unwrap()
+        lossy::TypeParser::new().parse("arr u8[32]").unwrap()
     );
 }

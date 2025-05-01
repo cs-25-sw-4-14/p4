@@ -7,6 +7,12 @@ pub struct VTable {
     pub variables: HashMap<String, VariableDeclaration>,
 }
 
+impl Default for VTable {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VTable {
     pub fn new() -> Self {
         Self {

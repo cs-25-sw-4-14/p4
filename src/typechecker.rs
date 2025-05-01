@@ -16,6 +16,12 @@ pub struct Typechecker {
     pub borrow_checker: borrow_checker::BorrowChecker,
 }
 
+impl Default for Typechecker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Typechecker {
     pub fn new() -> Self {
         Typechecker {
@@ -30,11 +36,8 @@ impl Typechecker {
         self.stable.walk(program.clone());
 
         for def in program.definitions.iter() {
-            match def {
-                crate::ast::TopLevelDefinition::Function(func_def) => {
-                    function_check::check(&func_def, &mut self.ftable, &self.stable, &debugger)?;
-                }
-                _ => {}
+            if let crate::ast::TopLevelDefinition::Function(func_def) = def {
+                function_check::check(func_def, &mut self.ftable, &self.stable, &debugger)?;
             }
         }
 

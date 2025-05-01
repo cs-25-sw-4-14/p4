@@ -36,7 +36,7 @@ pub fn semantic_check_array_definition<'a>(
     }
 }
 
-pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&'a Type> {
+pub fn semantic_check_array_type(array: &VariableDeclaration) -> Result<&Type> {
     let array_type = match &array.var_type {
         Type::Array(ty, _) => ty,
         _ => {
@@ -49,7 +49,7 @@ pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&
     Ok(array_type)
 }
 
-pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a i64> {
+pub fn semantic_check_array_length(array: &VariableDeclaration) -> Result<&i64> {
     let array_length = match &array.var_type {
         Type::Array(_, length) => length,
         _ => {
@@ -70,16 +70,13 @@ pub fn semantic_check_array_index<'a>(
     s_table: &'a STable,
 ) -> Result<()> {
     match expression_check::check(array_index, v_table, f_table, s_table)? {
-        Type::I64 => match array_index {
-            Expression::Literal(Literal::Int(index)) => {
-                if *index < 0 || *index >= *array_length {
-                    return Err(anyhow::anyhow!(
-                        "Array access index out of bounds: {}",
-                        index
-                    ));
-                }
+        Type::I64 => if let Expression::Literal(Literal::Int(index)) = array_index {
+            if *index < 0 || *index >= *array_length {
+                return Err(anyhow::anyhow!(
+                    "Array access index out of bounds: {}",
+                    index
+                ));
             }
-            _ => {}
         },
         _ => {
             return Err(anyhow::anyhow!(

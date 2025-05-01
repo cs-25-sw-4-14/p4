@@ -23,6 +23,12 @@ pub struct BorrowChecker {
     debug: bool,                           // debug mode flag
 }
 
+impl Default for BorrowChecker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BorrowChecker {
     pub fn new() -> Self {
         Self {

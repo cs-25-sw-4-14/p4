@@ -5,6 +5,12 @@ pub struct FTable {
     pub functions: HashMap<String, FunctionDef>,
 }
 
+impl Default for FTable {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FTable {
     pub fn new() -> Self {
         FTable {
@@ -14,11 +20,8 @@ impl FTable {
 
     pub fn walk(&mut self, program: Program) {
         for def in program.definitions {
-            match def {
-                TopLevelDefinition::Function(func) => {
-                    self.functions.insert(func.name.clone(), func.clone());
-                }
-                _ => {}
+            if let TopLevelDefinition::Function(func) = def {
+                self.functions.insert(func.name.clone(), func.clone());
             }
         }
     }
