@@ -13,6 +13,7 @@ mod struct_init;
 mod type_cast;
 mod unary_op;
 mod variable;
+mod vector_access;
 
 pub fn check(
     expression: &Expression,
