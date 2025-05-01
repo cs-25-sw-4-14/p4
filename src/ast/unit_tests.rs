@@ -1,10 +1,10 @@
 use crate::{
     ast::{
-        ArrayAccess, ArrayLiteral, BinaryOperation, BinaryOperator, ElseIf, Expression,
+        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, ElseIf, Expression,
         FunctionCall, FunctionDef, IfStatement, Literal, Param, Print, Program, Read,
         ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
         StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
-        VariableAssignment, VariableDeclaration, WhileStatement, Write,
+        VariableDeclaration, WhileStatement, Write,
     },
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
 };
@@ -100,13 +100,27 @@ fn test_struct_definition() {
 fn test_variable_assignment() {
     assert_eq!(
         Statement::Assignment(
-            VariableAssignment {
-                target: "test".to_string(),
+            Assignment {
+                target: Expression::Variable("test".to_string()),
                 value: Expression::Literal(Literal::Int(32)),
             },
             0
         ),
         StatementParser::new().parse("test = 32;").unwrap()
+    );
+
+    assert_eq!(
+        Statement::Assignment(
+            Assignment {
+                target: Expression::StructFieldAccess(StructFieldAccess {
+                    struct_expr: Box::new(Expression::Variable("test".to_string())),
+                    field_name: "field".to_string(),
+                }),
+                value: Expression::Literal(Literal::Int(32)),
+            },
+            0
+        ),
+        StatementParser::new().parse("test.field = 32;").unwrap()
     );
 }
 
