@@ -12,7 +12,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,
 ) -> Result<Type> {
-    let struct_definition = semantic_check_struct_defined(struct_init, s_table)?;
+    let struct_definition = semantic_check_struct_defined(struct_init, v_table, f_table, s_table)?;
     semantic_check_field_types(struct_init, struct_definition, v_table, f_table, s_table)?;
 
     Ok(Type::Struct(struct_definition.name.clone()))
@@ -20,6 +20,8 @@ pub fn check(
 
 pub fn semantic_check_struct_defined<'a>(
     struct_init: &'a StructInit,
+    _v_table: &'a VTable,
+    _f_table: &'a FTable,
     s_table: &'a STable,
 ) -> Result<&'a StructDef> {
     let struct_definition = s_table

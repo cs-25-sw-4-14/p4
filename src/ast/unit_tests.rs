@@ -1,10 +1,10 @@
 use crate::{
     ast::{
-        ArrayAccess, ArrayLiteral, BinaryOperation, BinaryOperator, ElseIf, Expression,
+        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, ElseIf, Expression,
         FunctionCall, FunctionDef, IfStatement, Literal, Param, Print, Program, Read,
         ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
         StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
-        VariableAssignment, VariableDeclaration, WhileStatement, Write,
+        VariableDeclaration, WhileStatement, Write,
     },
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
 };
@@ -100,13 +100,27 @@ fn test_struct_definition() {
 fn test_variable_assignment() {
     assert_eq!(
         Statement::Assignment(
-            VariableAssignment {
-                target: "test".to_string(),
+            Assignment {
+                target: Expression::Variable("test".to_string()),
                 value: Expression::Literal(Literal::Int(32)),
             },
             0
         ),
         StatementParser::new().parse("test = 32;").unwrap()
+    );
+
+    assert_eq!(
+        Statement::Assignment(
+            Assignment {
+                target: Expression::StructFieldAccess(StructFieldAccess {
+                    struct_expr: Box::new(Expression::Variable("test".to_string())),
+                    field_name: "field".to_string(),
+                }),
+                value: Expression::Literal(Literal::Int(32)),
+            },
+            0
+        ),
+        StatementParser::new().parse("test.field = 32;").unwrap()
     );
 }
 
@@ -490,12 +504,12 @@ fn test_print() {
     assert_eq!(
         Statement::Print(
             Print {
-                value: Expression::Literal(Literal::String("hi".to_string())),
+                expression: Expression::Literal(Literal::String("hi".to_string())),
             },
             0
         ),
         lossy::StatementParser::new()
-            .parse(r#"print("hi");"#)
+            .parse(r#"debug("hi");"#)
             .unwrap()
     );
 }
@@ -558,9 +572,9 @@ fn test_type() {
     assert_eq!(Type::I16, lossy::TypeParser::new().parse("i16").unwrap());
     assert_eq!(Type::I32, lossy::TypeParser::new().parse("i32").unwrap());
     assert_eq!(Type::I64, lossy::TypeParser::new().parse("i64").unwrap());
-    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("fp16").unwrap());
-    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("fp32").unwrap());
-    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("fp64").unwrap());
+    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("f16").unwrap());
+    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("f32").unwrap());
+    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("f64").unwrap());
     assert_eq!(
         Type::String,
         lossy::TypeParser::new().parse("String").unwrap()
@@ -573,6 +587,6 @@ fn test_type() {
     );
     assert_eq!(
         Type::Array(Box::new(Type::U8), 32),
-        lossy::TypeParser::new().parse("Array u8[32]").unwrap()
+        lossy::TypeParser::new().parse("arr u8[32]").unwrap()
     );
 }

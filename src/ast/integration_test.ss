@@ -137,6 +137,8 @@ void main() {
         location: Point {x: 50, y: 50}
     };   
 
+    person.age = 21;
+
     String full_name = person.first_name + " " + person.last_name;
     
     bool and_result = is_true && !is_false;
@@ -160,6 +162,6 @@ void main() {
 
     write("a");
     String aaaaa = read(" a" );
-    print("a");
+    debug("a");
 
 }

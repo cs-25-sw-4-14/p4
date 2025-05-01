@@ -13,9 +13,7 @@ pub fn check(
     s_table: &STable,
 ) -> Result<Type> {
     let result = semantic_check_binary_op(binary_operation, v_table, f_table, s_table)?;
-    match binary_operation.operator {
-        _ => Ok(result.clone()),
-    }
+    Ok(result.clone())
 }
 
 pub fn semantic_check_binary_op<'a>(

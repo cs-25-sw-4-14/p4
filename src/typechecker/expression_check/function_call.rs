@@ -33,10 +33,10 @@ pub fn semantic_check_function_is_defined<'a>(
     let function_def = f_table
         .get(&function_call.name)
         .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-    Ok(&function_def)
+    Ok(function_def)
 }
 
-pub fn semantic_check_function_has_return_type<'a>(function: &'a FunctionDef) -> Result<Type> {
+pub fn semantic_check_function_has_return_type(function: &FunctionDef) -> Result<Type> {
     let return_type = function.return_type.clone().ok_or_else(|| {
         anyhow::anyhow!(
             "Function {} has no return type and is therefore not an expression",
