@@ -231,9 +231,9 @@ pub enum Type {
     I16,
     I32,
     I64,
-    FP16,
-    FP32,
-    FP64,
+    F16,
+    F32,
+    F64,
     String,
     Char,
     Bool,
@@ -247,7 +247,7 @@ impl From<Literal> for Type {
     fn from(literal: Literal) -> Self {
         match literal {
             Literal::Int(_) => Type::I64,
-            Literal::Float(_) => Type::FP64,
+            Literal::Float(_) => Type::F64,
             Literal::String(_) => Type::String,
             Literal::Char(_) => Type::Char,
             Literal::Bool(_) => Type::Bool,

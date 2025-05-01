@@ -76,9 +76,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::I16 => self.context.i16_type().into(),
             Type::I32 => self.context.i32_type().into(),
             Type::I64 => self.context.i64_type().into(),
-            Type::FP16 => self.context.f16_type().into(),
-            Type::FP32 => self.context.f32_type().into(),
-            Type::FP64 => self.context.f64_type().into(),
+            Type::F16 => self.context.f16_type().into(),
+            Type::F32 => self.context.f32_type().into(),
+            Type::F64 => self.context.f64_type().into(),
             Type::Char => self.context.i8_type().into(),
             // Type::String => self
             //     .context
@@ -125,9 +125,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::I16 => Ok(self.context.i16_type().as_basic_type_enum()),
             Type::I32 => Ok(self.context.i32_type().as_basic_type_enum()),
             Type::I64 => Ok(self.context.i64_type().as_basic_type_enum()),
-            Type::FP16 => Ok(self.context.f16_type().as_basic_type_enum()),
-            Type::FP32 => Ok(self.context.f32_type().as_basic_type_enum()),
-            Type::FP64 => Ok(self.context.f64_type().as_basic_type_enum()),
+            Type::F16 => Ok(self.context.f16_type().as_basic_type_enum()),
+            Type::F32 => Ok(self.context.f32_type().as_basic_type_enum()),
+            Type::F64 => Ok(self.context.f64_type().as_basic_type_enum()),
             Type::Bool => Ok(self.context.bool_type().as_basic_type_enum()),
             Type::Reference(_, _) => todo!(),
             Type::String => Ok(self

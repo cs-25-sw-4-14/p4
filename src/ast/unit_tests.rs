@@ -572,9 +572,9 @@ fn test_type() {
     assert_eq!(Type::I16, lossy::TypeParser::new().parse("i16").unwrap());
     assert_eq!(Type::I32, lossy::TypeParser::new().parse("i32").unwrap());
     assert_eq!(Type::I64, lossy::TypeParser::new().parse("i64").unwrap());
-    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("f16").unwrap());
-    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("f32").unwrap());
-    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("f64").unwrap());
+    assert_eq!(Type::F16, lossy::TypeParser::new().parse("f16").unwrap());
+    assert_eq!(Type::F32, lossy::TypeParser::new().parse("f32").unwrap());
+    assert_eq!(Type::F64, lossy::TypeParser::new().parse("f64").unwrap());
     assert_eq!(
         Type::String,
         lossy::TypeParser::new().parse("String").unwrap()
