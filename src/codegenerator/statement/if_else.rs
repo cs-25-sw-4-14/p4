@@ -33,9 +33,17 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Then block
         // Compiles the statements inside the "then" block
         self.builder.position_at_end(then_bb);
+        
+        // Enter a new scope for the then block
+        self.enter_scope();
+        
         for stmt in &if_stmt.then_block {
             self.compile_statement(stmt)?;
         }
+        
+        // Clean up scope when exiting the block
+        self.exit_scope()?;
+        
         // If the last statement in the "then" block doesn't end with a return or break,
         // Adds an unconditional branch to the merge block
         if self.builder.get_insert_block().unwrap().get_terminator().is_none() {
@@ -65,9 +73,17 @@ impl<'ctx> CodeGenerator<'ctx> {
 
             // Else-if body
             self.builder.position_at_end(body_bb);
+            
+            // Enter a new scope for the else-if body
+            self.enter_scope();
+            
             for stmt in &else_if.body {
                 self.compile_statement(stmt)?;
             }
+            
+            // Clean up scope when exiting the block
+            self.exit_scope()?;
+            
             if self.builder.get_insert_block().unwrap().get_terminator().is_none() {
                 _ = self.builder.build_unconditional_branch(merge_bb);
             }
@@ -78,9 +94,17 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Adds an unconditional branch to the merge block
         if let Some(else_bb) = else_bb {
             self.builder.position_at_end(else_bb);
+            
+            // Enter a new scope for the else block
+            self.enter_scope();
+            
             for stmt in if_stmt.else_block.as_ref().unwrap() {
                 self.compile_statement(stmt)?;
             }
+            
+            // Clean up scope when exiting the block
+            self.exit_scope()?;
+            
             if self.builder.get_insert_block().unwrap().get_terminator().is_none() {
                 _ = self.builder.build_unconditional_branch(merge_bb);
             }

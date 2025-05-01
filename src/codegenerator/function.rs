@@ -42,9 +42,9 @@ impl<'ctx> CodeGenerator<'ctx> {
         let basic_block = self.context.append_basic_block(function, "entry");
         self.builder.position_at_end(basic_block);
 
-        // Save the current state
-        let prev_variables = self.variables.clone();
-        self.variables.clear(); // Clear variables for new function scope
+        // Save the current function and enter a new scope
+        self.current_function = Some(function);
+        self.enter_scope();
 
         // Allocate space for parameters and store their values
         for (i, param) in function_def.params.iter().enumerate() {
@@ -82,12 +82,14 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // Verify the function
         if function.verify(true) {
-            // Restore the previous state
-            self.variables = prev_variables;
+            // Exit the function scope and free any local variables
+            self.exit_scope()?;
+            self.current_function = None;
             Ok(())
         } else {
-            // Restore the previous state
-            self.variables = prev_variables;
+            // Exit the function scope and free any local variables
+            let _ = self.exit_scope(); // Ignore errors during cleanup on error path
+            self.current_function = None;
             
             // Delete the invalid function
             unsafe { function.delete(); }

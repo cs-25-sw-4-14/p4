@@ -48,6 +48,16 @@ impl<'ctx> CodeGenerator<'ctx> {
             self.builder.build_store(element_ptr, *value)?;
         }
 
+        // Register the array as a heap allocation for later deallocation
+        if let Some(scope) = self.scope_stack.last_mut() {
+            scope.to_free.push(super::super::ScopedVariable {
+                name: format!("array_literal_{}", array_literal.elements.len()),
+                var_type: array_type.as_basic_type_enum().try_into().unwrap(),
+                ptr: array_ptr,
+                needs_free: true, // Arrays are heap-allocated
+            });
+        }
+        
         Ok(BasicValueEnum::PointerValue(array_ptr))
     }
 }

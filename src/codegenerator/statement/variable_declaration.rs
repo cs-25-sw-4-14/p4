@@ -60,8 +60,26 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
         }
 
-        self.variables
-            .insert(var_name.clone(), (llvm_var_type, array_ptr));
+        // Add to the current scope
+        if let Some(scope) = self.scope_stack.last_mut() {
+            scope.variables.insert(var_name.clone(), (llvm_var_type, array_ptr));
+            
+            // Register for deallocation if needed (only heap allocations need this currently)
+            match var_type {
+                Type::Array(_, _) | Type::String | Type::Struct(_) => {
+                    scope.to_free.push(super::super::ScopedVariable {
+                        name: var_name.clone(),
+                        var_type: llvm_var_type,
+                        ptr: array_ptr,
+                        needs_free: true, // Arrays and complex types need freeing
+                    });
+                },
+                _ => {} // Primitive types are stack-allocated so no need for explicit free
+            }
+        }
+        
+        // Also add to the flat variables map for easier lookup
+        self.variables.insert(var_name.clone(), (llvm_var_type, array_ptr));
 
         Ok(())
     }
