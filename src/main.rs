@@ -81,12 +81,14 @@ fn main() {
 
     Target::initialize_all(&InitializationConfig::default());
 
-    let triple = TargetMachine::get_default_triple();
+    let triple = inkwell::targets::TargetTriple::create("aarch64-linux-android");
+
     let target = Target::from_triple(&triple).unwrap();
+
     let target_machine = target
         .create_target_machine(
             &triple,
-            "generic",
+            "cortex-a78",
             "",
             OptimizationLevel::Default,
             inkwell::targets::RelocMode::Default,
