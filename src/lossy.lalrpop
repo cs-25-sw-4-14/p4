@@ -159,7 +159,7 @@ pub Write: Write = {
 };
 
 pub Read: Read = {
-    "read" "(" <e:Expression> ")" ";" => Read {
+    "read_file" "(" <e:Expression> ")" ";" => Read {
         value: e,
     }
 };

@@ -9,6 +9,8 @@ mod throwaway;
 mod variable_assignment;
 mod variable_declaration;
 mod while_statement;
+mod write;
+mod read;
 
 pub fn check(
     expression: &Statement,
@@ -56,9 +58,16 @@ pub fn check(
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
         } // check if function is defined, type is void
-        Statement::Print(_, _) => {}
-        Statement::Write(_, _) => {}
-    }
+        Statement::Print(_, _) => {
+        }
+        Statement::Write(write, _) => {
+            write_stmt::check(write, v_table, f_table, s_table)?
+        }
+        Statement::Read(read_file, _) => {
+            read_stmt::check(read_file, v_table, f_table, s_table)?;
+        }
+    } 
+
 
     Ok(())
 }

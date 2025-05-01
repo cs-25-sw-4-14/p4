@@ -56,6 +56,7 @@ pub enum Statement {
     FunctionCall(FunctionCall, usize),
     Print(Print, usize),
     Write(Write, usize),
+    Read(Read, usize),
 }
 
 #[derive(Debug, Clone, PartialEq)]
