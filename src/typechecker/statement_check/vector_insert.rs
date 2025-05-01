@@ -49,10 +49,43 @@ pub fn check(
     } else {
         return Err(anyhow::anyhow!("Variable {} not found in vtable", vector_name));
     }
-
-
     Ok(())
 
 
 
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ast::{Expression, Statement, Type, VariableDeclaration, Literal, VectorLiteral};
+    
+    use crate::typechecker::variable_table::VTable;
+
+    #[test]
+    fn test_vector_insert() {
+        let mut v_table = VTable::new();
+        v_table.variables.insert(
+            "my_vector".to_string(),
+            VariableDeclaration {
+                var_type: Type::Vector(Box::new(Type::I64)),
+                name: "my_vector".to_string(),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral {
+                    elements: vec![],
+                })),
+                trivial: None,
+                mutable: None,
+            },
+        );
+
+        let vector_insert = VectorInsert {
+            vector_name: "my_vector".to_string(),
+            index: Expression::Literal(Literal::Int(1)),
+            value: Expression::Literal(Literal::Int(52)),
+        };
+
+        let result = check(&vector_insert, &mut v_table, &FTable::new(), &STable::new(), 0);
+        assert!(result.is_ok());
+    }
 }
