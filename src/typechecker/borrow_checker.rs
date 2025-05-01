@@ -292,12 +292,8 @@ impl BorrowChecker {
         match stmt {
             Statement::Throwaway(_, _) => {}
             Statement::VariableDeclaration(decl, _) => {
-                // check initialization expression
                 self.check_expression(&decl.value)?;
-
-                // check if it's a reference type
                 if let Type::Reference(_, is_mutable) = &decl.var_type {
-                    // check that the expression is actually a reference
                     if let Expression::Reference(_, ref_is_mutable) = decl.value {
                         if *is_mutable != ref_is_mutable {
                             return Err(anyhow!("Mismatched reference mutability"));
@@ -307,21 +303,36 @@ impl BorrowChecker {
                     }
                 }
             }
+
             Statement::Assignment(assign, _) => {
-                // check if the variable can be modified
-                self.can_modify(&assign.target)?;
-
-                // check the expression
-                self.check_expression(&assign.value)?;
-            }
-            Statement::ArrayAssignment(assign, _) => {
-                // check if the array can be modified
-                self.can_modify(&assign.target.array_name)?;
-
-                // check the index expression
-                self.check_expression(&assign.target.index)?;
-
-                // check the value expression
+                match &assign.target {
+                    Expression::Variable(var_name) => {
+                        self.can_modify(var_name)?;
+                    }
+                    Expression::ArrayAccess(array_access) => {
+                        self.can_modify(&array_access.array_name)?;
+                        self.check_expression(&array_access.index)?;
+                    }
+                    Expression::StructFieldAccess(field_access) => {
+                        match &*field_access.struct_expr {
+                            Expression::Variable(var_name) => {
+                                self.can_modify(var_name)?;
+                            }
+                            other => {
+                                return Err(anyhow!(
+                                    "Invalid assignment target: expected struct field on a variable, found `{:#?}`",
+                                    other
+                                ));
+                            }
+                        }
+                    }
+                    other => {
+                        return Err(anyhow!(
+                            "Invalid assignment target: expected variable or array access, found `{:#?}`",
+                            other
+                        ));
+                    }
+                }
                 self.check_expression(&assign.value)?;
             }
             Statement::If(if_stmt, _) => {
