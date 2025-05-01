@@ -49,6 +49,7 @@ pub enum Statement {
     Assignment(VariableAssignment, usize),
     ArrayAssignment(ArrayAssignment, usize),
     VectorInsert(VectorInsert, usize),
+    VectorRemove(VectorRemove, usize),
     If(IfStatement, usize),
     While(WhileStatement, usize),
     Break(usize),
@@ -82,7 +83,11 @@ pub struct VectorInsert {
     pub index: Expression,
     pub value: Expression,
 }
-
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorRemove {
+    pub vector_name: String,
+    pub index: Expression,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {

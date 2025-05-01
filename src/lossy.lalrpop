@@ -67,6 +67,7 @@ pub Statement: Statement = {
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
     <l:@L> <t:ArrayAssignment> => Statement::ArrayAssignment(t, l),
     <l:@L> <t:VectorInsert> => Statement::VectorInsert(t, l),
+    <l:@L> <t:VectorRemove> => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
@@ -116,6 +117,12 @@ pub VectorInsert: VectorInsert = {
         vector_name: n,
         index: i,
         value: v,
+    }
+};
+pub VectorRemove: VectorRemove = {
+    <n:ID> ".remove(" <i:Expression> ")" ";" => VectorRemove {
+        vector_name: n,
+        index: i,
     }
 };
 

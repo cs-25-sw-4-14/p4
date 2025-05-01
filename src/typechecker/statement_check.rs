@@ -10,6 +10,7 @@ mod variable_assignment;
 mod variable_declaration;
 mod while_statement;
 mod vector_insert;
+mod vector_remove;
 
 pub fn check(
     expression: &Statement,
@@ -47,10 +48,15 @@ pub fn check(
         } //check if the variable is declared and if the type matches
         Statement::ArrayAssignment(_array_assignment, l) => {
             array_assignment::check(_array_assignment, v_table, f_table, s_table, *l)?;
-        } // check if the struct is declared
+        } 
         Statement::VectorInsert(_vector_insert, l) => {
             vector_insert::check(_vector_insert, v_table, f_table, s_table, *l)?;
-        } // check if the struct is declared
+        } 
+        Statement::VectorRemove(vector_delete, l) => {
+            vector_remove::check(vector_delete, v_table, f_table, s_table, *l)?;
+        }
+
+
         Statement::If(if_else, _) => {
             if_else::check(if_else, v_table, f_table, s_table, debugger)?;
         }

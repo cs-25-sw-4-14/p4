@@ -335,6 +335,13 @@ impl BorrowChecker {
                 // check the value expression
                 self.check_expression(&vector_insert.value)?;
             }
+            Statement::VectorRemove(vector_delete, _) => {
+                // check if the vector can be modified
+                self.can_modify(&vector_delete.vector_name)?;
+
+                // check the index expression
+                self.check_expression(&vector_delete.index)?;
+            }
 
             Statement::If(if_stmt, _) => {
                 // check the condition
