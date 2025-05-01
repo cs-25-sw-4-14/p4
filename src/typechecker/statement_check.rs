@@ -2,11 +2,10 @@ use super::{expression_check, function_table::FTable, struct_table::STable, vari
 use crate::ast::Statement;
 use anyhow::Result;
 
-mod array_assignment;
+mod assignment;
 mod function_call;
 mod if_else;
 mod throwaway;
-mod variable_assignment;
 mod variable_declaration;
 mod while_statement;
 
@@ -30,32 +29,22 @@ pub fn check(
                 debugger,
                 *l,
             )?;
-        } // check if the variable is declared and if the type matches
+        }
         Statement::Assignment(variable_assignment, l) => {
-            variable_assignment::check(
-                variable_assignment,
-                v_table,
-                f_table,
-                s_table,
-                debugger,
-                *l,
-            )?;
-        } //check if the variable is declared and if the type matches
-        Statement::ArrayAssignment(_array_assignment, l) => {
-            array_assignment::check(_array_assignment, v_table, f_table, s_table, *l)?;
-        } // check if the struct is declared
+            assignment::check(variable_assignment, v_table, f_table, s_table, debugger, *l)?;
+        }
         Statement::If(if_else, _) => {
             if_else::check(if_else, v_table, f_table, s_table, debugger)?;
         }
         Statement::While(while_statement, _) => {
             while_statement::check(while_statement, v_table, f_table, s_table, debugger)?;
-        } // check if condition is bool
+        }
         Statement::Break(_) => {}
         Statement::Continue(_) => {}
         Statement::Return(_, _) => {}
         Statement::FunctionCall(function_call, _) => {
             function_call::check(function_call, v_table, f_table, s_table)?;
-        } // check if function is defined, type is void
+        }
         Statement::Print(print, _) => {expression_check::check(&print.expression, v_table, f_table, s_table)?;}
         Statement::Write(_, _) => {}
     }
