@@ -18,11 +18,11 @@ pub fn check(
 
     Ok(Type::Array(
         Box::new(array_type.clone()),
-        array_literal.elements.len() as i64,
+        array_literal.elements.len() as u64,
     ))
 }
 
-pub fn semantic_check_literal_not_empty<'a>(array_literal: &'a Box<ArrayLiteral>) -> Result<()> {
+pub fn semantic_check_literal_not_empty(array_literal: &Box<ArrayLiteral>) -> Result<()> {
     if array_literal.elements.is_empty() {
         return Err(anyhow::anyhow!("Array literal is empty"));
     }

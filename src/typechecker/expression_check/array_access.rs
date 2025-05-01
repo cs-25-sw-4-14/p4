@@ -1,7 +1,8 @@
-use crate::typechecker::expression_check;
 use crate::{
     ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration},
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
+    typechecker::{
+        expression_check, function_table::FTable, struct_table::STable, variable_table::VTable,
+    },
 };
 use anyhow::Result;
 
@@ -36,7 +37,7 @@ pub fn semantic_check_array_definition<'a>(
     }
 }
 
-pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&'a Type> {
+pub fn semantic_check_array_type(array: &VariableDeclaration) -> Result<&Type> {
     let array_type = match &array.var_type {
         Type::Array(ty, _) => ty,
         _ => {
@@ -49,7 +50,7 @@ pub fn semantic_check_array_type<'a>(array: &'a VariableDeclaration) -> Result<&
     Ok(array_type)
 }
 
-pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result<&'a i64> {
+pub fn semantic_check_array_length(array: &VariableDeclaration) -> Result<&u64> {
     let array_length = match &array.var_type {
         Type::Array(_, length) => length,
         _ => {
@@ -64,23 +65,22 @@ pub fn semantic_check_array_length<'a>(array: &'a VariableDeclaration) -> Result
 
 pub fn semantic_check_array_index<'a>(
     array_index: &'a Expression,
-    array_length: &'a i64,
+    array_length: &'a u64,
     v_table: &'a VTable,
     f_table: &'a FTable,
     s_table: &'a STable,
 ) -> Result<()> {
     match expression_check::check(array_index, v_table, f_table, s_table)? {
-        Type::I64 => match array_index {
-            Expression::Literal(Literal::Int(index)) => {
-                if *index < 0 || *index >= *array_length {
+        Type::I64 => {
+            if let Expression::Literal(Literal::Int(index)) = array_index {
+                if *index >= *array_length {
                     return Err(anyhow::anyhow!(
                         "Array access index out of bounds: {}",
                         index
                     ));
                 }
             }
-            _ => {}
-        },
+        }
         _ => {
             return Err(anyhow::anyhow!(
                 "Array access by non-integer expression: {:?}",

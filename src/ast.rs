@@ -75,6 +75,7 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+
 pub struct ArrayAssignment {
     pub target: ArrayAccess,
     pub value: Expression,
@@ -91,9 +92,9 @@ pub struct VectorRemove {
     pub index: Expression,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct VariableAssignment {
-    pub target: String,
+
+pub struct Assignment {
+    pub target: Expression,
     pub value: Expression,
 }
 
@@ -139,7 +140,7 @@ pub struct Read {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Print {
-    pub value: Expression,
+    pub expression: Expression,
 }
 
 // INFO: EXPRESSIONS
@@ -165,7 +166,7 @@ pub enum Expression {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
-    Int(i64),
+    Int(u64),
     Float(f64),
     String(String),
     Char(char),
@@ -271,7 +272,7 @@ pub enum Type {
     Char,
     Bool,
     Struct(String),
-    Array(Box<Type>, i64),
+    Array(Box<Type>, u64),
     Vector(Box<Type>),
     Reference(Box<Type>, bool), // (type, is_mutable)
 }

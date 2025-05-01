@@ -1,3 +1,5 @@
 /target
 .DS_Store # macOS SHIT!!!
 test.ss
+test.o
+test.out

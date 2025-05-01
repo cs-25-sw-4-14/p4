@@ -1,6 +1,10 @@
 use anyhow::anyhow;
 use clap::Parser;
+use inkwell::OptimizationLevel;
+use inkwell::targets::{FileType, InitializationConfig, Target, TargetMachine};
 use lalrpop_util::lalrpop_mod;
+use std::path::Path;
+use std::process::Command;
 
 lalrpop_mod!(
     #[allow(clippy::ptr_arg)]
@@ -8,6 +12,7 @@ lalrpop_mod!(
     pub lossy
 );
 pub mod ast;
+pub mod codegenerator;
 pub mod debugger;
 pub mod typechecker;
 
@@ -60,8 +65,58 @@ fn main() {
         .expect("Failed to parse:");
 
     let mut typechecker = typechecker::Typechecker::new();
-    typechecker.walk(ast.clone(), debugger).expect(&format!(
-        "{}\nSemantic check failed!!! You dork!!!: ",
-        &huttel
-    ));
+    typechecker
+        .walk(ast.clone(), debugger)
+        .unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ", &huttel));
+
+    let ctx = inkwell::context::Context::create();
+    let module = ctx.create_module("program");
+    let mut codegen = codegenerator::CodeGenerator::new(&ctx, module);
+    codegen
+        .compile_program(&ast)
+        .expect("Failed to compile program");
+
+    // let output = codegen.module.print_to_string().to_string();
+    // println!("\nIR code:\n{}", output);
+
+    Target::initialize_all(&InitializationConfig::default());
+
+    let triple = TargetMachine::get_default_triple();
+    let target = Target::from_triple(&triple).unwrap();
+    let target_machine = target
+        .create_target_machine(
+            &triple,
+            "generic",
+            "",
+            OptimizationLevel::Default,
+            inkwell::targets::RelocMode::Default,
+            inkwell::targets::CodeModel::Default,
+        )
+        .unwrap();
+
+    let filename = args.input.split('.').next().unwrap_or(&args.input);
+    let object_file = format!("{}.o", filename);
+    let output_file = format!("{}.out", filename);
+
+    target_machine
+        .write_to_file(&codegen.module, FileType::Object, Path::new(&object_file))
+        .unwrap();
+
+    Command::new("clang")
+        .arg(&object_file)
+        .arg("-o")
+        .arg(&output_file)
+        //   .arg("-no-pie")
+        .status()
+        .expect("Failed to invoke clang");
+
+    Command::new("rm")
+        .arg(&object_file)
+        .status()
+        .expect("Failed to delete object file");
+
+    println!(
+        "Program succesfully compiled and saved as '{}'",
+        &output_file
+    );
 }
