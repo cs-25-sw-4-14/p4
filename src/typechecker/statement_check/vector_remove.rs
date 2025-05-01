@@ -43,3 +43,38 @@ pub fn check(
 
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ast::{Expression, Statement, VectorLiteral, VariableDeclaration, Literal};
+    use crate::typechecker::statement_check;
+    use crate::typechecker::variable_table::VTable;
+    use crate::typechecker::function_table::FTable;
+    use crate::typechecker::struct_table::STable;
+
+    #[test]
+    fn test_vector_remove() {
+        let mut v_table = VTable::new();
+        v_table.variables.insert(
+            "my_vector".to_string(),
+            VariableDeclaration {
+                var_type: Type::Vector(Box::new(Type::I64)),
+                name: "my_vector".to_string(),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral {
+                    elements: vec![],
+                })),
+                trivial: None,
+                mutable: None,
+            },
+        );
+
+        let vector_remove = VectorRemove {
+            vector_name: "my_vector".to_string(),
+            index: Expression::Literal(Literal::Int(1)),
+        };
+
+        let result = check(&vector_remove, &mut v_table, &FTable::new(), &STable::new(), 0);
+        assert!(result.is_ok());
+    }
+    }
