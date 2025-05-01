@@ -24,7 +24,16 @@ if index_type != Type::I64 {
 }
 //check if vector is defined and has type vector
 if let Some(var) = v_table.get(&vector_access.vector_name) {
-    Ok(var.var_type.clone())
+    if let Type::Vector(inner_type) = &var.var_type {
+        // return the type of the vector
+        return Ok(*inner_type.clone());
+    } else {
+        return Err(anyhow::anyhow!(
+            "Variable {} is not a vector",
+            vector_access.vector_name
+        ));
+    }
+    
 } else {
     Err(anyhow::anyhow!("Variable {} not found in vtable", vector_access.vector_name))
 }

@@ -1,6 +1,8 @@
 i64 main() {
    
    Vec<i64> a = {2};
+   i64 b = a.get(0);
+   
 
 
    return 2; 
