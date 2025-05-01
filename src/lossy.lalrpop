@@ -112,7 +112,7 @@ ArrayAssignment: ArrayAssignment = {
     }
 };
 pub VectorInsert: VectorInsert = {
-    <n:ID> ".insert(" <i:Expression> "," <v:Expression> ")" => VectorInsert {
+    <n:ID> ".insert(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
         vector_name: n,
         index: i,
         value: v,
