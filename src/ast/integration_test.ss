@@ -162,6 +162,6 @@ void main() {
 
     write("a");
     String aaaaa = read(" a" );
-    print("a");
+    debug("a");
 
 }

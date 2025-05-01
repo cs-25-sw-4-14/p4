@@ -12,7 +12,7 @@ pub mod return_statement;
 pub mod variable_declaration;
 pub mod while_statement;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
         match stmt {
             Statement::Assignment(assign, _) => {

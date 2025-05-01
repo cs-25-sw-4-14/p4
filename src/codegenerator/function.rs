@@ -75,7 +75,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             let has_return = function_def
                 .body
                 .last()
-                .map_or(false, |stmt| matches!(stmt, Statement::Return(_, _)));
+                .is_some_and(|stmt| matches!(stmt, Statement::Return(_, _)));
 
             if !has_return {
                 self.builder.build_return(None)?;

@@ -2,7 +2,7 @@ use crate::{ast::WhileStatement, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
 use inkwell::IntPredicate;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_while_statement(&mut self, while_stmt: &WhileStatement) -> Result<()> {
         let current_fn = match self.current_function {
             Some(function) => function,

@@ -2,7 +2,7 @@ use crate::{ast::Print, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
 use inkwell::values::BasicValueEnum;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_print_stmt(&mut self, stmt: &Print) -> Result<()> {
         let value = self.compile_expression(&stmt.expression)?;
 

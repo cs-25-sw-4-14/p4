@@ -22,7 +22,7 @@ pub fn check(
     ))
 }
 
-pub fn semantic_check_literal_not_empty<'a>(array_literal: &'a Box<ArrayLiteral>) -> Result<()> {
+pub fn semantic_check_literal_not_empty(array_literal: &Box<ArrayLiteral>) -> Result<()> {
     if array_literal.elements.is_empty() {
         return Err(anyhow::anyhow!("Array literal is empty"));
     }

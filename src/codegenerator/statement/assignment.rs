@@ -1,7 +1,7 @@
 use crate::{ast::Assignment, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_variable_assignment(&mut self, assign: &Assignment) -> Result<()> {
         let new_value = self.compile_expression(&assign.value)?;
         match &assign.target {
@@ -19,10 +19,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
 
             _ => {
-                return Err(anyhow!(
+                Err(anyhow!(
                     "Invalid assignment target: expected a variable, found {:?}",
                     assign.target
-                ));
+                ))
             }
         }
     }

@@ -21,5 +21,5 @@ pub fn check(
             expr
         ));
     }
-    return Ok(());
+    Ok(())
 }

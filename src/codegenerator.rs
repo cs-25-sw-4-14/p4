@@ -54,10 +54,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         for def in &program.definitions {
             match def {
                 TopLevelDefinition::Function(func_def) => {
-                    self.compile_function(&func_def)?;
+                    self.compile_function(func_def)?;
                 }
                 TopLevelDefinition::Struct(struct_def) => {
-                    self.compile_struct(&struct_def)?;
+                    self.compile_struct(struct_def)?;
                 }
             }
         }

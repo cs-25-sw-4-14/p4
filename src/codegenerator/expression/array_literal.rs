@@ -6,7 +6,7 @@ use inkwell::{types::BasicType, values::BasicValueEnum};
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_literal(&mut self, array_literal: &Box<ArrayLiteral>) -> Result<BasicValueEnum<'ctx>> {
         // Make sure the array is not empty
-        let first_element = array_literal.elements.get(0)
+        let first_element = array_literal.elements.first()
             .ok_or_else(|| anyhow::anyhow!("Cannot create an array from an empty literal"))?;
 
         // Compile the first element and get its type

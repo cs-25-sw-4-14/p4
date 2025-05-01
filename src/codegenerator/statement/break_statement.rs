@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use anyhow::Result;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_break(&mut self) -> Result<()> {
         todo!();
         // if let Some(end_block) = self.loop_end_block {

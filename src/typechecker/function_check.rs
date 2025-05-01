@@ -46,7 +46,7 @@ pub fn check(
     check_return_statements(function, &v_table, f_table, s_table)?;
 
     for stmt in &function.body {
-        check_breaks_continues(&stmt, false, &debugger)?;
+        check_breaks_continues(stmt, false, debugger)?;
     }
 
     Ok(())

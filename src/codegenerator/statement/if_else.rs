@@ -1,7 +1,7 @@
 use crate::{ast::IfStatement, codegenerator::CodeGenerator};
 use anyhow::Result;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_if_else(&mut self, if_stmt: &IfStatement) -> Result<()> {
         let parent_fn = self
             .builder

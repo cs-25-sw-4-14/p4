@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use anyhow::Result;
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_continue(&mut self) -> Result<()> {
         todo!()
         // if let Some(cond_block) = self.loop_cond_block {

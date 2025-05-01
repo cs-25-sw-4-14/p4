@@ -2,7 +2,7 @@ use super::CodeGenerator;
 use crate::ast::{Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
 
-impl<'ctx> CodeGenerator<'ctx> {
+impl CodeGenerator<'_> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
         let value = self.compile_expression(&decl.value)?;
 
@@ -29,7 +29,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let array_llvm_type = llvm_var_type.into_array_type();
 
                 for i in 0..*size {
-                    let index = self.context.i32_type().const_int(i as u64, false);
+                    let index = self.context.i32_type().const_int(i, false);
                     let literal_elem_ptr = unsafe {
                         self.builder.build_in_bounds_gep(
                             array_llvm_type,

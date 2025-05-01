@@ -8,7 +8,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         Ok(match literal {
             Literal::Int(value) => {
                 let u64_type = self.context.i64_type();
-                let u64_value = u64_type.const_int((*value) as u64, false);
+                let u64_value = u64_type.const_int(*value, false);
                 BasicValueEnum::IntValue(u64_value)
             }
             Literal::Float(value) => {
