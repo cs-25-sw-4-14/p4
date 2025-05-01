@@ -337,7 +337,7 @@ impl BorrowChecker {
                 }
                 self.check_expression(&assign.value)?;
             }
-            // vector insert 
+            // vector insert
             Statement::VectorInsert(vector_insert, _) => {
                 // check if the vector can be modified
                 self.can_modify(&vector_insert.vector_name)?;

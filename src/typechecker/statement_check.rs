@@ -9,9 +9,9 @@ mod function_call;
 mod if_else;
 mod throwaway;
 mod variable_declaration;
-mod while_statement;
 mod vector_insert;
 mod vector_remove;
+mod while_statement;
 
 pub fn check(
     expression: &Statement,
@@ -35,11 +35,11 @@ pub fn check(
             )?;
         }
         Statement::Assignment(variable_assignment, l) => {
-                assignment::check(variable_assignment, v_table, f_table, s_table, debugger, *l)?;
+            assignment::check(variable_assignment, v_table, f_table, s_table, debugger, *l)?;
         }
         Statement::VectorInsert(_vector_insert, l) => {
             vector_insert::check(_vector_insert, v_table, f_table, s_table, *l)?;
-        } 
+        }
         Statement::VectorRemove(vector_delete, l) => {
             vector_remove::check(vector_delete, v_table, f_table, s_table, *l)?;
         }

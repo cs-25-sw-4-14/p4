@@ -1,12 +1,9 @@
-
-
+use crate::typechecker::expression_check;
 use crate::{
-    ast::{VectorRemove, Type},
+    ast::{Type, VectorRemove},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
-use crate::typechecker::expression_check;
 use anyhow::Result;
-
 
 pub fn check(
     vector_insert: &VectorRemove,
@@ -14,9 +11,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,
     _l: usize,
-
 ) -> Result<()> {
-
     let vector_name = vector_insert.vector_name.clone();
     let index = vector_insert.index.clone();
 
@@ -32,26 +27,24 @@ pub fn check(
             // return the type of the vector
             return Ok(());
         } else {
-            return Err(anyhow::anyhow!(
-                "Variable {} is not a vector",
-                vector_name
-            ));
+            return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
         }
     } else {
-        return Err(anyhow::anyhow!("Variable {} not found in vtable", vector_name));
+        return Err(anyhow::anyhow!(
+            "Variable {} not found in vtable",
+            vector_name
+        ));
     }
-
-
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Statement, VectorLiteral, VariableDeclaration, Literal};
-    use crate::typechecker::statement_check;
-    use crate::typechecker::variable_table::VTable;
+    use crate::ast::{Expression, Literal, Statement, VariableDeclaration, VectorLiteral};
     use crate::typechecker::function_table::FTable;
+    use crate::typechecker::statement_check;
     use crate::typechecker::struct_table::STable;
+    use crate::typechecker::variable_table::VTable;
 
     #[test]
     fn test_vector_remove() {
@@ -61,9 +54,7 @@ mod tests {
             VariableDeclaration {
                 var_type: Type::Vector(Box::new(Type::I64)),
                 name: "my_vector".to_string(),
-                value: Expression::VectorLiteral(Box::new(VectorLiteral {
-                    elements: vec![],
-                })),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,
                 mutable: None,
             },
@@ -74,7 +65,13 @@ mod tests {
             index: Expression::Literal(Literal::Int(1)),
         };
 
-        let result = check(&vector_remove, &mut v_table, &FTable::new(), &STable::new(), 0);
+        let result = check(
+            &vector_remove,
+            &mut v_table,
+            &FTable::new(),
+            &STable::new(),
+            0,
+        );
         assert!(result.is_ok());
     }
-    }
+}

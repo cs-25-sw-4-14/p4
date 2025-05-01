@@ -48,7 +48,6 @@ impl CodeGenerator<'_> {
             }
             Statement::VectorInsert(vector_insert, _) => todo!(),
             Statement::VectorRemove(vector_remove, _) => todo!(),
-
         };
         Ok(())
     }

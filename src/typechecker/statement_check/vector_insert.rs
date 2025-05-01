@@ -1,12 +1,9 @@
-
-
+use crate::typechecker::expression_check;
 use crate::{
-    ast::{VectorInsert, Type},
+    ast::{Type, VectorInsert},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
 };
-use crate::typechecker::expression_check;
 use anyhow::Result;
-
 
 pub fn check(
     vector_insert: &VectorInsert,
@@ -14,9 +11,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,
     _l: usize,
-
 ) -> Result<()> {
-
     let vector_name = vector_insert.vector_name.clone();
     let index = vector_insert.index.clone();
     let value = vector_insert.value.clone();
@@ -41,26 +36,22 @@ pub fn check(
                 ));
             }
         } else {
-            return Err(anyhow::anyhow!(
-                "Variable {} is not a vector",
-                vector_name
-            ));
+            return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
         }
     } else {
-        return Err(anyhow::anyhow!("Variable {} not found in vtable", vector_name));
+        return Err(anyhow::anyhow!(
+            "Variable {} not found in vtable",
+            vector_name
+        ));
     }
     Ok(())
-
-
-
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Statement, Type, VariableDeclaration, Literal, VectorLiteral};
-    
+    use crate::ast::{Expression, Literal, Statement, Type, VariableDeclaration, VectorLiteral};
+
     use crate::typechecker::variable_table::VTable;
 
     #[test]
@@ -71,9 +62,7 @@ mod tests {
             VariableDeclaration {
                 var_type: Type::Vector(Box::new(Type::I64)),
                 name: "my_vector".to_string(),
-                value: Expression::VectorLiteral(Box::new(VectorLiteral {
-                    elements: vec![],
-                })),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,
                 mutable: None,
             },
@@ -85,7 +74,13 @@ mod tests {
             value: Expression::Literal(Literal::Int(52)),
         };
 
-        let result = check(&vector_insert, &mut v_table, &FTable::new(), &STable::new(), 0);
+        let result = check(
+            &vector_insert,
+            &mut v_table,
+            &FTable::new(),
+            &STable::new(),
+            0,
+        );
         assert!(result.is_ok());
     }
 }

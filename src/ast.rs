@@ -226,7 +226,6 @@ pub struct ArrayAccess {
     pub index: Expression,
 }
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
@@ -240,7 +239,6 @@ pub struct VectorAccess {
     pub vector_name: String,
     pub index: Expression,
 }
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeCast {

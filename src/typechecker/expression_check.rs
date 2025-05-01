@@ -4,7 +4,6 @@ use anyhow::Result;
 
 mod array_access;
 mod array_literal;
-mod vector_literal;
 mod binary_op;
 mod function_call;
 mod literal;
@@ -14,7 +13,7 @@ mod type_cast;
 mod unary_op;
 mod variable;
 mod vector_access;
-
+mod vector_literal;
 
 pub fn check(
     expression: &Expression,
