@@ -36,7 +36,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
             }
             BasicValueEnum::FloatValue(float_val) => {
-                let fmt_str = self.builder.build_global_string_ptr("%lf\n", "fmt")?;
+                let fmt_str = self.builder.build_global_string_ptr("%llf\n", "fmt")?;
                 vec![fmt_str.as_pointer_value().into(), float_val.into()]
             }
             BasicValueEnum::PointerValue(ptr_val) => {
