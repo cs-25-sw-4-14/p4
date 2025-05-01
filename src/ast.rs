@@ -127,6 +127,7 @@ pub enum Expression {
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
     VectorAccess(Box<VectorAccess>),
+    VectorInsert(Box<VectorInsert>),
     VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
@@ -216,6 +217,12 @@ pub struct VectorLiteral {
 pub struct VectorAccess {
     pub vector_name: String,
     pub index: Expression,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorInsert {
+    pub vector_name: String,
+    pub index: Expression,
+    pub value: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]

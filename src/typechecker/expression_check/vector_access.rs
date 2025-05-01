@@ -16,6 +16,12 @@ pub fn check(
     s_table: &STable,
 
 ) -> Result<Type> {
+
+//check if index is an expression
+let index_type = expression_check::check(&vector_access.index, v_table, f_table, s_table)?;
+if index_type != Type::I64 {
+    return Err(anyhow::anyhow!("Index must be of type I64"));
+}
 //check if vector is defined and has type vector
 if let Some(var) = v_table.get(&vector_access.vector_name) {
     Ok(var.var_type.clone())
@@ -23,11 +29,9 @@ if let Some(var) = v_table.get(&vector_access.vector_name) {
     Err(anyhow::anyhow!("Variable {} not found in vtable", vector_access.vector_name))
 }
 
-//check if index is int 
-//check if index is in bounds
+
 
 }
-
 
 #[cfg(test)]
 pub mod vector_access_tests {

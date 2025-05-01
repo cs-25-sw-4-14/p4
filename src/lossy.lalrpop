@@ -167,6 +167,7 @@ pub Term: Expression = {
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
     <e:VectorAccess> => Expression::VectorAccess(Box::new(e)),
+    <e:VectorInsert> => Expression::VectorInsert(Box::new(e)),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
      <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
@@ -332,6 +333,14 @@ pub VectorAccess: VectorAccess = {
     <n:ID> ".get(" <i:Expression> ")" => VectorAccess {
         vector_name: n,
         index: i,
+    }
+};
+
+pub VectorInsert: VectorInsert = {
+    <n:ID> ".insert(" <i:Expression> "," <v:Expression> ")" => VectorInsert {
+        vector_name: n,
+        index: i,
+        value: v,
     }
 };
 

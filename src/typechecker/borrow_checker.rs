@@ -483,6 +483,7 @@ impl BorrowChecker {
                 }
             }
             Expression::VectorAccess(_vector_access) => todo!(),
+            Expression::VectorInsert(_vector_insert) => todo!(),
             Expression::ArrayLiteral(array_literal) => {
                 for elem in &array_literal.elements {
                     self.check_expression(elem)?;
