@@ -504,12 +504,12 @@ fn test_print() {
     assert_eq!(
         Statement::Print(
             Print {
-                value: Expression::Literal(Literal::String("hi".to_string())),
+                expression: Expression::Literal(Literal::String("hi".to_string())),
             },
             0
         ),
         lossy::StatementParser::new()
-            .parse(r#"print("hi");"#)
+            .parse(r#"debug("hi");"#)
             .unwrap()
     );
 }
@@ -572,9 +572,9 @@ fn test_type() {
     assert_eq!(Type::I16, lossy::TypeParser::new().parse("i16").unwrap());
     assert_eq!(Type::I32, lossy::TypeParser::new().parse("i32").unwrap());
     assert_eq!(Type::I64, lossy::TypeParser::new().parse("i64").unwrap());
-    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("fp16").unwrap());
-    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("fp32").unwrap());
-    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("fp64").unwrap());
+    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("f16").unwrap());
+    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("f32").unwrap());
+    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("f64").unwrap());
     assert_eq!(
         Type::String,
         lossy::TypeParser::new().parse("String").unwrap()
@@ -587,6 +587,6 @@ fn test_type() {
     );
     assert_eq!(
         Type::Array(Box::new(Type::U8), 32),
-        lossy::TypeParser::new().parse("Array u8[32]").unwrap()
+        lossy::TypeParser::new().parse("arr u8[32]").unwrap()
     );
 }

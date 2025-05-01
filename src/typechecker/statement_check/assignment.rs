@@ -28,22 +28,19 @@ pub fn check(
         ));
     }
 
-    match assignment.target {
-        Expression::Variable(ref var_name) => {
-            if let Some(var_type) = v_table.get(&var_name) {
-                if var_type.var_type != expression_value_type {
-                    return Err(anyhow::anyhow!(
-                        "{}: Type mismatch: expected {:?}, found {:?}",
-                        debugger.display(l),
-                        var_type.var_type,
-                        expression_value_type
-                    ));
-                }
-            } else {
-                return Err(anyhow::anyhow!("Variable {} not declared", var_name));
+    if let Expression::Variable(ref var_name) = assignment.target {
+        if let Some(var_type) = v_table.get(var_name) {
+            if var_type.var_type != expression_value_type {
+                return Err(anyhow::anyhow!(
+                    "{}: Type mismatch: expected {:?}, found {:?}",
+                    debugger.display(l),
+                    var_type.var_type,
+                    expression_value_type
+                ));
             }
+        } else {
+            return Err(anyhow::anyhow!("Variable {} not declared", var_name));
         }
-        _ => {}
     }
 
     Ok(())

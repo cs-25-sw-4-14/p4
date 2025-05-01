@@ -7,13 +7,9 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BorrowState {
-    // not borrowed
     Unborrowed,
-    // immutably borrowed with count
     Shared(usize),
-    // mutably borrowed
     Exclusive,
-    // borrowed by a function call (add this new state)
     FunctionBorrowed(String), // Function name that borrowed it
 }
 
@@ -21,6 +17,12 @@ pub struct BorrowChecker {
     borrows: HashMap<String, BorrowState>, // <var_name, borrow_state>
     current_function: Option<String>,      // keep track of current function being analyzed
     debug: bool,                           // debug mode flag
+}
+
+impl Default for BorrowChecker {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BorrowChecker {
