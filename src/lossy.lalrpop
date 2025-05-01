@@ -147,7 +147,7 @@ pub Return: ReturnStatement = {
 };
 
 pub Print: Print = {
-    "print" "(" <e:Expression> ")" ";" => Print {
+    "debug" "(" <e:Expression> ")" ";" => Print {
         expression: e,
     }
 };
@@ -348,9 +348,9 @@ pub Type: Type = {
     "i16" => Type::I16,
     "i32" => Type::I32,
     "i64" => Type::I64,
-    "fp16" => Type::FP16,
-    "fp32" => Type::FP32,
-    "fp64" => Type::FP64,
+    "f16" => Type::FP16,
+    "f32" => Type::FP32,
+    "f64" => Type::FP64,
     "String" => Type::String,
     "char" => Type::Char,
     "bool" => Type::Bool,
