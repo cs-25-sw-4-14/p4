@@ -66,7 +66,6 @@ pub Statement: Statement = {
     <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
-    <l:@L> <t:ArrayAssignment> => Statement::ArrayAssignment(t, l),
     <l:@L> <t:VectorInsert> => Statement::VectorInsert(t, l),
     <l:@L> <t:VectorRemove> => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),

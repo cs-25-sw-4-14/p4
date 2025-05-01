@@ -46,8 +46,7 @@ pub struct StructField {
 pub enum Statement {
     Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
-    Assignment(VariableAssignment, usize),
-    ArrayAssignment(ArrayAssignment, usize),
+    Assignment(Assignment, usize),
     VectorInsert(VectorInsert, usize),
     VectorRemove(VectorRemove, usize),
     If(IfStatement, usize),
@@ -75,12 +74,6 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-
-pub struct ArrayAssignment {
-    pub target: ArrayAccess,
-    pub value: Expression,
-}
-#[derive(Debug, Clone, PartialEq)]
 pub struct VectorInsert {
     pub vector_name: String,
     pub index: Expression,
@@ -92,7 +85,7 @@ pub struct VectorRemove {
     pub index: Expression,
 }
 
-
+#[derive(Debug, Clone, PartialEq)]
 pub struct Assignment {
     pub target: Expression,
     pub value: Expression,
