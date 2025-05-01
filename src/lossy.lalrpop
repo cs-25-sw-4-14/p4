@@ -66,7 +66,6 @@ pub Statement: Statement = {
     <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
-    <l:@L> <t:ArrayAssignment> => Statement::ArrayAssignment(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
@@ -101,14 +100,8 @@ pub Mutable: () = {
     "mut" => (),
 };
 
-pub Assignment: VariableAssignment = {
-    <t:ID> "=" <v:Expression> ";" => VariableAssignment {
-        target: t,
-        value: v,
-    }
-};
-ArrayAssignment: ArrayAssignment = {
-    <t:ArrayAccess> "=" <v:Expression> ";" => ArrayAssignment {
+pub Assignment: Assignment = {
+    <t:Expression> "=" <v:Expression> ";" => Assignment {
         target: t,
         value: v,
     }
