@@ -504,12 +504,12 @@ fn test_print() {
     assert_eq!(
         Statement::Print(
             Print {
-                value: Expression::Literal(Literal::String("hi".to_string())),
+                expression: Expression::Literal(Literal::String("hi".to_string())),
             },
             0
         ),
         lossy::StatementParser::new()
-            .parse(r#"print("hi");"#)
+            .parse(r#"debug("hi");"#)
             .unwrap()
     );
 }

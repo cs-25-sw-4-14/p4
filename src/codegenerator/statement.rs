@@ -15,8 +15,8 @@ pub mod while_statement;
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
         match stmt {
-            Statement::ArrayAssignment(_, _) => {
-                // Handle array assignment
+            Statement::Assignment(assign, _) => {
+                self.compile_variable_assignment(assign)?;
             }
             Statement::Throwaway(throwaway, _) => {
                 self.compile_expression(&throwaway.expression)?;
@@ -29,9 +29,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
             Statement::VariableDeclaration(decl, _) => {
                 self.compile_variable_declaration(decl)?;
-            }
-            Statement::Assignment(assign, _) => {
-                self.compile_variable_assignment(assign)?;
             }
             Statement::Return(ret_stmt, _) => {
                 self.compile_ret_stmt(ret_stmt)?;
