@@ -39,7 +39,8 @@ impl CodeGenerator<'_> {
             _ => return Err(anyhow!("Unsupported condition type in while statement")),
         };
 
-        _ = self.builder
+        _ = self
+            .builder
             .build_conditional_branch(condition.unwrap(), body_bb, after_bb);
 
         self.builder.position_at_end(body_bb);

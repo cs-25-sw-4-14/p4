@@ -10,11 +10,11 @@ use std::collections::HashMap;
 
 use crate::ast::{Program, TopLevelDefinition, Type};
 
+pub mod controlflow;
 pub mod expression;
 pub mod function;
 pub mod statement;
 pub mod structs;
-pub mod controlflow;
 
 pub struct CodeGenerator<'ctx> {
     pub context: &'ctx Context,

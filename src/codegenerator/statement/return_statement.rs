@@ -12,7 +12,7 @@ impl CodeGenerator<'_> {
             // No return value (for void functions)
             _ = self.builder.build_return(None);
         }
-        
+
         Ok(())
     }
 }

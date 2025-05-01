@@ -49,6 +49,7 @@ fn test_parser() {
         .expect("Failed to parse:");
 
     let mut typechecker = typechecker::Typechecker::new();
-    typechecker.walk(ast.clone(), debugger).unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ",
-        &huttel));
+    typechecker
+        .walk(ast.clone(), debugger)
+        .unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ", &huttel));
 }

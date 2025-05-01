@@ -18,12 +18,10 @@ impl CodeGenerator<'_> {
                 Ok(())
             }
 
-            _ => {
-                Err(anyhow!(
-                    "Invalid assignment target: expected a variable, found {:?}",
-                    assign.target
-                ))
-            }
+            _ => Err(anyhow!(
+                "Invalid assignment target: expected a variable, found {:?}",
+                assign.target
+            )),
         }
     }
 }

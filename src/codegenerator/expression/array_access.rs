@@ -48,7 +48,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // Load the value from the calculated address
         let element_value = self.builder.build_load(
-            element_type,                // First parameter is the type
+            element_type,                             // First parameter is the type
             element_ptr,                              // Second parameter is the pointer
             &format!("array_element_{}", array_name), // Third parameter is the name
         )?;

@@ -1,5 +1,5 @@
 use crate::{
-    ast::{ArrayAccess, Expression, Type, VariableDeclaration, Literal},
+    ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration},
     typechecker::{
         expression_check, function_table::FTable, struct_table::STable, variable_table::VTable,
     },
@@ -71,14 +71,16 @@ pub fn semantic_check_array_index<'a>(
     s_table: &'a STable,
 ) -> Result<()> {
     match expression_check::check(array_index, v_table, f_table, s_table)? {
-        Type::I64 => if let Expression::Literal(Literal::Int(index)) = array_index {
-            if *index >= *array_length {
-                return Err(anyhow::anyhow!(
-                    "Array access index out of bounds: {}",
-                    index
-                ));
+        Type::I64 => {
+            if let Expression::Literal(Literal::Int(index)) = array_index {
+                if *index >= *array_length {
+                    return Err(anyhow::anyhow!(
+                        "Array access index out of bounds: {}",
+                        index
+                    ));
+                }
             }
-        },
+        }
         _ => {
             return Err(anyhow::anyhow!(
                 "Array access by non-integer expression: {:?}",

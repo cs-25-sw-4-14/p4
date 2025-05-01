@@ -65,8 +65,9 @@ fn main() {
         .expect("Failed to parse:");
 
     let mut typechecker = typechecker::Typechecker::new();
-    typechecker.walk(ast.clone(), debugger).unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ",
-        &huttel));
+    typechecker
+        .walk(ast.clone(), debugger)
+        .unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ", &huttel));
 
     let ctx = inkwell::context::Context::create();
     let module = ctx.create_module("program");
@@ -105,7 +106,7 @@ fn main() {
         .arg(&object_file)
         .arg("-o")
         .arg(&output_file)
-   //   .arg("-no-pie")
+        //   .arg("-no-pie")
         .status()
         .expect("Failed to invoke clang");
 

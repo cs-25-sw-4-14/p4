@@ -12,7 +12,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // Create an opaque struct type first (with no body defined yet)
         let struct_type = self.context.opaque_struct_type(&struct_def.name);
-        
+
         // Convert field types to LLVM types
         let field_types: Result<Vec<BasicTypeEnum<'ctx>>> = struct_def
             .fields

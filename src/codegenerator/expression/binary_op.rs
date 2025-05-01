@@ -154,21 +154,15 @@ impl<'ctx> CodeGenerator<'ctx> {
                         )?;
                         Ok(BasicValueEnum::IntValue(result))
                     }
-                    BinaryOperator::Modulus => {
-                        Err(anyhow!(
-                            "Modulus operator not supported for floating point values"
-                        ))
-                    }
-                    BinaryOperator::And => {
-                        Err(anyhow!(
-                            "And operator not supported for floating point values"
-                        ))
-                    }
-                    BinaryOperator::Or => {
-                        Err(anyhow!(
-                            "Or operator not supported for floating point values"
-                        ))
-                    }
+                    BinaryOperator::Modulus => Err(anyhow!(
+                        "Modulus operator not supported for floating point values"
+                    )),
+                    BinaryOperator::And => Err(anyhow!(
+                        "And operator not supported for floating point values"
+                    )),
+                    BinaryOperator::Or => Err(anyhow!(
+                        "Or operator not supported for floating point values"
+                    )),
                 }
             }
 

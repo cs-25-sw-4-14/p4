@@ -3,17 +3,16 @@ use crate::ast::Expression;
 use anyhow::Result;
 use inkwell::values::BasicValueEnum;
 
+pub mod array_access;
+pub mod array_literal;
 pub mod binary_op;
 pub mod function_call;
 pub mod literal;
+pub mod struct_field_access;
 pub mod struct_init;
+pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
-pub mod array_access;
-pub mod array_literal;
-pub mod type_cast;
-pub mod struct_field_access;
-
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
@@ -29,7 +28,9 @@ impl<'ctx> CodeGenerator<'ctx> {
                 self.compile_function_call_expr(function_call)
             }
             Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
-            Expression::StructFieldAccess(struct_field_access) => self.compile_struct_field_access(struct_field_access),
+            Expression::StructFieldAccess(struct_field_access) => {
+                self.compile_struct_field_access(struct_field_access)
+            }
             Expression::ArrayAccess(array_access) => self.compile_array_access(array_access),
             Expression::ArrayLiteral(array_literal) => self.compile_array_literal(array_literal),
             Expression::TypeCast(type_cast) => {
@@ -37,7 +38,6 @@ impl<'ctx> CodeGenerator<'ctx> {
                 self.last_value = Some(value);
                 Ok(value)
             }
-            
         }
     }
 }

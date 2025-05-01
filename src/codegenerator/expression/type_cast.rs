@@ -1,10 +1,10 @@
-use crate::ast::{Expression, TypeCast, Type};
 use super::CodeGenerator;
-use anyhow::Result;
 use crate::ast::Literal;
-use inkwell::values::BasicValueEnum;
-use inkwell::types::BasicTypeEnum;
+use crate::ast::{Expression, Type, TypeCast};
+use anyhow::Result;
 use inkwell::types::BasicType;
+use inkwell::types::BasicTypeEnum;
+use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
     // Function to get the bit width of a float type (32-bit or 64-bit)
@@ -38,20 +38,29 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let src_bits = value.get_type().get_bit_width();
                 let tgt_bits = int_type.get_bit_width();
                 // Determine if the target type is signed or unsigned
-                let is_signed = matches!(type_cast.target_type, Type::I8 | Type::I16 | Type::I32 | Type::I64);
+                let is_signed = matches!(
+                    type_cast.target_type,
+                    Type::I8 | Type::I16 | Type::I32 | Type::I64
+                );
 
                 // Perform the appropriate extension or truncation based on bit widths
                 if src_bits < tgt_bits {
                     if is_signed {
                         // Signed extension
-                        self.builder.build_int_s_extend(value, int_type, "sext_tmp")?.into()
+                        self.builder
+                            .build_int_s_extend(value, int_type, "sext_tmp")?
+                            .into()
                     } else {
                         // Zero extension
-                        self.builder.build_int_z_extend(value, int_type, "zext_tmp")?.into()
+                        self.builder
+                            .build_int_z_extend(value, int_type, "zext_tmp")?
+                            .into()
                     }
                 } else if src_bits > tgt_bits {
                     // Truncation
-                    self.builder.build_int_truncate(value, int_type, "trunc_tmp")?.into()
+                    self.builder
+                        .build_int_truncate(value, int_type, "trunc_tmp")?
+                        .into()
                 } else {
                     // No change needed
                     value.into()
@@ -69,9 +78,13 @@ impl<'ctx> CodeGenerator<'ctx> {
 
                 // Perform the appropriate float extension or truncation based on bit widths
                 if src_bits < tgt_bits {
-                    self.builder.build_float_ext(value, float_type, "fext_tmp")?.into()
+                    self.builder
+                        .build_float_ext(value, float_type, "fext_tmp")?
+                        .into()
                 } else if src_bits > tgt_bits {
-                    self.builder.build_float_trunc(value, float_type, "ftrunc_tmp")?.into()
+                    self.builder
+                        .build_float_trunc(value, float_type, "ftrunc_tmp")?
+                        .into()
                 } else {
                     value.into()
                 }
@@ -80,26 +93,40 @@ impl<'ctx> CodeGenerator<'ctx> {
             // Integer to Float casting
             (BasicValueEnum::IntValue(value), BasicTypeEnum::FloatType(float_type)) => {
                 // Check if the integer is signed
-                let is_signed = matches!(type_cast.expression.as_ref(), Expression::Literal(Literal::Int(_)));
+                let is_signed = matches!(
+                    type_cast.expression.as_ref(),
+                    Expression::Literal(Literal::Int(_))
+                );
                 if is_signed {
                     // Signed integer to float
-                    self.builder.build_signed_int_to_float(value, float_type, "sitofp_tmp")?.into()
+                    self.builder
+                        .build_signed_int_to_float(value, float_type, "sitofp_tmp")?
+                        .into()
                 } else {
                     // Unsigned integer to float
-                    self.builder.build_unsigned_int_to_float(value, float_type, "uitofp_tmp")?.into()
+                    self.builder
+                        .build_unsigned_int_to_float(value, float_type, "uitofp_tmp")?
+                        .into()
                 }
             }
 
             // Float to Integer casting
             (BasicValueEnum::FloatValue(value), BasicTypeEnum::IntType(int_type)) => {
                 // Check if the target type is signed or unsigned
-                let is_signed = matches!(type_cast.target_type, Type::I8 | Type::I16 | Type::I32 | Type::I64);
+                let is_signed = matches!(
+                    type_cast.target_type,
+                    Type::I8 | Type::I16 | Type::I32 | Type::I64
+                );
                 if is_signed {
                     // Float to signed integer
-                    self.builder.build_float_to_signed_int(value, int_type, "fptosi_tmp")?.into()
+                    self.builder
+                        .build_float_to_signed_int(value, int_type, "fptosi_tmp")?
+                        .into()
                 } else {
                     // Float to unsigned integer
-                    self.builder.build_float_to_unsigned_int(value, int_type, "fptoui_tmp")?.into()
+                    self.builder
+                        .build_float_to_unsigned_int(value, int_type, "fptoui_tmp")?
+                        .into()
                 }
             }
 
@@ -109,7 +136,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                     "Unsupported type cast: {:?} to {:?}",
                     expr_value,
                     target_type
-                ))
+                ));
             }
         };
 
