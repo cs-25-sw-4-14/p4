@@ -46,8 +46,7 @@ pub struct StructField {
 pub enum Statement {
     Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
-    Assignment(VariableAssignment, usize),
-    ArrayAssignment(ArrayAssignment, usize),
+    Assignment(Assignment, usize),
     If(IfStatement, usize),
     While(WhileStatement, usize),
     Break(usize),
@@ -73,14 +72,8 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ArrayAssignment {
-    pub target: ArrayAccess,
-    pub value: Expression,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct VariableAssignment {
-    pub target: String,
+pub struct Assignment {
+    pub target: Expression,
     pub value: Expression,
 }
 
