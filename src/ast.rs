@@ -47,6 +47,8 @@ pub enum Statement {
     Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
     Assignment(Assignment, usize),
+    VectorInsert(VectorInsert, usize),
+    VectorRemove(VectorRemove, usize),
     If(IfStatement, usize),
     While(WhileStatement, usize),
     Break(usize),
@@ -69,6 +71,18 @@ pub struct VariableDeclaration {
     pub var_type: Type,
     pub name: String,
     pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorInsert {
+    pub vector_name: String,
+    pub index: Expression,
+    pub value: Expression,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorRemove {
+    pub vector_name: String,
+    pub index: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -134,6 +148,8 @@ pub enum Expression {
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
+    VectorAccess(Box<VectorAccess>),
+    VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Read(Box<Read>),
@@ -213,6 +229,15 @@ pub struct ArrayAccess {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorLiteral {
+    pub elements: Vec<Expression>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorAccess {
+    pub vector_name: String,
+    pub index: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
