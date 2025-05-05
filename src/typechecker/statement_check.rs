@@ -10,8 +10,6 @@ mod if_else;
 mod throwaway;
 mod variable_declaration;
 mod while_statement;
-mod write;
-mod read;
 
 pub fn check(
     expression: &Statement,
@@ -52,7 +50,6 @@ pub fn check(
         Statement::Print(print, _) => {
             expression_check::check(&print.expression, v_table, f_table, s_table)?;
         }
-        Statement::Write(_, _) => {}
     }
 
     Ok(())

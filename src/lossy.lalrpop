@@ -146,13 +146,14 @@ pub Print: Print = {
 };
 
 pub Write: Write = {
-    "write" "(" <e:Expression> ")" ";" => Write {
-        value: e,
+    "write_file" "(" <value: Expression> "," <target: Expression> ")" ";" => Write {
+        value,
+        target,
     }
 };
 
 pub Read: Read = {
-    "read_file" "(" <e:Expression> ")" ";" => Read {
+    "read_file" "(" <e: Expression> ")" ";" => Read {
         value: e,
     }
 };

@@ -21,9 +21,6 @@ impl CodeGenerator<'_> {
             Statement::Throwaway(throwaway, _) => {
                 self.compile_expression(&throwaway.expression)?;
             }
-            Statement::Write(_, _) => {
-                // Handle write statement
-            }
             Statement::Print(expr, _) => {
                 self.compile_print_stmt(expr)?;
             }

@@ -13,6 +13,8 @@ pub mod struct_init;
 pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
+pub mod read_file;
+pub mod write_file;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
@@ -38,6 +40,11 @@ impl<'ctx> CodeGenerator<'ctx> {
                 self.last_value = Some(value);
                 Ok(value)
             }
+            Expression::Write(write) => {
+                self.compile_write_file_expr(write)?;
+                Ok(self.context.i8_type().const_zero().into())
+            }
+            
         }
     }
 }
