@@ -1,5 +1,6 @@
 use crate::{ast::Assignment, codegenerator::CodeGenerator};
 use anyhow::{Result, anyhow};
+use inkwell::{types::BasicTypeEnum, values::BasicValueEnum};
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_assignment(&mut self, assign: &Assignment) -> Result<()> {
@@ -14,6 +15,51 @@ impl CodeGenerator<'_> {
                 self.builder
                     .build_store(ptr.1, new_value)
                     .map_err(|e| anyhow!("Failed to store new value in '{}': {}", var, e))?;
+
+                Ok(())
+            }
+            crate::ast::Expression::ArrayAccess(var) => {
+                let array_name = &var.array_name;
+                let index_value = self.compile_expression(&var.index)?;
+                let (array_type, array_ptr) = self
+                    .variables
+                    .get(array_name)
+                    .ok_or_else(|| anyhow!("Array variable '{}' not found", array_name))?;
+
+                let index_value = match index_value {
+                    BasicValueEnum::IntValue(val) => val,
+                    _ => return Err(anyhow!("Array index must be an integer")),
+                };
+                let zero = self.context.i32_type().const_zero();
+                let indices = [zero, index_value];
+                let element_ptr = unsafe {
+                    self.builder.build_gep(
+                        *array_type,
+                        *array_ptr,
+                        &indices,
+                        &format!("array_index_{}", array_name),
+                    )
+                }?;
+                let element_type = match array_type {
+                    BasicTypeEnum::ArrayType(array_ty) => array_ty.get_element_type(),
+                    _ => {
+                        return Err(anyhow!(
+                            "Expected an array type for variable '{}'",
+                            array_name
+                        ));
+                    }
+                };
+                self.builder
+                    .build_store(element_ptr, new_value)
+                    .map_err(|e| {
+                        anyhow!("Failed to store new value in array '{}': {}", array_name, e)
+                    })?;
+                self.last_value = Some(new_value);
+                self.builder.build_load(
+                    element_type,
+                    element_ptr,
+                    &format!("array_element_{}", array_name),
+                )?;
 
                 Ok(())
             }

@@ -132,12 +132,15 @@ pub Statement: Statement = {
     <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
+    <l:@L> <t:VectorInsert> => Statement::VectorInsert(t, l),
+    <l:@L> <t:VectorRemove> => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> "debug" "(" <e:Expression> ")" ";" => Statement::Debug(Debug { expression: e }, l),
     <l:@L> <t:Return> => Statement::Return(t, l),
+    <l:@L> <t:Debug> => Statement::Debug(t, l),
     <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
@@ -172,6 +175,19 @@ pub Assignment: Assignment = {
         value: v,
     }
 };
+pub VectorInsert: VectorInsert = {
+    <n:ID> ".insert(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
+        vector_name: n,
+        index: i,
+        value: v,
+    }
+};
+pub VectorRemove: VectorRemove = {
+    <n:ID> ".remove(" <i:Expression> ")" ";" => VectorRemove {
+        vector_name: n,
+        index: i,
+    }
+};
 
 ElseIf: ElseIf = {
     "else" "if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
@@ -203,6 +219,12 @@ pub While: WhileStatement = {
 pub Return: ReturnStatement = {
     "return" <e:Expression> ";" => ReturnStatement { value: Some(e) },
     "return" ";" => ReturnStatement { value: None },
+};
+
+pub Debug: Debug = {
+    "debug" "(" <e:Expression> ")" ";" => Debug {
+        expression: e,
+    }
 };
 
 pub Write: Write = {
@@ -240,8 +262,10 @@ pub Term: Expression = {
     <e:Read> => Expression::Read(Box::new(e)),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
-    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
+    <e:VectorAccess> => Expression::VectorAccess(Box::new(e)),
+    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
+     <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
     "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
     "*" <e:Term> => Expression::Dereference(Box::new(e)),
@@ -352,6 +376,16 @@ pub Expression: Expression = {
     }),
         };
 
+pub VectorLiteral: VectorLiteral = {
+    "{" <e:Expression> <en:("," Expression)*> "}" => VectorLiteral {
+        elements: {
+            let mut elements = vec![e];
+            elements.extend(en.into_iter().map(|x| x.1));
+            elements
+        },
+    }
+};
+
 pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
         elements: {
@@ -391,6 +425,14 @@ pub ArrayAccess: ArrayAccess = {
     }
 };
 
+pub VectorAccess: VectorAccess = {
+    <n:ID> ".get(" <i:Expression> ")" => VectorAccess {
+        vector_name: n,
+        index: i,
+    }
+};
+
+
 // Type - all possible data types in the language
 pub Type: Type = {
     "u8" => Type::U8,
@@ -412,4 +454,41 @@ pub Type: Type = {
     <i:Identifier> => Type::Struct(i.to_string()),
     "&" <t:Type> => Type::Reference(Box::new(t), false),
     "&mut" <t:Type> => Type::Reference(Box::new(t), true),
+};
+
+
+// String literals with escape support (e.g., "hello\nworld")
+pub StringLiteral: String = {
+    <s:r#""([^"\\\r\n]|\\.)*""#> => s[1..s.len() - 1].to_string()
+};
+
+// Integer literals (e.g., 0, 42)
+pub IntLiteral: u64 = {
+    <s:r"0|[1-9][0-9]*"> => s.parse().unwrap()
+};
+
+// Floating-point literals (e.g., 3.14, 0.001)
+pub FloatLiteral: f64 = {
+    <s:r"[0-9]+\.[0-9]+"> => s.parse().unwrap()
+};
+
+// Character literals with escape support (e.g., 'a', '\n')
+pub CharLiteral: char = {
+    <s:r#"'([^'\\\r\n]|\\.)'"#> => s.chars().nth(1).unwrap()
+};
+
+// Boolean literals (true / false)
+pub BoolLiteral: bool = {
+    "true" => true,
+    "false" => false,
+};
+
+
+// Identifiers (variable and function names)
+pub ID: String = {
+    <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => match s {
+        "write" | "read" | "debug" => panic!("Reserved keyword used as identifier: {}", s),
+        _ => s.to_string(),
+    }
+
 };

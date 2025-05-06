@@ -337,6 +337,25 @@ impl BorrowChecker {
                 }
                 self.check_expression(&assign.value)?;
             }
+            // vector insert
+            Statement::VectorInsert(vector_insert, _) => {
+                // check if the vector can be modified
+                self.can_modify(&vector_insert.vector_name)?;
+
+                // check the index expression
+                self.check_expression(&vector_insert.index)?;
+
+                // check the value expression
+                self.check_expression(&vector_insert.value)?;
+            }
+            Statement::VectorRemove(vector_delete, _) => {
+                // check if the vector can be modified
+                self.can_modify(&vector_delete.vector_name)?;
+
+                // check the index expression
+                self.check_expression(&vector_delete.index)?;
+            }
+
             Statement::If(if_stmt, _) => {
                 // check the condition
                 self.check_expression(&if_stmt.condition)?;
@@ -496,8 +515,40 @@ impl BorrowChecker {
                     }
                 }
             }
+            Expression::VectorAccess(vector_access) => {
+                // check if vector can be read
+                match self.borrows.get(&vector_access.vector_name) {
+                    Some(BorrowState::Exclusive) => Err(anyhow!(
+                        "Cannot access {} while it is mutably borrowed",
+                        vector_access.vector_name
+                    )),
+                    Some(BorrowState::FunctionBorrowed(func)) => {
+                        // if we're in the function that borrowed it, allow access
+                        if let Some(current_func) = &self.current_function {
+                            if current_func == func {
+                                return Ok(());
+                            }
+                        }
+                        Err(anyhow!(
+                            "Cannot access {} while it is borrowed by function {}",
+                            vector_access.vector_name,
+                            func
+                        ))
+                    }
+                    _ => {
+                        self.check_expression(&vector_access.index)?;
+                        Ok(())
+                    }
+                }
+            }
             Expression::ArrayLiteral(array_literal) => {
                 for elem in &array_literal.elements {
+                    self.check_expression(elem)?;
+                }
+                Ok(())
+            }
+            Expression::VectorLiteral(vector_literal) => {
+                for elem in &vector_literal.elements {
                     self.check_expression(elem)?;
                 }
                 Ok(())
