@@ -582,7 +582,7 @@ fn test_type() {
     assert_eq!(Type::Char, lossy::TypeParser::new().parse("char").unwrap());
     assert_eq!(Type::Bool, lossy::TypeParser::new().parse("bool").unwrap());
     assert_eq!(
-        Type::Vector(Box::new(Type::U8)),
+        Type::Vector(Box::new(Type::U8), 0),
         lossy::TypeParser::new().parse("Vec<u8>").unwrap()
     );
     assert_eq!(

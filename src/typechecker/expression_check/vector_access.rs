@@ -18,7 +18,7 @@ pub fn check(
     }
     //check if vector is defined and has type vector
     if let Some(var) = v_table.get(&vector_access.vector_name) {
-        if let Type::Vector(inner_type) = &var.var_type {
+        if let Type::Vector(inner_type, len) = &var.var_type {
             // return the type of the vector
             return Ok(*inner_type.clone());
         } else {
@@ -52,7 +52,7 @@ pub mod vector_access_tests {
             VariableDeclaration {
                 trivial: None,
                 mutable: None,
-                var_type: Type::Vector(Box::new(Type::I64)),
+                var_type: Type::Vector(Box::new(Type::I64), 0),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral {
                     elements: vec![Expression::Literal(Literal::Int(0))],

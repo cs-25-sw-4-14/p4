@@ -13,6 +13,7 @@ pub mod struct_init;
 pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
+pub mod vector_literal;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {

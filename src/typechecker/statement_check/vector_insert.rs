@@ -27,7 +27,7 @@ pub fn check(
 
     // check if vector is defined and has type vector
     if let Some(var) = v_table.get(&vector_name) {
-        if let Type::Vector(inner_type) = &var.var_type {
+        if let Type::Vector(inner_type, _) = &var.var_type {
             if *inner_type != Box::new(value_type.clone()) {
                 return Err(anyhow::anyhow!(
                     "Value type {:?} does not match vector type {:?}",
@@ -60,7 +60,7 @@ mod tests {
         v_table.variables.insert(
             "my_vector".to_string(),
             VariableDeclaration {
-                var_type: Type::Vector(Box::new(Type::I64)),
+                var_type: Type::Vector(Box::new(Type::I64), 0),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,

@@ -40,7 +40,10 @@ pub fn semantic_check_all_elements_same_type<'a>(
             ));
         }
     }
-    Ok(Type::Vector(Box::new(first_type)))
+    Ok(Type::Vector(
+        Box::new(first_type),
+        vector_literal.elements.len() as u64,
+    ))
 }
 
 #[cfg(test)]

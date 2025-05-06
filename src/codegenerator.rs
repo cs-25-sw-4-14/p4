@@ -107,8 +107,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
             // Type::Vector(element_type) => {
             //     let llvm_element_type = self.get_basic_type(element_type);
-            //     // If the vector length is dynamic, pass that as a parameter
-            //     llvm_element_type.array_type(4).into() // Example: Fixed length of 4, adjust dynamically if needed
+            //     llvm_element_type.vector_type(4).into() // Example: 4 elements
             // }
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
@@ -156,7 +155,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }
-            Type::Vector(_) => Err(anyhow::anyhow!("Vector types not supported yet")),
+            Type::Vector(_, _) => Err(anyhow::anyhow!("Vector types not supported yet")),
         }
     }
 }
