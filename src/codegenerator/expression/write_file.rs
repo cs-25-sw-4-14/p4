@@ -1,10 +1,9 @@
 use super::CodeGenerator;
-use crate::ast::{Write}; // Access AST nodes
+use crate::ast::{Write};
 use anyhow::{Result, anyhow};
 use inkwell::values::{BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
-    // This method handles the logic for the Write expression
     pub(super) fn compile_write_file(&mut self, write_node: &Write) -> Result<BasicValueEnum<'ctx>> {
         // 1. Compile value (content) - Expecting i8* (string)
         let value_val = self.compile_expression(&write_node.value)?;

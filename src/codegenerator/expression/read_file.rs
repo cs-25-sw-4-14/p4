@@ -1,5 +1,5 @@
 use super::CodeGenerator;
-use crate::ast::Read; // Remove unused Expression import if not needed elsewhere
+use crate::ast::Read;
 use anyhow::{Result, anyhow};
 use inkwell::values::{BasicValueEnum, BasicMetadataValueEnum};
 
@@ -15,7 +15,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // 2. Get C string "r" for read mode and necessary types/constants
 
-        let read_mode_ptr = self.get_global_string_ptr("r", "r_mode")?; // <--- ADDED ?
+        let read_mode_ptr = self.get_global_string_ptr("r", "r_mode")?;
         let i64_type = self.context.i64_type();
         let i32_type = self.context.i32_type();
         let i8_type = self.context.i8_type();
