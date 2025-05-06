@@ -1,21 +1,59 @@
-// write_file.rs
-use crate::ast::{Expression, Type};
-use anyhow::Result;
-use inkwell::values::{BasicValueEnum, PointerValue};
+use super::CodeGenerator;
+use crate::ast::{Expression, Write}; // Access AST nodes
+use anyhow::{Result, anyhow};
+use inkwell::values::{BasicValueEnum, PointerValue, IntValue};
 
-pub fn compile<'ctx>(gen: &mut CodeGenerator<'ctx>, write_expr: &Expression::Write) -> Result<BasicValueEnum<'ctx>> {
-    // Compile the value (string to be written)
-    let value_ir = gen.compile_expression(&write_expr.value)?;
+impl<'ctx> CodeGenerator<'ctx> {
+    // This method handles the logic for the Write expression
+    pub(super) fn compile_write_file(&mut self, write_node: &Write) -> Result<BasicValueEnum<'ctx>> {
+        // 1. Compile value (content) - Expecting i8* (string)
+        let value_val = self.compile_expression(&write_node.value)?;
+        let content_ptr = match value_val {
+            BasicValueEnum::PointerValue(pv) => pv,
+            _ => return Err(anyhow!("Write 'value' must compile to a string pointer (i8*)"))
+        };
 
-    // Compile the target (file path)
-    let target_ir = gen.compile_expression(&write_expr.target)?;
+        // 2. Compile target (filename) - Expecting i8* (string)
+        let target_val = self.compile_expression(&write_node.target)?;
+        let filename_ptr = match target_val {
+            BasicValueEnum::PointerValue(pv) => pv,
+            _ => return Err(anyhow!("Write 'target' must compile to a string pointer (i8*)"))
+        };
 
-    // Assuming you have an existing LLVM IR function for writing to a file
-    let write_function = gen.module.get_function("write_file")
-        .ok_or(anyhow::anyhow!("write_file function not found"))?;
+        // 3. Get C strings for "w" mode and "%s" format
+        let write_mode_ptr = self.get_global_string_ptr("w", "w_mode")?;
+        let format_str_ptr = self.get_global_string_ptr("%s", "s_format")?;
 
-    // Generate the call to write to the file
-    gen.builder.build_call(write_function, &[value_ir.into(), target_ir.into()], "write_call");
+        // 4. Call fopen(filename, "w") -> returns FILE* (i8*)
 
-    Ok(value_ir) // You can return the value IR or any other relevant information
+        let file_handle = self.builder.build_call(
+            self.fopen_func,
+            &[filename_ptr.into(), write_mode_ptr.into()],
+            "fopen_call",
+        )? 
+         .try_as_basic_value().left()
+         .ok_or_else(|| anyhow!("fopen call failed to return a basic value"))?
+         .into_pointer_value();
+
+
+        // 5. Call fprintf(file_handle, "%s", content) -> returns int
+        let _fprintf_ret = self.builder.build_call(
+            self.fprintf_func,
+            &[file_handle.into(), format_str_ptr.into(), content_ptr.into()],
+            "fprintf_call",
+        )?;
+
+
+        // 6. Call fclose(file_handle) -> returns int
+        // Add '?' for good practice
+        let _fclose_ret = self.builder.build_call(
+            self.fclose_func,
+            &[file_handle.into()],
+            "fclose_call",
+        )?; // <--- FIX: Added ?
+        // !!! TODO: Check return value of fclose for errors !!!
+
+        // Return placeholder i32(0) for void expression type
+        Ok(self.context.i32_type().const_int(0, false).into())
+    }
 }

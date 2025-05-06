@@ -72,7 +72,6 @@ pub Statement: Statement = {
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
     <l:@L> <t:Print> => Statement::Print(t, l),
-    <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
 
@@ -146,14 +145,14 @@ pub Print: Print = {
 };
 
 pub Write: Write = {
-    "write_file" "(" <value: Expression> "," <target: Expression> ")" ";" => Write {
+    "write_file" "(" <value: Expression> "," <target: Expression> ")" => Write {
         value,
         target,
     }
 };
 
 pub Read: Read = {
-    "read_file" "(" <e: Expression> ")" ";" => Read {
+    "read_file" "(" <e: Expression> ")" => Read {
         value: e,
     }
 };
@@ -178,7 +177,8 @@ pub Term: Expression = {
     "(" <e:Expression> ")" => e,
     <e:Literal> => Expression::Literal(e),
     <e:ID> => Expression::Variable(e),
-    <e:Read> => Expression::Read(Box::new(e)),
+    <e:Read> => Expression::Read(Box::new(e)), 
+    <e:Write> => Expression::Write(Box::new(e)),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),

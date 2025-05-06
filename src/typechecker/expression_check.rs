@@ -12,8 +12,8 @@ mod struct_init;
 mod type_cast;
 mod unary_op;
 mod variable;
-pub read_file;
-pub write_file;
+mod read_file;
+mod write_file;
 
 pub fn check(
     expression: &Expression,
@@ -58,11 +58,13 @@ pub fn check(
                 )),
             }
         }
-        Expression::Read(read_file) => {
-            read_file::check(read_file, v_table, f_table, s_table)
+        Expression::Read(read_expr) => {
+
+            read_file::check(read_expr, v_table, f_table, s_table)
         }
-        Expression::Write(write_file) => {
-            write_file::check(write_file, v_table, f_table, s_table)
+        Expression::Write(write_expr) => {
+
+            write_file::check(write_expr, v_table, f_table, s_table)
         }
         
 

@@ -1,14 +1,14 @@
 use inkwell::AddressSpace;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
-use inkwell::module::Module;
-use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, PointerValue};
+use inkwell::module::{Module, Linkage};
+use inkwell::types::{BasicType, BasicTypeEnum, IntType, PointerType, VoidType};
+use inkwell::values::{BasicValueEnum, PointerValue, FunctionValue, IntValue};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use std::collections::HashMap;
 
-use crate::ast::{Program, TopLevelDefinition, Type};
+use crate::ast::{Program, TopLevelDefinition, Type, Write, Read};
 
 pub mod controlflow;
 pub mod expression;
@@ -25,16 +25,54 @@ pub struct CodeGenerator<'ctx> {
     pub program: Option<Program>,
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
-    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
+    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,    
+    
+    printf_func: FunctionValue<'ctx>,
+    fopen_func: FunctionValue<'ctx>,
+    fprintf_func: FunctionValue<'ctx>,
+    fclose_func: FunctionValue<'ctx>,
+    fseek_func: FunctionValue<'ctx>,
+    ftell_func: FunctionValue<'ctx>,
+    fread_func: FunctionValue<'ctx>,
+    malloc_func: FunctionValue<'ctx>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn new(context: &'ctx Context, module: Module<'ctx>) -> Self {
         let builder = context.create_builder();
 
-        let i8_ptr_type = context.ptr_type(inkwell::AddressSpace::default());
-        let printf_type = context.i32_type().fn_type(&[i8_ptr_type.into()], true);
-        module.add_function("printf", printf_type, None);
+        let i8_type = context.i8_type();
+        let i32_type = context.i32_type();
+        let i64_type = context.i64_type();
+        let i8_ptr_type = i8_type.ptr_type(AddressSpace::default());
+        let file_ptr_type = i8_ptr_type;
+
+        let printf_type = i32_type.fn_type(&[i8_ptr_type.into()], true);
+        // Store the result of add_function
+        let printf_func = module.add_function("printf", printf_type, Some(Linkage::External));
+
+        // Define other function types and add functions...
+        let fopen_type = file_ptr_type.fn_type(&[i8_ptr_type.into(), i8_ptr_type.into()], false);
+        let fopen_func = module.add_function("fopen", fopen_type, Some(Linkage::External));
+
+        // ... fprintf_func, fclose_func, etc. definitions ...
+        let fprintf_type = i32_type.fn_type(&[file_ptr_type.into(), i8_ptr_type.into()], true);
+        let fprintf_func = module.add_function("fprintf", fprintf_type, Some(Linkage::External));
+
+        let fclose_type = i32_type.fn_type(&[file_ptr_type.into()], false);
+        let fclose_func = module.add_function("fclose", fclose_type, Some(Linkage::External));
+
+        let fseek_type = i32_type.fn_type(&[file_ptr_type.into(), i64_type.into(), i32_type.into()], false);
+        let fseek_func = module.add_function("fseek", fseek_type, Some(Linkage::External));
+
+        let ftell_type = i64_type.fn_type(&[file_ptr_type.into()], false);
+        let ftell_func = module.add_function("ftell", ftell_type, Some(Linkage::External));
+
+        let fread_type = i64_type.fn_type(&[i8_ptr_type.into(), i64_type.into(), i64_type.into(), file_ptr_type.into()], false);
+        let fread_func = module.add_function("fread", fread_type, Some(Linkage::External));
+
+        let malloc_type = i8_ptr_type.fn_type(&[i64_type.into()], false);
+        let malloc_func = module.add_function("malloc", malloc_type, Some(Linkage::External));
 
         CodeGenerator {
             context,
@@ -46,7 +84,34 @@ impl<'ctx> CodeGenerator<'ctx> {
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
+            printf_func: printf_func,
+            fprintf_func: fprintf_func,
+            fopen_func: fopen_func,
+            fclose_func: fclose_func,
+            fseek_func: fseek_func,
+            ftell_func: ftell_func,
+            fread_func: fread_func,
+            malloc_func: malloc_func,
         }
+    }
+
+
+    fn get_global_string_ptr(&self, string_literal: &str, name: &str) -> Result<PointerValue<'ctx>> {
+        let c_string = format!("{}\0", string_literal);
+        let bytes = c_string.as_bytes();
+        let global_str_type = self.context.i8_type().array_type(bytes.len() as u32);
+        let global_str = self.module.add_global(global_str_type, Some(AddressSpace::default()), name);
+        global_str.set_linkage(Linkage::Private);
+        global_str.set_initializer(&self.context.const_string(bytes, false));
+        global_str.set_constant(true);
+    
+        let i8_ptr_type = self.context.i8_type().ptr_type(AddressSpace::default());
+        self.builder.build_pointer_cast(
+            global_str.as_pointer_value(),
+            i8_ptr_type,
+            &format!("{}_ptr", name),
+        )
+        .map_err(anyhow::Error::new) // 
     }
 
     // Entry point for code generation: process all top-level definitions.

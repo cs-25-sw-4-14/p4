@@ -1,2 +1,1 @@
 hey
-print("hey2")

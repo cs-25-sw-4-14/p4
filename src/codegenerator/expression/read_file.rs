@@ -1,19 +1,100 @@
-// read_file.rs
-use crate::ast::{Expression, Type};
-use anyhow::Result;
-use inkwell::values::{BasicValueEnum, PointerValue};
+use super::CodeGenerator;
+use crate::ast::Read; // Remove unused Expression import if not needed elsewhere
+use anyhow::{Result, anyhow};
+use inkwell::values::{BasicValueEnum, PointerValue, BasicMetadataValueEnum};
 
-pub fn compile<'ctx>(gen: &mut CodeGenerator<'ctx>, read_expr: &Expression::Read) -> Result<BasicValueEnum<'ctx>> {
-    // Compile the path (string) to be read
-    let path_ir = gen.compile_expression(&read_expr.value)?;
 
-    // Assuming you have an existing LLVM IR function for reading from a file
-    let read_function = gen.module.get_function("read_file")
-        .ok_or(anyhow::anyhow!("read_file function not found"))?;
+impl<'ctx> CodeGenerator<'ctx> {
+    // This method handles the logic for the Read expression
+    pub(super) fn compile_read_file(&mut self, read_node: &Read) -> Result<BasicValueEnum<'ctx>> {
+        // 1. Compile filename expression - Expecting i8* (string)
+        let filename_val = self.compile_expression(&read_node.value)?;
+        let filename_ptr = match filename_val {
+            BasicValueEnum::PointerValue(pv) => pv,
+             _ => return Err(anyhow!("Read 'value' (filename) must compile to a string pointer (i8*)"))
+        };
 
-    // Generate the call to read the file
-    let read_result = gen.builder.build_call(read_function, &[path_ir.into()], "read_call");
+        // 2. Get C string "r" for read mode and necessary types/constants
+        // Assumes get_global_string_ptr returns Result<PointerValue>
+        let read_mode_ptr = self.get_global_string_ptr("r", "r_mode")?; // <--- ADDED ?
+        let i64_type = self.context.i64_type();
+        let i32_type = self.context.i32_type();
+        let i8_type = self.context.i8_type();
 
-    // Assuming `read_file` returns a string, extract it
-    Ok(read_result.try_as_basic_value().left().unwrap())
+        // 3. Call fopen(filename, "r") -> returns FILE* (i8*)
+        let file_handle = self.builder.build_call(
+            self.fopen_func,
+            &[filename_ptr.into(), read_mode_ptr.into()],
+            "fopen_call",
+        )? // <--- ADDED ? right after build_call
+         .try_as_basic_value().left()
+         .ok_or_else(|| anyhow!("fopen call failed to return a basic value"))?
+         .into_pointer_value();
+         // !!! TODO: Add runtime check: if file_handle == NULL, handle error !!!
+
+        // --- Logic for if fopen succeeded ---
+
+        // 4. Get file size
+        // 4. Get file size
+        let seek_end_const = i32_type.const_int(2, false);
+        let seek_set_const = i32_type.const_int(0, false);
+        let offset_zero_i64 = i64_type.const_int(0, false);
+        // *** ENSURE ? IS HERE ***
+        self.builder.build_call(self.fseek_func, &[file_handle.into(), offset_zero_i64.into(), seek_end_const.into()], "fseek_end")?;
+        // ftell call (already has ?)
+        let file_size_i64 = self.builder.build_call(self.ftell_func, &[file_handle.into()], "ftell")?
+                        .try_as_basic_value().left()
+                        .ok_or_else(|| anyhow!("ftell call failed to return a value"))?
+                        .into_int_value();
+        // *** ENSURE ? IS HERE ***
+        self.builder.build_call(self.fseek_func, &[file_handle.into(), offset_zero_i64.into(), seek_set_const.into()], "fseek_set")?;
+
+        // 5. Allocate buffer: malloc(file_size + 1)
+        // buffer_size should now be correctly inferred as IntValue
+        let buffer_size_result = self.builder.build_int_add(file_size_i64, i64_type.const_int(1, false), "buffer_size");
+        let buffer_size = buffer_size_result?; 
+        let buffer_size_arg: BasicMetadataValueEnum = buffer_size.into(); 
+        let buffer_ptr = self.builder.build_call(
+            self.malloc_func,
+            &[buffer_size_arg], // Pass the argument
+            "malloc_call"
+        )? // ? after build_call
+        .try_as_basic_value().left()
+        .ok_or_else(|| anyhow!("malloc call failed to return a basic value"))?
+        .into_pointer_value();
+
+        // --- Logic for if malloc succeeded ---
+
+        // 6. Read content: fread(buffer, 1, file_size, file_handle)
+        let size_one_i64 = i64_type.const_int(1, false);
+        let _read_count = self.builder.build_call(
+            self.fread_func,
+            &[buffer_ptr.into(), size_one_i64.into(), file_size_i64.into(), file_handle.into()],
+            "fread_call"
+        )? // <--- ADDED ? right after build_call
+         .try_as_basic_value().left()
+         .ok_or_else(|| anyhow!("fread call failed to return a basic value"))?
+         .into_int_value();
+        // !!! TODO: Check if _read_count == file_size for read errors !!!
+
+        // 7. Add null terminator
+        // build_gep returns Result
+         let null_terminator_ptr = unsafe {
+            self.builder.build_gep(i8_type, buffer_ptr, &[file_size_i64], "null_term_ptr")
+         }?; // <--- ADDED ? AFTER the unsafe block
+        // build_store returns Result<InstructionValue>, add ? if propagating error
+        self.builder.build_store(null_terminator_ptr, i8_type.const_int(0, false))?; // <--- ADDED ?
+
+        // 8. Close file
+        // Add ? for potential build_call errors
+        let _fclose_ret = self.builder.build_call(
+            self.fclose_func,
+            &[file_handle.into()],
+            "fclose_call",
+        )?; // <--- ADDED ?
+        // !!! TODO: Check return value of fclose for errors !!!
+
+        // 9. Return the pointer to the buffer (Type::String -> i8*)
+        Ok(buffer_ptr.into())
+    }
 }

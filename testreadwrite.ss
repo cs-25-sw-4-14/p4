@@ -1,5 +1,4 @@
 void main() {
-    path = "readthis.ss"
-    contents = read_file(path)
-    print(contents)
+    String path = "readthis.ss";
+    print(path);
 }
