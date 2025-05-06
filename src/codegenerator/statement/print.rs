@@ -36,7 +36,9 @@ impl CodeGenerator<'_> {
             BasicValueEnum::FloatValue(float_val) => {
                 match self.get_float_bit_width(float_val.get_type()) {
                     Ok(16) => {
-                        let fmt_str = self.builder.build_global_string_ptr("16: %0.40f\n", "fmt_f16")?;
+                        let fmt_str = self
+                            .builder
+                            .build_global_string_ptr("16: %0.40f\n", "fmt_f16")?;
                         let extended = self.builder.build_float_ext(
                             float_val,
                             self.context.f32_type(),
@@ -45,11 +47,15 @@ impl CodeGenerator<'_> {
                         vec![fmt_str.as_pointer_value().into(), extended.unwrap().into()]
                     }
                     Ok(32) => {
-                        let fmt_str = self.builder.build_global_string_ptr("32: %0.40f\n", "fmt_f32")?;
+                        let fmt_str = self
+                            .builder
+                            .build_global_string_ptr("32: %0.40f\n", "fmt_f32")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Ok(64) => {
-                        let fmt_str = self.builder.build_global_string_ptr("64: %.040lf\n", "fmt_f64")?;
+                        let fmt_str = self
+                            .builder
+                            .build_global_string_ptr("64: %.040lf\n", "fmt_f64")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Err(e) => {
@@ -63,6 +69,19 @@ impl CodeGenerator<'_> {
             BasicValueEnum::PointerValue(ptr_val) => {
                 let fmt_str = self.builder.build_global_string_ptr("%s\n", "fmt")?;
                 vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
+                /*
+                println!("Print: Pointer value: {:?}", ptr_val);
+                let deref_val = self.builder.build_load(ptr_val.get_type(), ptr_val, "deref_val")?;
+                println!("Print: Deref value: {:?}", deref_val);
+                let value = match deref_val {
+                BasicValueEnum::IntValue(val) => val,
+                _ => return Err(anyhow!("Unsupported pointer type")),
+                };
+                println!("Print: Value: {:?}", value);
+
+                let fmt_str = self.builder.build_global_string_ptr("%lld\n", "fmt_i64")?;
+                vec![fmt_str.as_pointer_value().into(), value.into()]
+                */
             }
             _ => return Err(anyhow!("not a valid type for print statement")),
         };

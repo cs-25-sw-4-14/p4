@@ -1,10 +1,13 @@
 use super::CodeGenerator;
 use crate::ast::{StructDef, StructInit};
 use anyhow::Result;
-use inkwell::values::{BasicValueEnum, PointerValue};
+use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
-    pub fn compile_struct_init(&mut self, struct_init: &StructInit) -> Result<BasicValueEnum<'ctx>> {
+    pub fn compile_struct_init(
+        &mut self,
+        struct_init: &StructInit,
+    ) -> Result<BasicValueEnum<'ctx>> {
         let struct_name = &struct_init.name;
         let struct_type = self
             .get_struct_type(struct_name)?
@@ -16,22 +19,22 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         for field_init in &struct_init.fields {
             let field_index = self.get_field_index(struct_name, &field_init.name)?;
-            let field_value = self.compile_expression(&field_init.value)?;
             let field_ptr = self.builder.build_struct_gep(
                 struct_type,
                 struct_ptr,
                 field_index as u32,
-                &format!("{}_field_{}", struct_name, field_init.name),
+                &format!("{}_field_ptr_{}", struct_name, field_init.name),
             )?;
+            let field_value = self.compile_expression(&field_init.value)?;
             self.builder.build_store(field_ptr, field_value)?;
         }
 
-        let struct_val =
+        let struct_value =
             self.builder
                 .build_load(struct_type, struct_ptr, &format!("{}_value", struct_name))?;
 
-        self.last_value = Some(struct_val);
-        Ok(BasicValueEnum::PointerValue(struct_ptr))
+        println!("Debug: Struct value: {:?}", struct_value);
+        Ok(struct_value)
     }
 
     pub fn get_struct_type(
@@ -41,7 +44,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         Ok(self.module.get_struct_type(struct_name))
     }
 
-    fn get_field_index(&self, struct_name: &str, field_name: &str) -> Result<usize> {
+    pub fn get_field_index(&self, struct_name: &str, field_name: &str) -> Result<usize> {
         let struct_def = self.find_struct_definition(struct_name)?;
         struct_def
             .fields

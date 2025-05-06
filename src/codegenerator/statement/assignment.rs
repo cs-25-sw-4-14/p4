@@ -64,80 +64,60 @@ impl CodeGenerator<'_> {
                 Ok(())
             }
             crate::ast::Expression::StructFieldAccess(var) => {
-                let struct_name = "n1";
+                let struct_name =
+                    if let crate::ast::Expression::Variable(var_name) = &*var.struct_expr {
+                        var_name
+                    } else {
+                        return Err(anyhow!("Invalid struct expression"));
+                    };
+
                 let field_name = &var.field_name;
 
-                // Get the struct pointer from the variables table
                 let (struct_type, struct_ptr) = self
                     .variables
                     .get(struct_name)
                     .ok_or_else(|| anyhow!("Struct variable '{:?}' not found", struct_name))?;
 
-                // Get the struct type definition
-                let struct_def = self
-                    .struct_definitions
-                    .get("Node")
-                    .ok_or_else(|| anyhow!("Struct type for '{:?}' not found", struct_name))?;
+                println!("Struct type : {}", struct_type);
 
-                // Find the field index within the struct
-                let field_index = struct_def
-                    .fields
-                    .iter()
-                    .position(|field| field.name == *field_name)
-                    .ok_or_else(|| {
-                        anyhow!(
-                            "Field '{:?}' not found in struct '{:?}'",
-                            field_name,
-                            struct_name
-                        )
-                    })?;
+                let struct_type = if let BasicTypeEnum::StructType(ty) = struct_type {
+                    *ty
+                } else {
+                    return Err(anyhow!(
+                        "Expected struct type for variable '{}'",
+                        struct_name
+                    ));
+                };
 
-                let field_idx = self.context.i32_type().const_int(field_index as u64, false);
+                let field_index =
+                    self.get_field_index(struct_type.get_name().unwrap().to_str()?, field_name)?;
 
-                let zero = self.context.i32_type().const_zero();
-                let indices = [zero, field_idx];
+                println!("Struct type : {}", struct_type);
 
-                let field_ptr = unsafe {
-                    self.builder.build_gep(
-                        *struct_type,
-                        *struct_ptr,
-                        &indices,
-                        &format!("{}_field_{}", struct_name, field_name),
-                    )
-                }?;
+                let field_type = struct_type;
 
-                // Store the new value to the field
+                let field_ptr = self.builder.build_struct_gep(
+                    struct_type,
+                    *struct_ptr,
+                    field_index as u32,
+                    &format!("{}_field_ptr_{}", struct_name, field_name),
+                )?;
+
                 self.builder
                     .build_store(field_ptr, new_value)
                     .map_err(|e| {
                         anyhow!(
-                            "Failed to store new value in struct field '{}.{}': {}",
-                            struct_name,
+                            "Failed to store new value in struct field '{}': {}",
                             field_name,
                             e
                         )
                     })?;
 
-                // Load the field value to maintain consistency with other branches
-                let field_type = match struct_type {
-                    BasicTypeEnum::StructType(struct_ty) => struct_ty
-                        .get_field_type_at_index(field_index as u32)
-                        .ok_or_else(|| {
-                            anyhow!("Could not get type for field at index {}", field_index)
-                        })?,
-                    _ => {
-                        return Err(anyhow!(
-                            "Expected a struct type for variable '{}'",
-                            struct_name
-                        ));
-                    }
-                };
-
                 self.last_value = Some(new_value);
                 self.builder.build_load(
                     field_type,
                     field_ptr,
-                    &format!("{}_field_{}_value", struct_name, field_name),
+                    &format!("{}_field_val_{}", struct_name, field_name),
                 )?;
 
                 Ok(())

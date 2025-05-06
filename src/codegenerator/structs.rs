@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::StructDef;
-use anyhow::Result;
-use inkwell::types::BasicTypeEnum;
+use anyhow::{Result, anyhow};
+use inkwell::types::{BasicTypeEnum, StructType};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_struct(&mut self, struct_def: &StructDef) -> Result<()> {
