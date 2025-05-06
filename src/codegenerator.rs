@@ -8,7 +8,7 @@ use inkwell::values::{BasicValueEnum, PointerValue};
 use anyhow::Result;
 use std::collections::HashMap;
 
-use crate::ast::{Program, TopLevelDefinition, Type};
+use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
 
 pub mod controlflow;
 pub mod expression;
@@ -22,10 +22,10 @@ pub struct CodeGenerator<'ctx> {
     pub builder: Builder<'ctx>,
     pub variables: HashMap<String, (BasicTypeEnum<'ctx>, PointerValue<'ctx>)>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
-    pub program: Option<Program>,
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
+    pub struct_definitions: HashMap<String, StructDef>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -42,10 +42,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             builder,
             variables: HashMap::new(),
             last_value: None,
-            program: None,
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
+            struct_definitions: HashMap::new()
         }
     }
 
@@ -58,6 +58,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 TopLevelDefinition::Struct(struct_def) => {
                     self.compile_struct(struct_def)?;
+                    self.struct_definitions.insert(struct_def.name.clone(), struct_def.clone());
                 }
             }
         }
