@@ -1,4 +1,4 @@
-use crate::typechecker;
+use crate::{lexer::Lexer, typechecker};
 use anyhow::anyhow;
 use lalrpop_util::lalrpop_mod;
 
@@ -15,8 +15,10 @@ fn test_parser() {
     let file = include_str!("integration_test.ss");
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let ast = lossy::ProgramParser::new()
-        .parse(file)
+    let lexer = Lexer::new(file);
+    let parser = lossy::ProgramParser::new();
+    let ast = parser
+        .parse(lexer)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
                 anyhow!("Invalid token at {}", debugger.display(location))

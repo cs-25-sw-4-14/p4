@@ -458,6 +458,7 @@ dependencies = [
  "lalrpop",
  "lalrpop-util 0.21.0",
  "logos",
+ "string_iter",
 ]
 
 [[package]]
@@ -669,6 +670,12 @@ dependencies = [
  "phf_shared",
  "precomputed-hash",
 ]
+
+[[package]]
+name = "string_iter"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8d4732e1057f0f3b6766f347a8aa8d730ae04c493e8739e5ac7b8bad85f333b"
 
 [[package]]
 name = "strsim"

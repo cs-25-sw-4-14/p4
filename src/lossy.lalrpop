@@ -1,12 +1,78 @@
 use crate::ast::*;
+use crate::tokens::{Token, LexicalError};
 
 grammar;
 
-match {
-    r"\s*" => { }, // Skip whitespace
-    r"//[^\n\r]*[\n\r]*" => { }, // Skip line comments
-    r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/" => { }, // Skip block comments
-    _
+extern {
+  type Location = usize;
+  type Error = LexicalError;
+
+  enum Token {
+    "mut" => Token::KeywordMut,
+    "triv" => Token::KeywordTrivial,
+    "&mut" => Token::KeywordRefMut,
+    "&" => Token::KeywordRef,
+    "arr" => Token::TypeArray,
+    "Vec" => Token::TypeVector,
+    "bool" => Token::TypeBool,
+    "char" => Token::TypeChar,
+    "String" => Token::TypeString,
+    "f64" => Token::TypeF64,
+    "f32" => Token::TypeF32,
+    "f16" => Token::TypeF16,
+    "i64" => Token::TypeI64,
+    "i32" => Token::TypeI32,
+    "i16" => Token::TypeI16,
+    "i8" => Token::TypeI8,
+    "u64" => Token::TypeU64,
+    "u32" => Token::TypeU32,
+    "u16" => Token::TypeU16,
+    "u8" => Token::TypeU8,
+    "(" => Token::LParen,
+    ")" => Token::RParen,
+    "[" => Token::LBracket,
+    "]" => Token::RBracket,
+    "{" => Token::LBrace,
+    "}" => Token::RBrace,
+    "," => Token::Comma,
+    ";" => Token::Semicolon,
+    ":" => Token::Colon,
+    "||" => Token::OperatorOr,
+    "&&" => Token::OperatorAnd,
+    "!=" => Token::OperatorNotEqual,
+    "==" => Token::OperatorEqual,
+    ">=" => Token::OperatorGreaterEqual,
+    "<=" => Token::OperatorLessEqual,
+    ">" => Token::OperatorGreater,
+    "<" => Token::OperatorLess,
+    "+" => Token::OperatorAdd,
+    "%" => Token::OperatorMod,
+    "*" => Token::Star,
+    "/" => Token::OperatorDiv,
+    "." => Token::Dot,
+    "!" => Token::OperatorNot,
+    "-" => Token::OperatorNeg,
+    "as" => Token::OperatorAs,
+    "read" => Token::KeywordRead,
+    "write" => Token::KeywordWrite,
+    "debug" => Token::KeywordDebug,
+    "return" => Token::KeywordReturn,
+    "while" => Token::KeywordWhile,
+    "if" => Token::KeywordIf,
+    "else" => Token::KeywordElse,
+    "=" => Token::Assign,
+    "struct" => Token::KeywordStruct,
+    "void" => Token::KeywordVoid,
+    "break" => Token::KeywordBreak,
+    "continue" => Token::KeywordContinue,
+    "_" => Token::Throwaway,
+    Identifier => Token::Identifier(<String>),
+    IntLiteral => Token::IntLiteral(<u64>),
+    StringLiteral => Token::StringLiteral(<String>),
+    BoolLiteral => Token::BoolLiteral(<bool>),
+    FloatLiteral => Token::FloatLiteral(<f64>),
+    CharLiteral => Token::CharLiteral(<char>),
+  }
 }
 
 pub Program: Program = {
@@ -20,7 +86,7 @@ pub TopLevelDefinition: TopLevelDefinition = {
 
 
 pub FunctionDef: FunctionDef = {
-    <r:ReturnOpt> <n:ID> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
+    <r:ReturnOpt> <n:Identifier> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
          return_type: r,
          name: n,
          params: p.unwrap_or(vec![]),
@@ -42,21 +108,21 @@ pub ParamList: Vec<Param> = {
 };
 
 pub Param: Param = {
-    <t:Type> <n:ID> => Param {
+    <t:Type> <n:Identifier> => Param {
         param_type: t,
         name: n,
     }
 };
 
 pub StructDef: StructDef = {
-    "struct" <n:ID> "{" <f:StructField*> "}" => StructDef {
+    "struct" <n:Identifier> "{" <f:StructField*> "}" => StructDef {
         name: n,
         fields: f,
     }
 };
 
 pub StructField: StructField = {
-    <t:Type> <n:ID> ";" => StructField {
+    <t:Type> <n:Identifier> ";" => StructField {
         field_type: t,
         name: n,
     }
@@ -70,8 +136,8 @@ pub Statement: Statement = {
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
+    <l:@L> "debug" "(" <e:Expression> ")" ";" => Statement::Debug(Debug { expression: e }, l),
     <l:@L> <t:Return> => Statement::Return(t, l),
-    <l:@L> <t:Debug> => Statement::Debug(t, l),
     <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
@@ -83,7 +149,7 @@ pub Throwaway: Throwaway = {
 };
 
 pub VariableDeclaration: VariableDeclaration = {
-    <tr:Trivial?> <mu:Mutable?> <t:Type> <n:ID> "=" <v:Expression> ";" => VariableDeclaration {
+    <tr:Trivial?> <mu:Mutable?> <t:Type> <n:Identifier> "=" <v:Expression> ";" => VariableDeclaration {
         trivial: tr,
         mutable: mu,
         var_type: t,
@@ -108,7 +174,7 @@ pub Assignment: Assignment = {
 };
 
 ElseIf: ElseIf = {
-    "else if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
+    "else" "if" "(" <c:Expression> ")" "{" <b:Statement*> "}" => ElseIf {
         condition: c,
         body: b,
     }
@@ -139,27 +205,21 @@ pub Return: ReturnStatement = {
     "return" ";" => ReturnStatement { value: None },
 };
 
-pub Debug: Debug = {
-    "debug" "(" <e:Expression> ")" ";" => Debug {
-        expression: e,
-    }
-};
-
 pub Write: Write = {
-    "write" "(" <e:Expression> ")" ";" => Write {
+    "write" "(" <e:Expression> ")" => Write {
         value: e,
     }
 };
 
 pub Read: Read = {
-    "read" "(" <e:Expression> ")" ";" => Read {
+    "read" "(" <e:Expression> ")" => Read {
         value: e,
     }
 };
 
 
 pub FunctionCall: FunctionCall = {
-    <n:ID> "(" <a:ArgumentList?> ")"=> FunctionCall {
+    <n:Identifier> "(" <a:ArgumentList?> ")"=> FunctionCall {
         name: n,
         args: a.unwrap_or(vec![]),
     }
@@ -176,7 +236,7 @@ pub ArgumentList: Vec<Expression> = {
 pub Term: Expression = {
     "(" <e:Expression> ")" => e,
     <e:Literal> => Expression::Literal(e),
-    <e:ID> => Expression::Variable(e),
+    <e:Identifier> => Expression::Variable(e),
     <e:Read> => Expression::Read(Box::new(e)),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
@@ -207,7 +267,7 @@ pub Expression: Expression = {
     }),
     // TODO: Fix struct field access so it is recursive
     #[precedence(level="4")] #[assoc(side="left")]
-    <e:Expression> "." <f:ID> => Expression::StructFieldAccess(StructFieldAccess {
+    <e:Expression> "." <f:Identifier> => Expression::StructFieldAccess(StructFieldAccess {
         struct_expr: Box::new(e),
         field_name: f,
     }),
@@ -311,21 +371,21 @@ pub Literal: Literal = {
 };
 
 pub StructInit: StructInit = {
-    <n:ID> "{" <f:StructFieldInit*> "}" => StructInit {
+    <n:Identifier> "{" <f:StructFieldInit*> "}" => StructInit {
         name: n,
         fields: f,
     }
 };
 
 pub StructFieldInit: StructFieldInit = {
-    <n:ID> ":" <v:Expression> ","? => StructFieldInit {
+    <n:Identifier> ":" <v:Expression> ","? => StructFieldInit {
         name: n,
         value: v,
     }
 };
 
 pub ArrayAccess: ArrayAccess = {
-    <n:ID> "[" <i:Expression> "]" => ArrayAccess {
+    <n:Identifier> "[" <i:Expression> "]" => ArrayAccess {
         array_name: n,
         index: i,
     }
@@ -349,44 +409,7 @@ pub Type: Type = {
     "bool" => Type::Bool,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
-    <i:ID> => Type::Struct(i.to_string()),
+    <i:Identifier> => Type::Struct(i.to_string()),
     "&" <t:Type> => Type::Reference(Box::new(t), false),
     "&mut" <t:Type> => Type::Reference(Box::new(t), true),
-};
-
-
-// String literals with escape support (e.g., "hello\nworld")
-pub StringLiteral: String = {
-    <s:r#""([^"\\\r\n]|\\.)*""#> => s[1..s.len() - 1].to_string()
-};
-
-// Integer literals (e.g., 0, 42)
-pub IntLiteral: u64 = {
-    <s:r"0|[1-9][0-9]*"> => s.parse().unwrap()
-};
-
-// Floating-point literals (e.g., 3.14, 0.001)
-pub FloatLiteral: f64 = {
-    <s:r"[0-9]+\.[0-9]+"> => s.parse().unwrap()
-};
-
-// Character literals with escape support (e.g., 'a', '\n')
-pub CharLiteral: char = {
-    <s:r#"'([^'\\\r\n]|\\.)'"#> => s.chars().nth(1).unwrap()
-};
-
-// Boolean literals (true / false)
-pub BoolLiteral: bool = {
-    "true" => true,
-    "false" => false,
-};
-
-
-// Identifiers (variable and function names)
-pub ID: String = {
-    <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => match s {
-        "write" | "read" | "debug" => panic!("Reserved keyword used as identifier: {}", s),
-        _ => s.to_string(),
-    }
-
 };
