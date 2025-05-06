@@ -66,12 +66,14 @@ pub Statement: Statement = {
     <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
     <l:@L> <t:Assignment> => Statement::Assignment(t, l),
+    <l:@L> <t:VectorInsert> => Statement::VectorInsert(t, l),
+    <l:@L> <t:VectorRemove> => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
-    <l:@L> <t:Print> => Statement::Print(t, l),
+    <l:@L> <t:Debug> => Statement::Debug(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
 
@@ -103,6 +105,19 @@ pub Assignment: Assignment = {
     <t:Expression> "=" <v:Expression> ";" => Assignment {
         target: t,
         value: v,
+    }
+};
+pub VectorInsert: VectorInsert = {
+    <n:ID> ".insert(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
+        vector_name: n,
+        index: i,
+        value: v,
+    }
+};
+pub VectorRemove: VectorRemove = {
+    <n:ID> ".remove(" <i:Expression> ")" ";" => VectorRemove {
+        vector_name: n,
+        index: i,
     }
 };
 
@@ -138,8 +153,8 @@ pub Return: ReturnStatement = {
     "return" ";" => ReturnStatement { value: None },
 };
 
-pub Print: Print = {
-    "debug" "(" <e:Expression> ")" ";" => Print {
+pub Debug: Debug = {
+    "debug" "(" <e:Expression> ")" ";" => Debug {
         expression: e,
     }
 };
@@ -181,8 +196,10 @@ pub Term: Expression = {
     <e:Write> => Expression::Write(Box::new(e)),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
-    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),
+    <e:VectorAccess> => Expression::VectorAccess(Box::new(e)),
+    <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
+     <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
     "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
     "*" <e:Term> => Expression::Dereference(Box::new(e)),
@@ -293,6 +310,16 @@ pub Expression: Expression = {
     }),
         };
 
+pub VectorLiteral: VectorLiteral = {
+    "{" <e:Expression> <en:("," Expression)*> "}" => VectorLiteral {
+        elements: {
+            let mut elements = vec![e];
+            elements.extend(en.into_iter().map(|x| x.1));
+            elements
+        },
+    }
+};
+
 pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
         elements: {
@@ -332,6 +359,14 @@ pub ArrayAccess: ArrayAccess = {
     }
 };
 
+pub VectorAccess: VectorAccess = {
+    <n:ID> ".get(" <i:Expression> ")" => VectorAccess {
+        vector_name: n,
+        index: i,
+    }
+};
+
+
 // Type - all possible data types in the language
 pub Type: Type = {
     "u8" => Type::U8,
@@ -342,9 +377,9 @@ pub Type: Type = {
     "i16" => Type::I16,
     "i32" => Type::I32,
     "i64" => Type::I64,
-    "f16" => Type::FP16,
-    "f32" => Type::FP32,
-    "f64" => Type::FP64,
+    "f16" => Type::F16,
+    "f32" => Type::F32,
+    "f64" => Type::F64,
     "String" => Type::String,
     "char" => Type::Char,
     "bool" => Type::Bool,
@@ -386,7 +421,7 @@ pub BoolLiteral: bool = {
 // Identifiers (variable and function names)
 pub ID: String = {
     <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => match s {
-        "write" | "read" | "print" => panic!("Reserved keyword used as identifier: {}", s),
+        "write" | "read" | "debug" => panic!("Reserved keyword used as identifier: {}", s),
         _ => s.to_string(),
     }
 

@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, ElseIf, Expression,
-        FunctionCall, FunctionDef, IfStatement, Literal, Param, Print, Program, Read,
+        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, Debug, ElseIf,
+        Expression, FunctionCall, FunctionDef, IfStatement, Literal, Param, Program, Read,
         ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
         StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
         VariableDeclaration, WhileStatement, Write,
@@ -502,8 +502,8 @@ fn test_array_literal() {
 #[test]
 fn test_print() {
     assert_eq!(
-        Statement::Print(
-            Print {
+        Statement::Debug(
+            Debug {
                 expression: Expression::Literal(Literal::String("hi".to_string())),
             },
             0
@@ -572,9 +572,9 @@ fn test_type() {
     assert_eq!(Type::I16, lossy::TypeParser::new().parse("i16").unwrap());
     assert_eq!(Type::I32, lossy::TypeParser::new().parse("i32").unwrap());
     assert_eq!(Type::I64, lossy::TypeParser::new().parse("i64").unwrap());
-    assert_eq!(Type::FP16, lossy::TypeParser::new().parse("f16").unwrap());
-    assert_eq!(Type::FP32, lossy::TypeParser::new().parse("f32").unwrap());
-    assert_eq!(Type::FP64, lossy::TypeParser::new().parse("f64").unwrap());
+    assert_eq!(Type::F16, lossy::TypeParser::new().parse("f16").unwrap());
+    assert_eq!(Type::F32, lossy::TypeParser::new().parse("f32").unwrap());
+    assert_eq!(Type::F64, lossy::TypeParser::new().parse("f64").unwrap());
     assert_eq!(
         Type::String,
         lossy::TypeParser::new().parse("String").unwrap()

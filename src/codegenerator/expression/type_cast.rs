@@ -1,24 +1,20 @@
 use super::CodeGenerator;
 use crate::ast::Literal;
 use crate::ast::{Expression, Type, TypeCast};
-use anyhow::Result;
-use inkwell::types::BasicType;
+use anyhow::{Result, anyhow};
 use inkwell::types::BasicTypeEnum;
 use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
-    // Function to get the bit width of a float type (32-bit or 64-bit)
-    fn get_float_bit_width<T>(&self, float_val_or_type: T) -> Option<u32>
-    where
-        T: Into<BasicTypeEnum<'ctx>> + Copy,
-    {
-        let ty = float_val_or_type.into();
-        if ty == self.context.f32_type().as_basic_type_enum() {
-            Some(32) // 32-bit float
-        } else if ty == self.context.f64_type().as_basic_type_enum() {
-            Some(64) // 64-bit float
+    pub fn get_float_bit_width(&self, float_type: inkwell::types::FloatType<'ctx>) -> Result<u32> {
+        if float_type.eq(&self.context.f16_type()) {
+            Ok(16)
+        } else if float_type.eq(&self.context.f32_type()) {
+            Ok(32)
+        } else if float_type.eq(&self.context.f64_type()) {
+            Ok(64)
         } else {
-            None // Unsupported float type
+            Err(anyhow!("Unknown floating-point type"))
         }
     }
 }
@@ -69,12 +65,8 @@ impl<'ctx> CodeGenerator<'ctx> {
 
             // Float to Float casting
             (BasicValueEnum::FloatValue(value), BasicTypeEnum::FloatType(float_type)) => {
-                let src_bits = self
-                    .get_float_bit_width(value.get_type().as_basic_type_enum())
-                    .ok_or_else(|| anyhow::anyhow!("Unsupported source float type"))?;
-                let tgt_bits = self
-                    .get_float_bit_width(float_type.as_basic_type_enum())
-                    .ok_or_else(|| anyhow::anyhow!("Unsupported target float type"))?;
+                let src_bits = self.get_float_bit_width(value.get_type()).unwrap();
+                let tgt_bits = self.get_float_bit_width(float_type).unwrap();
 
                 // Perform the appropriate float extension or truncation based on bit widths
                 if src_bits < tgt_bits {

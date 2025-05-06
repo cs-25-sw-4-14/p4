@@ -47,13 +47,15 @@ pub enum Statement {
     Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
     Assignment(Assignment, usize),
+    VectorInsert(VectorInsert, usize),
+    VectorRemove(VectorRemove, usize),
     If(IfStatement, usize),
     While(WhileStatement, usize),
     Break(usize),
     Continue(usize),
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
-    Print(Print, usize),
+    Debug(Debug, usize),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -68,6 +70,18 @@ pub struct VariableDeclaration {
     pub var_type: Type,
     pub name: String,
     pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorInsert {
+    pub vector_name: String,
+    pub index: Expression,
+    pub value: Expression,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorRemove {
+    pub vector_name: String,
+    pub index: Expression,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -118,7 +132,7 @@ pub struct Read {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Print {
+pub struct Debug {
     pub expression: Expression,
 }
 
@@ -134,6 +148,8 @@ pub enum Expression {
     StructInit(StructInit),
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
+    VectorAccess(Box<VectorAccess>),
+    VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Reference(Box<Expression>, bool), // (expression, is_mutable)
@@ -215,6 +231,15 @@ pub struct ArrayAccess {
 pub struct ArrayLiteral {
     pub elements: Vec<Expression>,
 }
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorLiteral {
+    pub elements: Vec<Expression>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct VectorAccess {
+    pub vector_name: String,
+    pub index: Expression,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeCast {
@@ -232,9 +257,9 @@ pub enum Type {
     I16,
     I32,
     I64,
-    FP16,
-    FP32,
-    FP64,
+    F16,
+    F32,
+    F64,
     String,
     Char,
     Bool,
@@ -248,7 +273,7 @@ impl From<Literal> for Type {
     fn from(literal: Literal) -> Self {
         match literal {
             Literal::Int(_) => Type::I64,
-            Literal::Float(_) => Type::FP64,
+            Literal::Float(_) => Type::F64,
             Literal::String(_) => Type::String,
             Literal::Char(_) => Type::Char,
             Literal::Bool(_) => Type::Bool,

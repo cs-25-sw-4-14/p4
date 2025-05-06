@@ -1,11 +1,11 @@
 i64 main() {
-    String a = "abc";
-    
-    borrow_2(a);
-    borrow_1(&a);
-    borrow_1(&a);
+   
+   Vec<i64> a = {2};
+   i64 b = a.get(0);
+   a.insert(1,2);
+   a.remove(0);
 
-    return 0;
+   return 2; 
 }
 
 void borrow_1(&String in) {
