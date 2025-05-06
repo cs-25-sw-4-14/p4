@@ -7,15 +7,15 @@ mod array_literal;
 mod binary_op;
 mod function_call;
 mod literal;
+mod read_file;
 mod struct_field_access;
 mod struct_init;
 mod type_cast;
 mod unary_op;
 mod variable;
-mod read_file;
-mod write_file;
 mod vector_access;
 mod vector_literal;
+mod write_file;
 
 pub fn check(
     expression: &Expression,
@@ -66,13 +66,7 @@ pub fn check(
                 )),
             }
         }
-        Expression::Read(read_expr) => {
-
-            read_file::check(read_expr, v_table, f_table, s_table)
-        }
-        Expression::Write(write_expr) => {
-
-            write_file::check(write_expr, v_table, f_table, s_table)
-        }
+        Expression::Read(read_expr) => read_file::check(read_expr, v_table, f_table, s_table),
+        Expression::Write(write_expr) => write_file::check(write_expr, v_table, f_table, s_table),
     }
 }

@@ -1,11 +1,11 @@
 use inkwell::AddressSpace;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
-use inkwell::module::{Module, Linkage};
+use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, PointerValue, FunctionValue};
+use inkwell::values::{BasicValueEnum, FunctionValue, PointerValue};
 
-use anyhow::{Result};
+use anyhow::Result;
 use std::collections::HashMap;
 
 use crate::ast::{Program, TopLevelDefinition, Type};
@@ -25,8 +25,8 @@ pub struct CodeGenerator<'ctx> {
     pub program: Option<Program>,
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
-    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,    
-    
+    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
+
     fopen_func: FunctionValue<'ctx>,
     fprintf_func: FunctionValue<'ctx>,
     fclose_func: FunctionValue<'ctx>,
@@ -63,7 +63,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         let fclose_func = module.add_function("fclose", fclose_type, Some(Linkage::External));
 
         // fseek: int fseek(FILE* stream, long offset, int whence);
-        let fseek_type = i32_type.fn_type(&[file_ptr_type.into(), i64_type.into(), i32_type.into()], false);
+        let fseek_type = i32_type.fn_type(
+            &[file_ptr_type.into(), i64_type.into(), i32_type.into()],
+            false,
+        );
         let fseek_func = module.add_function("fseek", fseek_type, Some(Linkage::External));
 
         // ftell: long ftell(FILE* stream);
@@ -71,7 +74,15 @@ impl<'ctx> CodeGenerator<'ctx> {
         let ftell_func = module.add_function("ftell", ftell_type, Some(Linkage::External));
 
         // fread: size_t fread(void* ptr, size_t size, size_t count, FILE* stream);
-        let fread_type = i64_type.fn_type(&[i8_ptr_type.into(), i64_type.into(), i64_type.into(), file_ptr_type.into()], false);
+        let fread_type = i64_type.fn_type(
+            &[
+                i8_ptr_type.into(),
+                i64_type.into(),
+                i64_type.into(),
+                file_ptr_type.into(),
+            ],
+            false,
+        );
         let fread_func = module.add_function("fread", fread_type, Some(Linkage::External));
 
         // malloc: void* malloc(size_t size);
@@ -101,22 +112,29 @@ impl<'ctx> CodeGenerator<'ctx> {
 
     // Helper function to get a global string pointer for string literals
     // This function creates a global string in the LLVM module and returns a pointer to it.
-    fn get_global_string_ptr(&self, string_literal: &str, name: &str) -> Result<PointerValue<'ctx>> {
+    fn get_global_string_ptr(
+        &self,
+        string_literal: &str,
+        name: &str,
+    ) -> Result<PointerValue<'ctx>> {
         let c_string = format!("{}\0", string_literal);
         let bytes = c_string.as_bytes();
         let global_str_type = self.context.i8_type().array_type(bytes.len() as u32);
-        let global_str = self.module.add_global(global_str_type, Some(AddressSpace::default()), name);
+        let global_str =
+            self.module
+                .add_global(global_str_type, Some(AddressSpace::default()), name);
         global_str.set_linkage(Linkage::Private);
         global_str.set_initializer(&self.context.const_string(bytes, false));
         global_str.set_constant(true);
-    
+
         let i8_ptr_type = self.context.ptr_type(AddressSpace::default());
-        self.builder.build_pointer_cast(
-            global_str.as_pointer_value(),
-            i8_ptr_type,
-            &format!("{}_ptr", name),
-        )
-        .map_err(anyhow::Error::new) // 
+        self.builder
+            .build_pointer_cast(
+                global_str.as_pointer_value(),
+                i8_ptr_type,
+                &format!("{}_ptr", name),
+            )
+            .map_err(anyhow::Error::new) // 
     }
 
     // Entry point for code generation: process all top-level definitions.

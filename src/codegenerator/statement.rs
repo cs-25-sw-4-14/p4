@@ -22,7 +22,6 @@ impl CodeGenerator<'_> {
                 self.compile_expression(&throwaway.expression)?;
             }
             Statement::Debug(expr, _) => {
-
                 self.compile_print_stmt(expr)?;
             }
             Statement::VariableDeclaration(decl, _) => {
