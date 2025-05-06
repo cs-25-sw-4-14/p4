@@ -141,11 +141,11 @@ pub enum Token {
     #[token("write")]
     KeywordWrite,
     #[token(".insert")]
-    KeywordInsert,
+    MethodInsert,
     #[token(".remove")]
-    KeywordRemove,
+    MethodRemove,
     #[token(".get")]
-    KeywordGet,
+    MethodGet,
     #[token("debug")]
     KeywordDebug,
     #[token("return")]

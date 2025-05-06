@@ -55,9 +55,9 @@ extern {
     "as" => Token::OperatorAs,
     "read" => Token::KeywordRead,
     "write" => Token::KeywordWrite,
-    "insert" => Token::KeywordInsert,
-    "remove" => Token::KeywordRemove,
-    "get" => Token::KeywordGet,
+    ".insert" => Token::MethodInsert,
+    ".remove" => Token::MethodRemove,
+    ".get" => Token::MethodGet,
     "debug" => Token::KeywordDebug,
     "return" => Token::KeywordReturn,
     "while" => Token::KeywordWhile,
@@ -178,14 +178,14 @@ pub Assignment: Assignment = {
     }
 };
 pub VectorInsert: VectorInsert = {
-    <n:Identifier> "insert" "(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
+    <n:Identifier> ".insert" "(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
         vector_name: n,
         index: i,
         value: v,
     }
 };
 pub VectorRemove: VectorRemove = {
-    <n:Identifier> "remove" "(" <i:Expression> ")" ";" => VectorRemove {
+    <n:Identifier> ".remove" "(" <i:Expression> ")" ";" => VectorRemove {
         vector_name: n,
         index: i,
     }
@@ -428,7 +428,7 @@ pub ArrayAccess: ArrayAccess = {
 };
 
 pub VectorAccess: VectorAccess = {
-    <n:Identifier> "get" "(" <i:Expression> ")" => VectorAccess {
+    <n:Identifier> ".get" "(" <i:Expression> ")" => VectorAccess {
         vector_name: n,
         index: i,
     }
