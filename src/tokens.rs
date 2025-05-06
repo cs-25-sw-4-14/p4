@@ -140,6 +140,12 @@ pub enum Token {
     KeywordRead,
     #[token("write")]
     KeywordWrite,
+    #[token(".insert")]
+    KeywordInsert,
+    #[token(".remove")]
+    KeywordRemove,
+    #[token(".get")]
+    KeywordGet,
     #[token("debug")]
     KeywordDebug,
     #[token("return")]
