@@ -76,8 +76,8 @@ fn main() {
         .compile_program(&ast)
         .expect("Failed to compile program");
 
-    // let output = codegen.module.print_to_string().to_string();
-    // println!("\nIR code:\n{}", output);
+    let output = codegen.module.print_to_string().to_string();
+    println!("\nIR code:\n{}", output);
 
     Target::initialize_all(&InitializationConfig::default());
 
@@ -107,6 +107,7 @@ fn main() {
         .arg("-o")
         .arg(&output_file)
         //   .arg("-no-pie")
+        .arg("-g")
         .status()
         .expect("Failed to invoke clang");
 

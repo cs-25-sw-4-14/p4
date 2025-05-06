@@ -23,7 +23,7 @@ pub mod tests {
                 Type::String,
             ),
             (Expression::Literal(Literal::Bool(true)), Type::Bool),
-            (Expression::Literal(Literal::Float(0.1)), Type::FP64),
+            (Expression::Literal(Literal::Float(0.1)), Type::F64),
             (Expression::Literal(Literal::Int(0)), Type::I64),
         ];
 
