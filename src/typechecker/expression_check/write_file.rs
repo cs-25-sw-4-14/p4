@@ -13,7 +13,7 @@ pub fn check(
     f_table: &FTable,
     s_table: &STable,  
 ) -> Result<Type> {
-    // 1. Check the type of the 'value' expression (the content to write)
+    // Check the type of the 'value' expression (the content to write)
     let value_type = expression_check::check(&write_expr.value, v_table, f_table, s_table)?;
 
     // Validate that the value expression evaluates to a String
@@ -25,7 +25,7 @@ pub fn check(
         ));
     }
 
-    // 2. Check the type of the 'target' expression (the filename)
+    // Check the type of the 'target' expression (the filename)
     let target_type = expression_check::check(&write_expr.target, v_table, f_table, s_table)?;
 
     // Validate that the target expression evaluates to a String

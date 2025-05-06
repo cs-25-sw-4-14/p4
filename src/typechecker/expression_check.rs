@@ -66,7 +66,5 @@ pub fn check(
 
             write_file::check(write_expr, v_table, f_table, s_table)
         }
-        
-
     }
 }

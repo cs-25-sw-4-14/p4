@@ -1,7 +1,7 @@
 use super::CodeGenerator;
-use crate::ast::{Expression, Write}; // Access AST nodes
+use crate::ast::{Write}; // Access AST nodes
 use anyhow::{Result, anyhow};
-use inkwell::values::{BasicValueEnum, PointerValue, IntValue};
+use inkwell::values::{BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     // This method handles the logic for the Write expression
@@ -25,7 +25,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         let format_str_ptr = self.get_global_string_ptr("%s", "s_format")?;
 
         // 4. Call fopen(filename, "w") -> returns FILE* (i8*)
-
         let file_handle = self.builder.build_call(
             self.fopen_func,
             &[filename_ptr.into(), write_mode_ptr.into()],
@@ -45,13 +44,11 @@ impl<'ctx> CodeGenerator<'ctx> {
 
 
         // 6. Call fclose(file_handle) -> returns int
-        // Add '?' for good practice
         let _fclose_ret = self.builder.build_call(
             self.fclose_func,
             &[file_handle.into()],
             "fclose_call",
-        )?; // <--- FIX: Added ?
-        // !!! TODO: Check return value of fclose for errors !!!
+        )?;
 
         // Return placeholder i32(0) for void expression type
         Ok(self.context.i32_type().const_int(0, false).into())
