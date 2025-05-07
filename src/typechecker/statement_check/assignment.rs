@@ -39,6 +39,13 @@ pub fn check(
                     expression_value_type
                 ));
             }
+            if var_type.mutable == None {
+                return Err(anyhow::anyhow!(
+                    "{}: Variable {} is immutable",
+                    debugger.display(l),
+                    var_name
+                ));
+            }
         } else {
             return Err(anyhow::anyhow!("Variable {} not declared", var_name));
         }
