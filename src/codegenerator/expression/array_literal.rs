@@ -34,8 +34,9 @@ impl<'ctx> CodeGenerator<'ctx> {
 
        
         let array_type = match element_type {
-            BasicTypeEnum::FloatType(_) => self.context.f32_type().array_type(element_values.len() as u32),
-            BasicTypeEnum::IntType(_) => self.context.i32_type().array_type(element_values.len() as u32),
+            BasicTypeEnum::FloatType(_) => self.context.f64_type().array_type(element_values.len() as u32),
+            BasicTypeEnum::IntType(_) => self.context.i64_type().array_type(element_values.len() as u32),
+            BasicTypeEnum::PointerType(_) => self.context.i8_type().array_type(element_values.len() as u32),
             _ => return Err(anyhow::anyhow!("Unsupported vector element type")),
         };
 
