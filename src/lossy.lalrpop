@@ -378,6 +378,13 @@ pub VectorLiteral: VectorLiteral = {
 pub ArrayLiteral: ArrayLiteral = {
     "[" <e:Comma<Expression>> "]" => ArrayLiteral {
         elements: e
+    },
+    "[" <n:IntLiteral> ";" <e:Expression> "]" => {
+      ArrayLiteral {
+        elements: std::iter::repeat(e.clone())
+        .take(n as usize)
+        .collect::<Vec<Expression>>()
+      }
     }
 };
 
