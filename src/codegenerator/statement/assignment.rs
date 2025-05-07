@@ -78,8 +78,6 @@ impl CodeGenerator<'_> {
                     .get(struct_name)
                     .ok_or_else(|| anyhow!("Struct variable '{:?}' not found", struct_name))?;
 
-                println!("Struct type : {}", struct_type);
-
                 let struct_type = if let BasicTypeEnum::StructType(ty) = struct_type {
                     *ty
                 } else {
@@ -91,8 +89,6 @@ impl CodeGenerator<'_> {
 
                 let field_index =
                     self.get_field_index(struct_type.get_name().unwrap().to_str()?, field_name)?;
-
-                println!("Struct type : {}", struct_type);
 
                 let field_type = struct_type;
 

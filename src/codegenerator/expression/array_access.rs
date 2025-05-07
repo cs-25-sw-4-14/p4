@@ -8,7 +8,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         &mut self,
         array_access: &Box<ArrayAccess>,
     ) -> Result<BasicValueEnum<'ctx>> {
-        println!("Compiling array access: {:?}", array_access);
         let array_name = &array_access.array_name;
         let index_value = self.compile_expression(&array_access.index)?;
 
