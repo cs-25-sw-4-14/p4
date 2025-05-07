@@ -1,3 +1,4 @@
+use crate::lexer::Lexer;
 use anyhow::anyhow;
 use clap::Parser;
 use inkwell::OptimizationLevel;
@@ -14,7 +15,11 @@ lalrpop_mod!(
 pub mod ast;
 pub mod codegenerator;
 pub mod debugger;
+pub mod lexer;
+pub mod tokens;
 pub mod typechecker;
+
+use anyhow::Result;
 
 /// The Lossy compiler
 #[derive(Parser, Debug)]
@@ -24,7 +29,7 @@ struct Args {
     input: String,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let huttel = include_str!("huttel.txt");
     let args = Args::parse();
     let file = std::fs::read_to_string(&args.input).unwrap_or_else(|_| {
@@ -32,8 +37,11 @@ fn main() {
     });
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let ast = lossy::ProgramParser::new()
-        .parse(&file)
+    let source_code = std::fs::read_to_string("myscript.toy")?;
+    let lexer = Lexer::new(&source_code);
+    let parser = lossy::ProgramParser::new();
+    let ast = parser
+        .parse(lexer)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
                 anyhow!("Invalid token at {}", debugger.display(location))
@@ -120,4 +128,5 @@ fn main() {
         "Program succesfully compiled and saved as '{}'",
         &output_file
     );
+    Ok(())
 }

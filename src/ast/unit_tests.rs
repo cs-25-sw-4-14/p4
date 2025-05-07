@@ -6,6 +6,7 @@ use crate::{
         StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
         VariableDeclaration, WhileStatement, Write,
     },
+    lexer::Lexer,
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
 };
 
@@ -45,7 +46,9 @@ fn test_top_level() {
             ],
         },
         lossy::ProgramParser::new()
-            .parse("struct test { u8 field; u16 field2; } u32 test(u8 arg1, u16 arg2) {}")
+            .parse(Lexer::new(
+                "struct test { u8 field; u16 field2; } u32 test(u8 arg1, u16 arg2) {}"
+            ))
             .unwrap()
     );
 }
@@ -69,7 +72,7 @@ fn function_definition() {
             body: vec![],
         },
         FunctionDefParser::new()
-            .parse("u32 test(u8 arg1, u16 arg2) {}")
+            .parse(Lexer::new("u32 test(u8 arg1, u16 arg2) {}"))
             .unwrap()
     );
 }
@@ -91,7 +94,7 @@ fn test_struct_definition() {
             ],
         },
         StructDefParser::new()
-            .parse("struct test { u8 field; u16 field2; }")
+            .parse(Lexer::new("struct test { u8 field; u16 field2; }"))
             .unwrap()
     );
 }
@@ -106,7 +109,9 @@ fn test_variable_assignment() {
             },
             0
         ),
-        StatementParser::new().parse("test = 32;").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("test = 32;"))
+            .unwrap()
     );
 
     assert_eq!(
@@ -120,7 +125,9 @@ fn test_variable_assignment() {
             },
             0
         ),
-        StatementParser::new().parse("test.field = 32;").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("test.field = 32;"))
+            .unwrap()
     );
 }
 
@@ -137,7 +144,9 @@ fn test_variable_declaration() {
             },
             0
         ),
-        StatementParser::new().parse("u8 test = 32;").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("u8 test = 32;"))
+            .unwrap()
     );
 }
 
@@ -155,7 +164,7 @@ fn test_mut_variable_declaration() {
             0
         ),
         StatementParser::new()
-            .parse("triv mut u8 test = 32;")
+            .parse(Lexer::new("triv mut u8 test = 32;"))
             .unwrap()
     );
 }
@@ -184,7 +193,7 @@ fn test_if_statement() {
             0
         ),
         StatementParser::new()
-            .parse("if (2 > 3) {} else if (2 < 3) {} else {}")
+            .parse(Lexer::new("if (2 > 3) {} else if (2 < 3) {} else {}"))
             .unwrap()
     );
 }
@@ -199,7 +208,9 @@ fn test_while_statement() {
             },
             0
         ),
-        StatementParser::new().parse("while (true) {}").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("while (true) {}"))
+            .unwrap()
     );
 }
 
@@ -207,7 +218,7 @@ fn test_while_statement() {
 fn test_break_statement() {
     assert_eq!(
         Statement::Break(0),
-        StatementParser::new().parse("break;").unwrap()
+        StatementParser::new().parse(Lexer::new("break;")).unwrap()
     );
 }
 
@@ -215,7 +226,9 @@ fn test_break_statement() {
 fn test_continue_statement() {
     assert_eq!(
         Statement::Continue(0),
-        StatementParser::new().parse("continue;").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("continue;"))
+            .unwrap()
     );
 }
 
@@ -228,7 +241,9 @@ fn test_return_statement() {
             },
             0
         ),
-        StatementParser::new().parse("return 32;").unwrap()
+        StatementParser::new()
+            .parse(Lexer::new("return 32;"))
+            .unwrap()
     );
 }
 
@@ -236,7 +251,7 @@ fn test_return_statement() {
 fn test_empty_return_statement() {
     assert_eq!(
         Statement::Return(ReturnStatement { value: None }, 0),
-        StatementParser::new().parse("return;").unwrap()
+        StatementParser::new().parse(Lexer::new("return;")).unwrap()
     );
 }
 
@@ -244,23 +259,33 @@ fn test_empty_return_statement() {
 fn test_literal() {
     assert_eq!(
         Expression::Literal(Literal::Int(32)),
-        lossy::ExpressionParser::new().parse("32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::Literal(Literal::Float(32.0)),
-        lossy::ExpressionParser::new().parse("32.0").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32.0"))
+            .unwrap()
     );
     assert_eq!(
         Expression::Literal(Literal::String("test".to_string())),
-        lossy::ExpressionParser::new().parse("\"test\"").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("\"test\""))
+            .unwrap()
     );
     assert_eq!(
         Expression::Literal(Literal::Char('a')),
-        lossy::ExpressionParser::new().parse("'a'").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("'a'"))
+            .unwrap()
     );
     assert_eq!(
         Expression::Literal(Literal::Bool(true)),
-        lossy::ExpressionParser::new().parse("true").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("true"))
+            .unwrap()
     );
 }
 
@@ -268,7 +293,9 @@ fn test_literal() {
 fn test_variable() {
     assert_eq!(
         Expression::Variable("test".to_string()),
-        lossy::ExpressionParser::new().parse("test").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("test"))
+            .unwrap()
     );
 }
 
@@ -279,7 +306,9 @@ fn test_function_call() {
             name: "test".to_string(),
             args: vec![Expression::Literal(Literal::Int(32))],
         }),
-        lossy::ExpressionParser::new().parse("test(32)").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("test(32)"))
+            .unwrap()
     );
 }
 
@@ -294,7 +323,7 @@ fn test_function_call_with_multiple_args() {
             ],
         }),
         lossy::ExpressionParser::new()
-            .parse("test(32, 32)")
+            .parse(Lexer::new("test(32, 32)"))
             .unwrap()
     );
 }
@@ -306,7 +335,9 @@ fn test_function_call_with_no_args() {
             name: "test".to_string(),
             args: vec![],
         }),
-        lossy::ExpressionParser::new().parse("test()").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("test()"))
+            .unwrap()
     );
 }
 
@@ -318,7 +349,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 / 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 / 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -326,7 +359,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 * 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 * 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -334,7 +369,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 % 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 % 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -342,7 +379,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 + 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 + 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -350,7 +389,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 - 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 - 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -358,7 +399,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 < 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 < 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -366,7 +409,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 > 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 > 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -374,7 +419,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 <= 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 <= 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -382,7 +429,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 >= 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 >= 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -390,7 +439,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 == 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 == 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -398,7 +449,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 != 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 != 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -406,7 +459,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 && 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 && 32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::BinaryOp(BinaryOperation {
@@ -414,7 +469,9 @@ fn test_binary_operation() {
             left: Box::new(Expression::Literal(Literal::Int(32))),
             right: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("32 || 32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 || 32"))
+            .unwrap()
     );
 }
 
@@ -425,14 +482,18 @@ fn test_unary_operation() {
             operator: UnaryOperator::Negate,
             operand: Box::new(Expression::Literal(Literal::Int(32))),
         }),
-        lossy::ExpressionParser::new().parse("-32").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("-32"))
+            .unwrap()
     );
     assert_eq!(
         Expression::UnaryOp(UnaryOperation {
             operator: UnaryOperator::Not,
             operand: Box::new(Expression::Literal(Literal::Bool(false))),
         }),
-        lossy::ExpressionParser::new().parse("!false").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("!false"))
+            .unwrap()
     );
 }
 
@@ -447,7 +508,7 @@ fn test_struct_init() {
             }],
         }),
         lossy::ExpressionParser::new()
-            .parse("test { field: 32 }")
+            .parse(Lexer::new("test { field: 32 }"))
             .unwrap()
     );
 }
@@ -459,7 +520,9 @@ fn test_struct_field_init() {
             struct_expr: Box::new(Expression::Variable("test".to_string())),
             field_name: "field".to_string(),
         }),
-        lossy::ExpressionParser::new().parse("test.field").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("test.field"))
+            .unwrap()
     );
 }
 
@@ -470,7 +533,9 @@ fn test_struct_field_access() {
             struct_expr: Box::new(Expression::Variable("test".to_string())),
             field_name: "field".to_string(),
         }),
-        lossy::ExpressionParser::new().parse("test.field").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("test.field"))
+            .unwrap()
     );
 }
 
@@ -481,7 +546,9 @@ fn test_array_access() {
             array_name: "test".to_string(),
             index: Expression::Literal(Literal::Int(32))
         },
-        lossy::ArrayAccessParser::new().parse("test[32]").unwrap()
+        lossy::ArrayAccessParser::new()
+            .parse(Lexer::new("test[32]"))
+            .unwrap()
     );
 }
 
@@ -495,7 +562,9 @@ fn test_array_literal() {
                 Expression::Literal(Literal::Int(3)),
             ],
         },
-        lossy::ArrayLiteralParser::new().parse("[1,2,3]").unwrap()
+        lossy::ArrayLiteralParser::new()
+            .parse(Lexer::new("[1,2,3]"))
+            .unwrap()
     );
 }
 
@@ -509,7 +578,7 @@ fn test_print() {
             0
         ),
         lossy::StatementParser::new()
-            .parse(r#"debug("hi");"#)
+            .parse(Lexer::new(r#"debug("hi");"#))
             .unwrap()
     );
 }
@@ -517,14 +586,12 @@ fn test_print() {
 #[test]
 fn test_write() {
     assert_eq!(
-        Statement::Write(
-            Write {
-                value: Expression::Literal(Literal::String("hi".to_string())),
-            },
-            0
-        ),
-        lossy::StatementParser::new()
-            .parse(r#"write("hi");"#)
+        Expression::Write(Box::new(Write {
+            value: Expression::Literal(Literal::String("hi".to_string())),
+            target: Expression::Literal(Literal::String("hi".to_string())),
+        })),
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new(r#"write_file("hi", "hi")"#))
             .unwrap()
     );
 }
@@ -536,7 +603,7 @@ fn test_read() {
             value: Expression::Literal(Literal::String("hi".to_string())),
         },)),
         lossy::ExpressionParser::new()
-            .parse(r#"read("hi");"#)
+            .parse(Lexer::new(r#"read_file("hi")"#))
             .unwrap()
     );
 }
@@ -548,7 +615,9 @@ fn test_type_cast() {
             expression: Box::new(Expression::Literal(Literal::Int(32))),
             target_type: Type::U8
         }),
-        lossy::ExpressionParser::new().parse("32 as u8").unwrap()
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new("32 as u8"))
+            .unwrap()
     );
 
     assert_eq!(
@@ -557,36 +626,81 @@ fn test_type_cast() {
             target_type: Type::Bool
         }),
         lossy::ExpressionParser::new()
-            .parse("test as bool")
+            .parse(Lexer::new("test as bool"))
             .unwrap()
     );
 }
 
 #[test]
 fn test_type() {
-    assert_eq!(Type::U8, lossy::TypeParser::new().parse("u8").unwrap());
-    assert_eq!(Type::U16, lossy::TypeParser::new().parse("u16").unwrap());
-    assert_eq!(Type::U32, lossy::TypeParser::new().parse("u32").unwrap());
-    assert_eq!(Type::U64, lossy::TypeParser::new().parse("u64").unwrap());
-    assert_eq!(Type::I8, lossy::TypeParser::new().parse("i8").unwrap());
-    assert_eq!(Type::I16, lossy::TypeParser::new().parse("i16").unwrap());
-    assert_eq!(Type::I32, lossy::TypeParser::new().parse("i32").unwrap());
-    assert_eq!(Type::I64, lossy::TypeParser::new().parse("i64").unwrap());
-    assert_eq!(Type::F16, lossy::TypeParser::new().parse("f16").unwrap());
-    assert_eq!(Type::F32, lossy::TypeParser::new().parse("f32").unwrap());
-    assert_eq!(Type::F64, lossy::TypeParser::new().parse("f64").unwrap());
+    assert_eq!(
+        Type::U8,
+        lossy::TypeParser::new().parse(Lexer::new("u8")).unwrap()
+    );
+    assert_eq!(
+        Type::U16,
+        lossy::TypeParser::new().parse(Lexer::new("u16")).unwrap()
+    );
+    assert_eq!(
+        Type::U32,
+        lossy::TypeParser::new().parse(Lexer::new("u32")).unwrap()
+    );
+    assert_eq!(
+        Type::U64,
+        lossy::TypeParser::new().parse(Lexer::new("u64")).unwrap()
+    );
+    assert_eq!(
+        Type::I8,
+        lossy::TypeParser::new().parse(Lexer::new("i8")).unwrap()
+    );
+    assert_eq!(
+        Type::I16,
+        lossy::TypeParser::new().parse(Lexer::new("i16")).unwrap()
+    );
+    assert_eq!(
+        Type::I32,
+        lossy::TypeParser::new().parse(Lexer::new("i32")).unwrap()
+    );
+    assert_eq!(
+        Type::I64,
+        lossy::TypeParser::new().parse(Lexer::new("i64")).unwrap()
+    );
+    assert_eq!(
+        Type::F16,
+        lossy::TypeParser::new().parse(Lexer::new("f16")).unwrap()
+    );
+    assert_eq!(
+        Type::F32,
+        lossy::TypeParser::new().parse(Lexer::new("f32")).unwrap()
+    );
+    assert_eq!(
+        Type::F64,
+        lossy::TypeParser::new().parse(Lexer::new("f64")).unwrap()
+    );
     assert_eq!(
         Type::String,
-        lossy::TypeParser::new().parse("String").unwrap()
+        lossy::TypeParser::new()
+            .parse(Lexer::new("String"))
+            .unwrap()
     );
-    assert_eq!(Type::Char, lossy::TypeParser::new().parse("char").unwrap());
-    assert_eq!(Type::Bool, lossy::TypeParser::new().parse("bool").unwrap());
+    assert_eq!(
+        Type::Char,
+        lossy::TypeParser::new().parse(Lexer::new("char")).unwrap()
+    );
+    assert_eq!(
+        Type::Bool,
+        lossy::TypeParser::new().parse(Lexer::new("bool")).unwrap()
+    );
     assert_eq!(
         Type::Vector(Box::new(Type::U8)),
-        lossy::TypeParser::new().parse("Vec<u8>").unwrap()
+        lossy::TypeParser::new()
+            .parse(Lexer::new("Vec<u8>"))
+            .unwrap()
     );
     assert_eq!(
         Type::Array(Box::new(Type::U8), 32),
-        lossy::TypeParser::new().parse("arr u8[32]").unwrap()
+        lossy::TypeParser::new()
+            .parse(Lexer::new("arr u8[32]"))
+            .unwrap()
     );
 }
