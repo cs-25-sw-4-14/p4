@@ -37,8 +37,7 @@ fn main() -> Result<()> {
     });
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let source_code = std::fs::read_to_string("myscript.toy")?;
-    let lexer = Lexer::new(&source_code);
+    let lexer = Lexer::new(&file);
     let parser = lossy::ProgramParser::new();
     let ast = parser
         .parse(lexer)
@@ -75,7 +74,7 @@ fn main() -> Result<()> {
     let mut typechecker = typechecker::Typechecker::new();
     typechecker
         .walk(ast.clone(), debugger)
-        .unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ", &huttel));
+        .map_err(|e| anyhow!("{}{}", &huttel, e))?;
 
     let ctx = inkwell::context::Context::create();
     let module = ctx.create_module("program");
