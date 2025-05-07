@@ -18,7 +18,7 @@ pub fn check(
     }
     //check if vector is defined and has type vector
     if let Some(var) = v_table.get(&vector_access.vector_name) {
-        if let Type::Vector(inner_type, len) = &var.var_type {
+        if let Type::Vector(inner_type, _len) = &var.var_type {
             // return the type of the vector
             return Ok(*inner_type.clone());
         } else {
