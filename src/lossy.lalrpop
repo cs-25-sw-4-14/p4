@@ -53,8 +53,8 @@ extern {
     "!" => Token::OperatorNot,
     "-" => Token::OperatorNeg,
     "as" => Token::OperatorAs,
-    "read" => Token::KeywordRead,
-    "write" => Token::KeywordWrite,
+    "read_file" => Token::KeywordRead,
+    "write_file" => Token::KeywordWrite,
     ".insert" => Token::MethodInsert,
     ".remove" => Token::MethodRemove,
     ".get" => Token::MethodGet,
@@ -229,7 +229,7 @@ pub Debug: Debug = {
 };
 
 pub Write: Write = {
-    "write" "(" <value:Expression> "," <target:Expression> ")" => Write {
+    "write_file" "(" <value:Expression> "," <target:Expression> ")" => Write {
         value,
         target,
     }
@@ -262,6 +262,7 @@ pub Term: Expression = {
     <e:Literal> => Expression::Literal(e),
     <e:Identifier> => Expression::Variable(e),
     <e:Read> => Expression::Read(Box::new(e)),
+    <e:Write> => Expression::Write(Box::new(e)),
     <e:FunctionCall> => Expression::FunctionCall(e),
     <e:StructInit> => Expression::StructInit(e),
     <e:ArrayAccess> => Expression::ArrayAccess(Box::new(e)),

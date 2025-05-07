@@ -586,14 +586,12 @@ fn test_print() {
 #[test]
 fn test_write() {
     assert_eq!(
-        Statement::Write(
-            Write {
-                value: Expression::Literal(Literal::String("hi".to_string())),
-            },
-            0
-        ),
-        lossy::StatementParser::new()
-            .parse(Lexer::new(r#"write("hi")"#))
+        Expression::Write(Box::new(Write {
+            value: Expression::Literal(Literal::String("hi".to_string())),
+            target: Expression::Literal(Literal::String("hi".to_string())),
+        })),
+        lossy::ExpressionParser::new()
+            .parse(Lexer::new(r#"write_file("hi", "hi")"#))
             .unwrap()
     );
 }
@@ -605,7 +603,7 @@ fn test_read() {
             value: Expression::Literal(Literal::String("hi".to_string())),
         },)),
         lossy::ExpressionParser::new()
-            .parse(Lexer::new(r#"read("hi")"#))
+            .parse(Lexer::new(r#"read_file("hi")"#))
             .unwrap()
     );
 }

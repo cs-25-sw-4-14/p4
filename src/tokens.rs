@@ -136,9 +136,9 @@ pub enum Token {
     OperatorAs,
 
     // keywords
-    #[token("read")]
+    #[token("read_file")]
     KeywordRead,
-    #[token("write")]
+    #[token("write_file")]
     KeywordWrite,
     #[token(".insert")]
     MethodInsert,
