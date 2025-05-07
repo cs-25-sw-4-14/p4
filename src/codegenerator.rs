@@ -105,6 +105,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 llvm_element_type.array_type(*size as u32).into()
             }
+            // Type::Vector(element_type) => {
+            //     let llvm_element_type = self.get_basic_type(element_type);
+            //     llvm_element_type.vector_type(4).into() // Example: 4 elements
+            // }
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
@@ -150,26 +154,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }
-            Type::Vector(elem_type, size) => {
-                let elem_llvm_type = self.get_llvm_type(elem_type)?;
-                match elem_llvm_type {
-                    BasicTypeEnum::FloatType(ft) => {
-                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::IntType(it) => {
-                        Ok(it.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::PointerType(pt) => {
-                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    BasicTypeEnum::StructType(st) => {
-                        Ok(st.array_type(*size as u32).as_basic_type_enum())
-                    }
-                    _ => Err(anyhow::anyhow!("Unsupported Vector element type")),
-                }
-            }
-            
-            ,
+            Type::Vector(_, _) => Err(anyhow::anyhow!("Vector types not supported yet")),
         }
     }
 }

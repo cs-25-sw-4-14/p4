@@ -50,7 +50,7 @@ pub fn check(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Literal, Type, VariableDeclaration, VectorLiteral};
+    use crate::ast::{Expression, Literal, Statement, Type, VariableDeclaration, VectorLiteral};
 
     use crate::typechecker::variable_table::VTable;
 
