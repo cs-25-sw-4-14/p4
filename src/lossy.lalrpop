@@ -87,12 +87,21 @@ pub TopLevelDefinition: TopLevelDefinition = {
     StructDef    => TopLevelDefinition::Struct(<>),
 };
 
+Comma<T>: Vec<T> = {
+    <mut v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
 
 pub FunctionDef: FunctionDef = {
-    <r:ReturnOpt> <n:Identifier> "(" <p:ParamList?> ")" "{" <b:Statement*> "}" => FunctionDef {
-         return_type: r,
+    <t:ReturnOpt> <n:Identifier> "(" <p:Comma<Param>> ")" "{" <b:Statement*> "}" => FunctionDef {
+         return_type: t,
          name: n,
-         params: p.unwrap_or(vec![]),
+         params: p,
          body: b,
     }
 };
@@ -100,14 +109,6 @@ pub FunctionDef: FunctionDef = {
 pub ReturnOpt: Option<Type> = {
     <t:Type> => Some(t),
     "void" => None
-};
-
-pub ParamList: Vec<Param> = {
-    <p:Param> <pn:("," Param)*> => {
-        let mut params = vec![p];
-        params.extend(pn.into_iter().map(|x| x.1));
-        params
-    }
 };
 
 pub Param: Param = {
@@ -132,28 +133,28 @@ pub StructField: StructField = {
 };
 
 pub Statement: Statement = {
-    <l:@L> <t:Throwaway> => Statement::Throwaway(t, l),
-    <l:@L> <t:VariableDeclaration> => Statement::VariableDeclaration(t, l),
-    <l:@L> <t:Assignment> => Statement::Assignment(t, l),
-    <l:@L> <t:VectorInsert> => Statement::VectorInsert(t, l),
-    <l:@L> <t:VectorRemove> => Statement::VectorRemove(t, l),
+    <l:@L> <t:Throwaway> ";"=> Statement::Throwaway(t, l),
+    <l:@L> <t:VariableDeclaration> ";" => Statement::VariableDeclaration(t, l),
+    <l:@L> <t:Assignment> ";" => Statement::Assignment(t, l),
+    <l:@L> <t:VectorInsert> ";" => Statement::VectorInsert(t, l),
+    <l:@L> <t:VectorRemove> ";" => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
     <l:@L> <t:While> => Statement::While(t, l),
     <l:@L> "break" ";" => Statement::Break(l),
     <l:@L> "continue" ";" => Statement::Continue(l),
-    <l:@L> <t:Return> => Statement::Return(t, l),
-    <l:@L> <t:Debug> => Statement::Debug(t, l),
+    <l:@L> <t:Return> ";" => Statement::Return(t, l),
+    <l:@L> <t:Debug> ";" => Statement::Debug(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
 
 pub Throwaway: Throwaway = {
-    "_" "=" <e:Expression> ";" => Throwaway {
+    "_" "=" <e:Expression> => Throwaway {
         expression: e,
     }
 };
 
 pub VariableDeclaration: VariableDeclaration = {
-    <tr:Trivial?> <mu:Mutable?> <t:Type> <n:Identifier> "=" <v:Expression> ";" => VariableDeclaration {
+    <tr:Trivial?> <mu:Mutable?> <t:Type> <n:Identifier> "=" <v:Expression> => VariableDeclaration {
         trivial: tr,
         mutable: mu,
         var_type: t,
@@ -171,20 +172,20 @@ pub Mutable: () = {
 };
 
 pub Assignment: Assignment = {
-    <t:Expression> "=" <v:Expression> ";" => Assignment {
+    <t:Expression> "=" <v:Expression> => Assignment {
         target: t,
         value: v,
     }
 };
 pub VectorInsert: VectorInsert = {
-    <n:Identifier> ".insert" "(" <i:Expression> "," <v:Expression> ")" ";" => VectorInsert {
+    <n:Identifier> ".insert" "(" <i:Expression> "," <v:Expression> ")" => VectorInsert {
         vector_name: n,
         index: i,
         value: v,
     }
 };
 pub VectorRemove: VectorRemove = {
-    <n:Identifier> ".remove" "(" <i:Expression> ")" ";" => VectorRemove {
+    <n:Identifier> ".remove" "(" <i:Expression> ")" => VectorRemove {
         vector_name: n,
         index: i,
     }
@@ -218,12 +219,12 @@ pub While: WhileStatement = {
 };
 
 pub Return: ReturnStatement = {
-    "return" <e:Expression> ";" => ReturnStatement { value: Some(e) },
-    "return" ";" => ReturnStatement { value: None },
+    "return" <e:Expression> => ReturnStatement { value: Some(e) },
+    "return" => ReturnStatement { value: None },
 };
 
 pub Debug: Debug = {
-    "debug" "(" <e:Expression> ")" ";" => Debug {
+    "debug" "(" <e:Expression> ")" => Debug {
         expression: e,
     }
 };
@@ -241,19 +242,10 @@ pub Read: Read = {
     }
 };
 
-
 pub FunctionCall: FunctionCall = {
-    <n:Identifier> "(" <a:ArgumentList?> ")"=> FunctionCall {
+    <n:Identifier> "(" <a:Comma<Expression>> ")" => FunctionCall {
         name: n,
-        args: a.unwrap_or(vec![]),
-    }
-};
-
-pub ArgumentList: Vec<Expression> = {
-    <e:Expression> <en:("," Expression)*> => {
-        let mut args = vec![e];
-        args.extend(en.into_iter().map(|x| x.1));
-        args
+        args: a,
     }
 };
 
@@ -292,13 +284,11 @@ pub Expression: Expression = {
         operator: UnaryOperator::Not,
         operand: Box::new(o),
     }),
-    // TODO: Fix struct field access so it is recursive
     #[precedence(level="4")] #[assoc(side="left")]
     <e:Expression> "." <f:Identifier> => Expression::StructFieldAccess(StructFieldAccess {
         struct_expr: Box::new(e),
         field_name: f,
     }),
-        
     #[precedence(level="5")] #[assoc(side="left")]
     <l:Expression> "/" <r:Expression> => Expression::BinaryOp(BinaryOperation {
         left: Box::new(l),
@@ -380,22 +370,14 @@ pub Expression: Expression = {
         };
 
 pub VectorLiteral: VectorLiteral = {
-    "{" <e:Expression> <en:("," Expression)*> "}" => VectorLiteral {
-        elements: {
-            let mut elements = vec![e];
-            elements.extend(en.into_iter().map(|x| x.1));
-            elements
-        },
+    "{" <e:Comma<Expression>> "}" => VectorLiteral {
+        elements: e
     }
 };
 
 pub ArrayLiteral: ArrayLiteral = {
-    "[" <e:Expression> <en:("," Expression)*> "]" => ArrayLiteral {
-        elements: {
-            let mut elements = vec![e];
-            elements.extend(en.into_iter().map(|x| x.1));
-            elements
-        },
+    "[" <e:Comma<Expression>> "]" => ArrayLiteral {
+        elements: e
     }
 };
 
@@ -408,14 +390,14 @@ pub Literal: Literal = {
 };
 
 pub StructInit: StructInit = {
-    <n:Identifier> "{" <f:StructFieldInit*> "}" => StructInit {
+    <n:Identifier> "{" <f:Comma<StructFieldInit>> "}" => StructInit {
         name: n,
         fields: f,
     }
 };
 
 pub StructFieldInit: StructFieldInit = {
-    <n:Identifier> ":" <v:Expression> ","? => StructFieldInit {
+    <n:Identifier> ":" <v:Expression> => StructFieldInit {
         name: n,
         value: v,
     }
