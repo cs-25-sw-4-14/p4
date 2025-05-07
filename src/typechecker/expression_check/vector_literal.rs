@@ -2,8 +2,8 @@ use crate::ast::{Type, VectorLiteral};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
-    pub fn check_vector_literal(&self, vector_literal: &Box<VectorLiteral>) -> Result<Type> {
+impl Typechecker<'_> {
+    pub fn check_vector_literal(&self, vector_literal: &VectorLiteral) -> Result<Type> {
         let vector_type =
             self.semantic_check_all_elements_same_type_vector_literal(vector_literal)?;
 
@@ -12,7 +12,7 @@ impl<'a> Typechecker<'a> {
 
     pub fn semantic_check_all_elements_same_type_vector_literal(
         &self,
-        vector_literal: &'a Box<VectorLiteral>,
+        vector_literal: &VectorLiteral,
     ) -> Result<Type> {
         let first_type = self.check_expression(&vector_literal.elements[0])?;
 
@@ -35,7 +35,6 @@ pub mod vector_literal_tests {
     use super::*;
     use crate::ast::{Expression, Literal};
     use crate::debugger::Debugger;
-    
 
     #[test]
     fn test_vector_literal() {

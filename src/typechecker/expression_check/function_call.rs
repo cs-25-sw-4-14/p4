@@ -4,8 +4,8 @@ use crate::{
 };
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
-    pub fn check_function_call(&'a self, function_call: &'a FunctionCall) -> Result<Type> {
+impl Typechecker<'_> {
+    pub fn check_function_call(&self, function_call: &FunctionCall) -> Result<Type> {
         let func = self.semantic_check_function_is_defined(function_call)?;
 
         let return_type = Self::semantic_check_function_has_return_type(func)?;
@@ -21,9 +21,9 @@ impl<'a> Typechecker<'a> {
     }
 
     pub fn semantic_check_function_is_defined(
-        &'a self,
-        function_call: &'a FunctionCall,
-    ) -> Result<&'a FunctionDef> {
+        &self,
+        function_call: &FunctionCall,
+    ) -> Result<&FunctionDef> {
         let function_def = self
             .f_table
             .get(&function_call.name)
@@ -42,8 +42,8 @@ impl<'a> Typechecker<'a> {
     }
 
     pub fn semantic_check_argument_length_are_equal(
-        function: &'a FunctionDef,
-        function_call: &'a FunctionCall,
+        function: &FunctionDef,
+        function_call: &FunctionCall,
     ) -> Result<()> {
         if function.params.len() != function_call.args.len() {
             return Err(anyhow::anyhow!(
@@ -55,9 +55,9 @@ impl<'a> Typechecker<'a> {
     }
 
     pub fn semantic_check_arguments_are_same_type(
-        &'a self,
-        function: &'a FunctionDef,
-        function_call: &'a FunctionCall,
+        &self,
+        function: &FunctionDef,
+        function_call: &FunctionCall,
     ) -> Result<()> {
         for i in 0..function.params.len() {
             let expected_type = function.params[i].param_type.clone();

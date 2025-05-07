@@ -4,20 +4,20 @@ use crate::{
 };
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
-    pub fn check_array_access(&self, array_access: &Box<ArrayAccess>) -> Result<Type> {
+impl Typechecker<'_> {
+    pub fn check_array_access(&self, array_access: &ArrayAccess) -> Result<Type> {
         let array = self.semantic_check_array_definition(array_access)?;
         let array_type = Self::semantic_check_array_type(array)?;
         let array_length = Self::semantic_check_array_length(array)?;
-        self.semantic_check_array_index(&array_access.index, array_length)?;
+        self.semantic_check_array_index(&array_access.index, *array_length)?;
 
         Ok(array_type.clone())
     }
 
     pub fn semantic_check_array_definition(
-        &'a self,
-        array_access: &'a Box<ArrayAccess>,
-    ) -> Result<&'a VariableDeclaration> {
+        &self,
+        array_access: &ArrayAccess,
+    ) -> Result<&VariableDeclaration> {
         let array = self
             .v_table
             .get(&array_access.array_name)
@@ -60,13 +60,13 @@ impl<'a> Typechecker<'a> {
 
     pub fn semantic_check_array_index(
         &self,
-        array_index: &'a Expression,
-        array_length: &'a u64,
+        array_index: &Expression,
+        array_length: u64,
     ) -> Result<()> {
         match self.check_expression(array_index)? {
             Type::I64 => {
                 if let Expression::Literal(Literal::Int(index)) = array_index {
-                    if *index >= *array_length {
+                    if *index >= array_length {
                         return Err(anyhow::anyhow!(
                             "Array access index out of bounds: {}",
                             index

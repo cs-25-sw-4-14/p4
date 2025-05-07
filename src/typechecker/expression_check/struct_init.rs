@@ -3,8 +3,8 @@ use crate::ast::{StructInit, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
-    pub fn check_struct_init(&'a self, struct_init: &StructInit) -> Result<Type> {
+impl Typechecker<'_> {
+    pub fn check_struct_init(&self, struct_init: &StructInit) -> Result<Type> {
         let struct_definition = self.semantic_check_struct_defined_init(struct_init)?;
         self.semantic_check_field_types(struct_init, struct_definition)?;
 
@@ -12,9 +12,9 @@ impl<'a> Typechecker<'a> {
     }
 
     pub fn semantic_check_struct_defined_init(
-        &'a self,
-        struct_init: &'a StructInit,
-    ) -> Result<&'a StructDef> {
+        &self,
+        struct_init: &StructInit,
+    ) -> Result<&StructDef> {
         let struct_definition = self
             .s_table
             .get(&struct_init.name)
@@ -24,9 +24,9 @@ impl<'a> Typechecker<'a> {
     }
 
     pub fn semantic_check_field_types(
-        &'a self,
-        struct_init: &'a StructInit,
-        struct_definition: &'a StructDef,
+        &self,
+        struct_init: &StructInit,
+        struct_definition: &StructDef,
     ) -> Result<()> {
         for field in 0..struct_definition.fields.len() {
             let expected_type = struct_definition.fields[field].field_type.clone();

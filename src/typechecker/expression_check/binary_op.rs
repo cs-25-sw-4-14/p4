@@ -3,16 +3,13 @@ use crate::ast::{BinaryOperation, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_binary_op(&self, binary_operation: &BinaryOperation) -> Result<Type> {
         let result = self.semantic_check_binary_op(binary_operation)?;
         Ok(result.clone())
     }
 
-    pub fn semantic_check_binary_op(
-        &'a self,
-        binary_operation: &'a BinaryOperation,
-    ) -> Result<Type> {
+    pub fn semantic_check_binary_op(&self, binary_operation: &BinaryOperation) -> Result<Type> {
         let left_type = self.check_expression(&binary_operation.left)?;
         let right_type = self.check_expression(&binary_operation.right)?;
 

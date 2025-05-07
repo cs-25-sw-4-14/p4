@@ -2,8 +2,8 @@ use crate::ast::{ArrayLiteral, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
-    pub fn check_array_literal(&self, array_literal: &Box<ArrayLiteral>) -> Result<Type> {
+impl Typechecker<'_> {
+    pub fn check_array_literal(&self, array_literal: &ArrayLiteral) -> Result<Type> {
         self.semantic_check_literal_not_empty(array_literal)?;
 
         let array_type = self.semantic_check_all_elements_same_type(array_literal)?;
@@ -14,10 +14,7 @@ impl<'a> Typechecker<'a> {
         ))
     }
 
-    pub fn semantic_check_literal_not_empty(
-        &self,
-        array_literal: &Box<ArrayLiteral>,
-    ) -> Result<()> {
+    pub fn semantic_check_literal_not_empty(&self, array_literal: &ArrayLiteral) -> Result<()> {
         if array_literal.elements.is_empty() {
             return Err(anyhow::anyhow!("Array literal is empty"));
         }
@@ -26,7 +23,7 @@ impl<'a> Typechecker<'a> {
 
     pub fn semantic_check_all_elements_same_type(
         &self,
-        array_literal: &'a Box<ArrayLiteral>,
+        array_literal: &ArrayLiteral,
     ) -> Result<Type> {
         let first_type = self.check_expression(&array_literal.elements[0])?;
 

@@ -2,7 +2,7 @@ use crate::ast::VariableDeclaration;
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_variable_declaration(
         &mut self,
         declaration: &VariableDeclaration,
@@ -30,7 +30,7 @@ impl<'a> Typechecker<'a> {
 
     pub fn semantic_check_variable_already_declared_variable_declaration(
         &self,
-        declaration: &'a VariableDeclaration,
+        declaration: &VariableDeclaration,
     ) -> Result<()> {
         // Check if the variable is already declared in the current scope
         if self.v_table.variables.contains_key(&declaration.name) {
