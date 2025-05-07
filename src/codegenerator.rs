@@ -98,7 +98,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
-            struct_definitions: HashMap::new()
+            struct_definitions: HashMap::new(),
             fprintf_func: fprintf_func,
             fopen_func: fopen_func,
             fclose_func: fclose_func,
