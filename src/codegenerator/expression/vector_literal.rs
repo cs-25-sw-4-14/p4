@@ -1,7 +1,8 @@
 use super::CodeGenerator;
 use crate::ast::VectorLiteral;
 use anyhow::Result;
-use inkwell::{types::BasicType, values::BasicValueEnum};
+use inkwell::{values::BasicValueEnum, types::BasicTypeEnum};
+
 
 
 impl <'ctx> CodeGenerator<'ctx> {
@@ -31,8 +32,8 @@ impl <'ctx> CodeGenerator<'ctx> {
         }
 
         // Create LLVM vector type and allocate it
-        let vector_type = element_type.VectorType(element_values.len() as u32);
-        let vector_ptr = self.builder.build_alloca(vector_type, "vector_literal")?;
+
+        let vector_ptr = self.builder.build_alloca(element_type, "vector_literal")?;
         // Store each value into the vector
         for (i, value) in element_values.iter().enumerate() {
             let zero = self.context.i32_type().const_zero();
@@ -41,7 +42,7 @@ impl <'ctx> CodeGenerator<'ctx> {
 
             let element_ptr = unsafe {
                 self.builder.build_in_bounds_gep(
-                    vector_type,
+                    element_type,
                     vector_ptr,
                     &indices,
                     &format!("vector_element_ptr_{}", i),

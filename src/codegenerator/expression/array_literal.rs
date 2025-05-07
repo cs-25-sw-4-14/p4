@@ -2,6 +2,7 @@ use super::CodeGenerator;
 use crate::ast::ArrayLiteral;
 use anyhow::Result;
 use inkwell::{types::BasicType, values::BasicValueEnum};
+use inkwell::types::BasicTypeEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_literal(
@@ -31,8 +32,13 @@ impl<'ctx> CodeGenerator<'ctx> {
             element_values.push(value);
         }
 
-        // Create LLVM array type and allocate it
-        let array_type = element_type.array_type(element_values.len() as u32);
+       
+        let array_type = match element_type {
+            BasicTypeEnum::FloatType(_) => self.context.f32_type().array_type(element_values.len() as u32),
+            BasicTypeEnum::IntType(_) => self.context.i32_type().array_type(element_values.len() as u32),
+            _ => return Err(anyhow::anyhow!("Unsupported vector element type")),
+        };
+
         let array_ptr = self.builder.build_alloca(array_type, "array_literal")?;
 
         // Store each value into the array

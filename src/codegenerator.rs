@@ -105,26 +105,9 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 llvm_element_type.array_type(*size as u32).into()
             }
-            Type::Vector(element_type, size) => {
-                let llvm_element_type = self.get_basic_type(element_type);
-                // Handle vector size overflow
-                if *size > u32::MAX as u64 {
-                    panic!(
-                        "Vector size {} exceeds maximum supported size {}",
-                        size,
-                        u32::MAX
-                    );
-                }
-                llvm_element_type.VectorType(*size as u32).into()
-            }
-            // Type::Vector(element_type) => {
-            //     let llvm_element_type = self.get_basic_type(element_type);
-            //     llvm_element_type.vector_type(4).into() // Example: 4 elements
-            // }
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
-
     // Comprehensive helper method to get an LLVM type from an AST type, with error handling
     pub fn get_llvm_type(&self, ast_type: &Type) -> Result<BasicTypeEnum<'ctx>> {
         match ast_type {
