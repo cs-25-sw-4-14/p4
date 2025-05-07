@@ -2,7 +2,7 @@ use crate::ast::{Type, TypeCast};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_type_cast(&self, type_cast: &TypeCast) -> Result<Type> {
         self.check_expression(&type_cast.expression)?;
         Ok(type_cast.target_type.clone())
@@ -21,7 +21,7 @@ pub mod tests {
     #[test]
     fn check_type_cast_should_return_type() {
         let debugger = Debugger::new(String::from(""));
-        let mut typechecker = Typechecker::new(&debugger);
+        let typechecker = Typechecker::new(&debugger);
 
         let typecast = TypeCast {
             expression: Box::new(Expression::Literal(Literal::Int(4))),

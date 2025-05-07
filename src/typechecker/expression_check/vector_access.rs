@@ -2,7 +2,7 @@ use crate::ast::{Type, VectorAccess};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_vector_access(&self, vector_access: &VectorAccess) -> Result<Type> {
         let index_type = self.check_expression(&vector_access.index)?;
 
@@ -11,12 +11,12 @@ impl<'a> Typechecker<'a> {
         }
         if let Some(var) = self.v_table.get(&vector_access.vector_name) {
             if let Type::Vector(inner_type) = &var.var_type {
-                return Ok(*inner_type.clone());
+                Ok(*inner_type.clone())
             } else {
-                return Err(anyhow::anyhow!(
+                Err(anyhow::anyhow!(
                     "Variable {} is not a vector",
                     vector_access.vector_name
-                ));
+                ))
             }
         } else {
             Err(anyhow::anyhow!(
@@ -32,7 +32,7 @@ pub mod vector_access_tests {
     use super::*;
     use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
     use crate::debugger::Debugger;
-    use crate::typechecker::expression_check;
+    
 
     #[test]
     fn test_vector_access() {

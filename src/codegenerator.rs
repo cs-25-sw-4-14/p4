@@ -100,13 +100,13 @@ impl<'ctx> CodeGenerator<'ctx> {
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
-            fprintf_func: fprintf_func,
-            fopen_func: fopen_func,
-            fclose_func: fclose_func,
-            fseek_func: fseek_func,
-            ftell_func: ftell_func,
-            fread_func: fread_func,
-            malloc_func: malloc_func,
+            fprintf_func,
+            fopen_func,
+            fclose_func,
+            fseek_func,
+            ftell_func,
+            fread_func,
+            malloc_func,
         }
     }
 

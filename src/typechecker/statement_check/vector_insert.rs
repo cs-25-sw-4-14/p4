@@ -46,7 +46,7 @@ mod tests {
     use crate::ast::{Expression, Literal, Type, VariableDeclaration, VectorLiteral};
 
     use crate::debugger::Debugger;
-    use crate::typechecker::variable_table::VTable;
+    
 
     #[test]
     fn test_vector_insert() {
@@ -70,6 +70,6 @@ mod tests {
             value: Expression::Literal(Literal::Int(52)),
         };
 
-        let result = typechecker.check_vector_insert(&vector_insert, 0).unwrap();
+        typechecker.check_vector_insert(&vector_insert, 0).unwrap();
     }
 }

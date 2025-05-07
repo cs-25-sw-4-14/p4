@@ -3,7 +3,7 @@ use crate::ast::{Expression, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_assignment(&self, assignment: &Assignment, l: usize) -> Result<()> {
         let expression_value_type = self.check_expression(&assignment.value)?;
         let expression_target_type = self.check_expression(&assignment.target)?;
@@ -28,7 +28,7 @@ impl<'a> Typechecker<'a> {
                         expression_value_type
                     ));
                 }
-                if var_type.mutable == None {
+                if var_type.mutable.is_none() {
                     return Err(anyhow::anyhow!(
                         "{}: Variable {} is immutable",
                         self.debugger.display(l),

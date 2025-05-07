@@ -2,7 +2,7 @@ use crate::ast::{Type, WhileStatement};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_while_statement(&mut self, declaration: &WhileStatement) -> Result<()> {
         let condition_type = self.check_expression(&declaration.condition)?;
         if condition_type != Type::Bool {

@@ -4,7 +4,7 @@ use crate::{
 };
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_literal(literal: &Literal) -> Result<Type> {
         Ok(Type::from(literal.clone()))
     }

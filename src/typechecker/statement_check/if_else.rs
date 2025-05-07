@@ -2,7 +2,7 @@ use crate::ast::{IfStatement, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_if_else(&mut self, declaration: &IfStatement) -> Result<()> {
         let condition_type = self.check_expression(&declaration.condition)?;
         if condition_type != Type::Bool {

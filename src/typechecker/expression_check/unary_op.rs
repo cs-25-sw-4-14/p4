@@ -2,7 +2,7 @@ use crate::ast::{Type, UnaryOperation, UnaryOperator};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_unary_op(&self, unary_operation: &UnaryOperation) -> Result<Type> {
         let operand_type = self.check_expression(&unary_operation.operand)?;
         match unary_operation.operator {

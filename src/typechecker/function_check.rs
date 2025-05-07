@@ -3,7 +3,7 @@ use crate::ast::{FunctionDef, ReturnStatement, Statement, Type};
 use anyhow::{Result, anyhow};
 use std::collections::HashSet;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_function(&mut self, function: &FunctionDef) -> Result<()> {
         // check if function exists in the function table
         if self.f_table.get(&function.name).is_none() {

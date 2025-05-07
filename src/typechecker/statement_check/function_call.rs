@@ -2,7 +2,7 @@ use crate::ast::FunctionCall;
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_function_call_stmt(&self, declaration: &FunctionCall) -> Result<()> {
         // Check if the function is defined
         if let Some(function_def) = self.f_table.get(&declaration.name) {

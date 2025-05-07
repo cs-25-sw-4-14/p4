@@ -11,7 +11,7 @@ mod vector_insert;
 mod vector_remove;
 mod while_statement;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_statement(&mut self, expression: &Statement) -> Result<()> {
         match expression {
             Statement::Throwaway(expression, l) => self.check_throwaway(expression, *l)?,

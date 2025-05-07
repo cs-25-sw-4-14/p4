@@ -2,7 +2,7 @@ use crate::ast::{Type, Write};
 use crate::typechecker::Typechecker;
 use anyhow::{Result, anyhow};
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_write_file(&self, write_expr: &Write) -> Result<Type> {
         // Check the type of the 'value' expression (the content to write)
         let value_type = self.check_expression(&write_expr.value)?;

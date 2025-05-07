@@ -18,7 +18,7 @@ mod vector_access;
 mod vector_literal;
 mod write_file;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_expression(&self, expression: &Expression) -> Result<Type> {
         match expression {
             Expression::Literal(literal) => Self::check_literal(literal),

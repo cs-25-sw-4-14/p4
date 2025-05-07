@@ -35,7 +35,7 @@ pub mod vector_literal_tests {
     use super::*;
     use crate::ast::{Expression, Literal};
     use crate::debugger::Debugger;
-    use crate::typechecker::expression_check;
+    
 
     #[test]
     fn test_vector_literal() {
@@ -48,7 +48,7 @@ pub mod vector_literal_tests {
         }));
 
         let debugger = Debugger::new(String::from(""));
-        let mut typechecker = Typechecker::new(&debugger);
+        let typechecker = Typechecker::new(&debugger);
 
         let result = typechecker.check_expression(&expression);
         assert!(result.is_ok());

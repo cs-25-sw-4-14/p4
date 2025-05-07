@@ -3,7 +3,7 @@ use crate::ast::Type;
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-impl<'a> Typechecker<'a> {
+impl Typechecker<'_> {
     pub fn check_enum_literal(&self, _enum_literal: &EnumLiteral) -> Result<Type> {
         todo!()
     }
