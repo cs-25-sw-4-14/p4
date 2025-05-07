@@ -566,6 +566,18 @@ fn test_array_literal() {
             .parse(Lexer::new("[1,2,3]"))
             .unwrap()
     );
+    assert_eq!(
+        ArrayLiteral {
+            elements: vec![
+                Expression::Literal(Literal::Int(1)),
+                Expression::Literal(Literal::Int(1)),
+                Expression::Literal(Literal::Int(1)),
+            ],
+        },
+        lossy::ArrayLiteralParser::new()
+            .parse(Lexer::new("[3;1]"))
+            .unwrap()
+    );
 }
 
 #[test]
