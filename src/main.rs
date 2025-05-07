@@ -114,7 +114,7 @@ fn main() -> Result<()> {
         .arg(&object_file)
         .arg("-o")
         .arg(&output_file)
-        //   .arg("-no-pie")
+        .arg("-no-pie")
         .arg("-g")
         .status()
         .expect("Failed to invoke clang");

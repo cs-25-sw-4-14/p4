@@ -1,5 +1,6 @@
 /target
-.DS_Store # macOS SHIT!!!
-test.ss
-test.o
-test.out
+.DS_Store 
+*.out
+/*.ss
+/*.out
+/*.o

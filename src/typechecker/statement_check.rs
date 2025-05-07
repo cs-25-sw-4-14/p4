@@ -59,7 +59,6 @@ pub fn check(
         Statement::Debug(print, _) => {
             expression_check::check(&print.expression, v_table, f_table, s_table)?;
         }
-        Statement::Write(_, _) => {}
     }
 
     Ok(())

@@ -143,7 +143,6 @@ pub Statement: Statement = {
     <l:@L> "continue" ";" => Statement::Continue(l),
     <l:@L> <t:Return> => Statement::Return(t, l),
     <l:@L> <t:Debug> => Statement::Debug(t, l),
-    <l:@L> <t:Write> => Statement::Write(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
 };
 
@@ -230,13 +229,14 @@ pub Debug: Debug = {
 };
 
 pub Write: Write = {
-    "write" "(" <e:Expression> ")" => Write {
-        value: e,
+    "write" "(" <value:Expression> "," <target:Expression> ")" => Write {
+        value,
+        target,
     }
 };
 
 pub Read: Read = {
-    "read" "(" <e:Expression> ")" => Read {
+    "read_file" "(" <e: Expression> ")" => Read {
         value: e,
     }
 };
