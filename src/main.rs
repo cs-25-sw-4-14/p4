@@ -37,8 +37,7 @@ fn main() -> Result<()> {
     });
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let source_code = std::fs::read_to_string("myscript.toy")?;
-    let lexer = Lexer::new(&source_code);
+    let lexer = Lexer::new(&file);
     let parser = lossy::ProgramParser::new();
     let ast = parser
         .parse(lexer)
