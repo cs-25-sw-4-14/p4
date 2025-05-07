@@ -1,18 +1,20 @@
-use crate::ast::{Literal, Type};
+use crate::{
+    ast::{Literal, Type},
+    typechecker::Typechecker,
+};
 use anyhow::Result;
 
-pub fn check(literal: &Literal) -> Result<Type> {
-    Ok(Type::from(literal.clone()))
+impl<'a> Typechecker<'a> {
+    pub fn check_literal(literal: &Literal) -> Result<Type> {
+        Ok(Type::from(literal.clone()))
+    }
 }
 
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::typechecker::expression_check;
-    use crate::{
-        ast::{Expression, Literal},
-        typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
-    };
+    use crate::ast::{Expression, Literal};
+    use crate::debugger::Debugger;
 
     #[test]
     fn check_literal_should_return_type() {
@@ -27,13 +29,11 @@ pub mod tests {
             (Expression::Literal(Literal::Int(0)), Type::I64),
         ];
 
-        let v_table = VTable::new();
-        let f_table = FTable::new();
-        let s_table = STable::new();
+        let debugger = Debugger::new(String::from(""));
+        let typechecker = Typechecker::new(&debugger);
 
         for (expression, expected_type) in tests {
-            let result =
-                expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
+            let result = typechecker.check_expression(&expression).unwrap();
             assert_eq!(result, expected_type);
         }
     }

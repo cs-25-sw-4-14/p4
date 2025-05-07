@@ -147,6 +147,8 @@ impl<'ctx> CodeGenerator<'ctx> {
                 TopLevelDefinition::Struct(struct_def) => {
                     self.compile_struct(struct_def)?;
                 }
+                // TODO: Handle enums
+                TopLevelDefinition::Enum(_) => todo!(),
             }
         }
         Ok(())
@@ -222,7 +224,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 .context
                 .ptr_type(AddressSpace::default())
                 .as_basic_type_enum()),
-            Type::Struct(name) => match self.module.get_struct_type(name) {
+            Type::Custom(name) => match self.module.get_struct_type(name) {
                 Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
                 None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
             },

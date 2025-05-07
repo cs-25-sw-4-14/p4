@@ -1,63 +1,59 @@
-use crate::typechecker::expression_check;
-use crate::{
-    ast::{Type, VectorInsert},
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
-};
+use crate::ast::{Type, VectorInsert};
+use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-pub fn check(
-    vector_insert: &VectorInsert,
-    v_table: &mut VTable,
-    f_table: &FTable,
-    s_table: &STable,
-    _l: usize,
-) -> Result<()> {
-    let vector_name = vector_insert.vector_name.clone();
-    let index = vector_insert.index.clone();
-    let value = vector_insert.value.clone();
+impl Typechecker<'_> {
+    pub fn check_vector_insert(&self, vector_insert: &VectorInsert, _l: usize) -> Result<()> {
+        let vector_name = vector_insert.vector_name.clone();
+        let index = vector_insert.index.clone();
+        let value = vector_insert.value.clone();
 
-    // check if index is an expression
-    let index_type = expression_check::check(&index, v_table, f_table, s_table)?;
-    if index_type != Type::I64 {
-        return Err(anyhow::anyhow!("Index must be of type I64"));
-    }
+        // check if index is an expression
+        let index_type = self.check_expression(&index)?;
+        if index_type != Type::I64 {
+            return Err(anyhow::anyhow!("Index must be of type I64"));
+        }
 
-    // check if value is an expression
-    let value_type = expression_check::check(&value, v_table, f_table, s_table)?;
+        // check if value is an expression
+        let value_type = self.check_expression(&value)?;
 
-    // check if vector is defined and has type vector
-    if let Some(var) = v_table.get(&vector_name) {
-        if let Type::Vector(inner_type) = &var.var_type {
-            if *inner_type != Box::new(value_type.clone()) {
-                return Err(anyhow::anyhow!(
-                    "Value type {:?} does not match vector type {:?}",
-                    value_type,
-                    inner_type
-                ));
+        // check if vector is defined and has type vector
+        if let Some(var) = self.v_table.get(&vector_name) {
+            if let Type::Vector(inner_type) = &var.var_type {
+                if **inner_type != value_type {
+                    return Err(anyhow::anyhow!(
+                        "Value type {:?} does not match vector type {:?}",
+                        value_type,
+                        inner_type
+                    ));
+                }
+            } else {
+                return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
             }
         } else {
-            return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
+            return Err(anyhow::anyhow!(
+                "Variable {} not found in vtable",
+                vector_name
+            ));
         }
-    } else {
-        return Err(anyhow::anyhow!(
-            "Variable {} not found in vtable",
-            vector_name
-        ));
+        Ok(())
     }
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Literal, Statement, Type, VariableDeclaration, VectorLiteral};
+    use crate::ast::{Expression, Literal, Type, VariableDeclaration, VectorLiteral};
 
+    use crate::debugger::Debugger;
     use crate::typechecker::variable_table::VTable;
 
     #[test]
     fn test_vector_insert() {
-        let mut v_table = VTable::new();
-        v_table.variables.insert(
+        let debugger = Debugger::new(String::from(""));
+        let mut typechecker = Typechecker::new(&debugger);
+
+        typechecker.v_table.variables.insert(
             "my_vector".to_string(),
             VariableDeclaration {
                 var_type: Type::Vector(Box::new(Type::I64)),
@@ -74,13 +70,6 @@ mod tests {
             value: Expression::Literal(Literal::Int(52)),
         };
 
-        let result = check(
-            &vector_insert,
-            &mut v_table,
-            &FTable::new(),
-            &STable::new(),
-            0,
-        );
-        assert!(result.is_ok());
+        let result = typechecker.check_vector_insert(&vector_insert, 0).unwrap();
     }
 }
