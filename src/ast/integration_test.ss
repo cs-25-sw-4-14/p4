@@ -5,7 +5,7 @@ struct Point {
 
 struct Circle {
     Point center;
-    fp64 radius;
+    f64 radius;
 }
 
 struct Rectangle {
@@ -28,8 +28,8 @@ void main() {
     triv mut i64 value = -100;        
     i64 large_number = 69420;
     
-    fp64 pi = 3.14159;
-    fp64 precise_value = 2.7182818284590452353602;
+    f64 pi = 3.14159;
+    f64 precise_value = 2.7182818284590452353602;
     
     bool is_true = true;
     bool is_false = false;
@@ -160,8 +160,7 @@ void main() {
 
     bool is_same_x = person.location.x == circle.center.x;
 
-    write("a");
-    String aaaaa = read(" a" );
+    String lol = read_file("lol");
     debug("a");
 
 }

@@ -8,16 +8,17 @@ pub mod array_literal;
 pub mod binary_op;
 pub mod function_call;
 pub mod literal;
+pub mod read_file;
 pub mod struct_field_access;
 pub mod struct_init;
 pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
+pub mod write_file;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
         match expr {
-            Expression::Read(_) => todo!(),
             Expression::Dereference(_) => todo!(),
             Expression::Reference(_, _) => todo!(),
             Expression::Literal(literal) => self.compile_literal(literal),
@@ -40,6 +41,8 @@ impl<'ctx> CodeGenerator<'ctx> {
                 self.last_value = Some(value);
                 Ok(value)
             }
+            Expression::Write(write_node) => self.compile_write_file(write_node),
+            Expression::Read(read_node) => self.compile_read_file(read_node),
         }
     }
 }

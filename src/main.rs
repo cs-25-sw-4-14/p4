@@ -1,3 +1,4 @@
+use crate::lexer::Lexer;
 use anyhow::anyhow;
 use clap::Parser;
 use inkwell::OptimizationLevel;
@@ -14,7 +15,11 @@ lalrpop_mod!(
 pub mod ast;
 pub mod codegenerator;
 pub mod debugger;
+pub mod lexer;
+pub mod tokens;
 pub mod typechecker;
+
+use anyhow::Result;
 
 /// The Lossy compiler
 #[derive(Parser, Debug)]
@@ -24,7 +29,7 @@ struct Args {
     input: String,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let huttel = include_str!("huttel.txt");
     let args = Args::parse();
     let file = std::fs::read_to_string(&args.input).unwrap_or_else(|_| {
@@ -32,8 +37,10 @@ fn main() {
     });
     let debugger = debugger::Debugger::new(file.to_string());
 
-    let ast = lossy::ProgramParser::new()
-        .parse(&file)
+    let lexer = Lexer::new(&file);
+    let parser = lossy::ProgramParser::new();
+    let ast = parser
+        .parse(lexer)
         .map_err(|err| match err {
             lalrpop_util::ParseError::InvalidToken { location } => {
                 anyhow!("Invalid token at {}", debugger.display(location))
@@ -67,7 +74,7 @@ fn main() {
     let mut typechecker = typechecker::Typechecker::new();
     typechecker
         .walk(ast.clone(), debugger)
-        .unwrap_or_else(|_| panic!("{}\nSemantic check failed!!! You dork!!!: ", &huttel));
+        .map_err(|e| anyhow!("{}{}", &huttel, e))?;
 
     let ctx = inkwell::context::Context::create();
     let module = ctx.create_module("program");
@@ -120,4 +127,5 @@ fn main() {
         "Program succesfully compiled and saved as '{}'",
         &output_file
     );
+    Ok(())
 }
