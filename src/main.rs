@@ -74,7 +74,7 @@ fn main() -> Result<()> {
     let mut typechecker = typechecker::Typechecker::new();
     typechecker
         .walk(ast.clone(), debugger)
-        .map_err(|e| anyhow!("{}\nSemantic check failed!!! You dork!!!: {}", &huttel, e))?;
+        .map_err(|e| anyhow!("{}{}", &huttel, e))?;
 
     let ctx = inkwell::context::Context::create();
     let module = ctx.create_module("program");
