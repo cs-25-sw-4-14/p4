@@ -25,7 +25,7 @@ pub struct CodeGenerator<'ctx> {
     pub program: Option<Program>,
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
-    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>
+    pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -90,7 +90,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             program: None,
             current_function: None,
             break_target_stack: Vec::new(),
-            continue_target_stack: Vec::new()
+            continue_target_stack: Vec::new(),
         }
     }
 
