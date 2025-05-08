@@ -39,27 +39,20 @@ impl<'ctx> CodeGenerator<'ctx> {
                     Type::I8 | Type::I16 | Type::I32 | Type::I64
                 );
 
-                // Perform the appropriate extension or truncation based on bit widths
-                if src_bits < tgt_bits {
-                    if is_signed {
-                        // Signed extension
-                        self.builder
-                            .build_int_s_extend(value, int_type, "sext_tmp")?
-                            .into()
-                    } else {
-                        // Zero extension
-                        self.builder
-                            .build_int_z_extend(value, int_type, "zext_tmp")?
-                            .into()
-                    }
-                } else if src_bits > tgt_bits {
-                    // Truncation
-                    self.builder
+                match src_bits.cmp(&tgt_bits) {
+                    std::cmp::Ordering::Less if is_signed => self
+                        .builder
+                        .build_int_s_extend(value, int_type, "sext_tmp")?
+                        .into(),
+                    std::cmp::Ordering::Less => self
+                        .builder
+                        .build_int_z_extend(value, int_type, "zext_tmp")?
+                        .into(),
+                    std::cmp::Ordering::Greater => self
+                        .builder
                         .build_int_truncate(value, int_type, "trunc_tmp")?
-                        .into()
-                } else {
-                    // No change needed
-                    value.into()
+                        .into(),
+                    std::cmp::Ordering::Equal => value.into(),
                 }
             }
 
@@ -68,17 +61,16 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let src_bits = self.get_float_bit_width(value.get_type()).unwrap();
                 let tgt_bits = self.get_float_bit_width(float_type).unwrap();
 
-                // Perform the appropriate float extension or truncation based on bit widths
-                if src_bits < tgt_bits {
-                    self.builder
+                match src_bits.cmp(&tgt_bits) {
+                    std::cmp::Ordering::Less => self
+                        .builder
                         .build_float_ext(value, float_type, "fext_tmp")?
-                        .into()
-                } else if src_bits > tgt_bits {
-                    self.builder
+                        .into(),
+                    std::cmp::Ordering::Greater => self
+                        .builder
                         .build_float_trunc(value, float_type, "ftrunc_tmp")?
-                        .into()
-                } else {
-                    value.into()
+                        .into(),
+                    std::cmp::Ordering::Equal => value.into(),
                 }
             }
 
