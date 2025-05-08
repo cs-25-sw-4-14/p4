@@ -8,7 +8,7 @@ use inkwell::values::{BasicValueEnum, FunctionValue, PointerValue};
 use anyhow::Result;
 use std::collections::HashMap;
 
-use crate::ast::{Program, TopLevelDefinition, Type};
+use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
 
 pub mod controlflow;
 pub mod expression;
@@ -22,18 +22,10 @@ pub struct CodeGenerator<'ctx> {
     pub builder: Builder<'ctx>,
     pub variables: HashMap<String, (BasicTypeEnum<'ctx>, PointerValue<'ctx>)>,
     pub last_value: Option<BasicValueEnum<'ctx>>,
-    pub program: Option<Program>,
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
-
-    fopen_func: FunctionValue<'ctx>,
-    fprintf_func: FunctionValue<'ctx>,
-    fclose_func: FunctionValue<'ctx>,
-    fseek_func: FunctionValue<'ctx>,
-    ftell_func: FunctionValue<'ctx>,
-    fread_func: FunctionValue<'ctx>,
-    malloc_func: FunctionValue<'ctx>,
+    pub struct_definitions: HashMap<String, StructDef>
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -52,26 +44,26 @@ impl<'ctx> CodeGenerator<'ctx> {
         // fopen: FILE* fopen(const char* filename, const char* mode);
 
         let fopen_type = file_ptr_type.fn_type(&[i8_ptr_type.into(), i8_ptr_type.into()], false);
-        let fopen_func = module.add_function("fopen", fopen_type, Some(Linkage::External));
+        module.add_function("fopen", fopen_type, Some(Linkage::External));
 
         // fprintf: int fprintf(FILE* stream, const char* format, ...);
         let fprintf_type = i32_type.fn_type(&[file_ptr_type.into(), i8_ptr_type.into()], true);
-        let fprintf_func = module.add_function("fprintf", fprintf_type, Some(Linkage::External));
+        module.add_function("fprintf", fprintf_type, Some(Linkage::External));
 
         // fclose: int fclose(FILE* stream);
         let fclose_type = i32_type.fn_type(&[file_ptr_type.into()], false);
-        let fclose_func = module.add_function("fclose", fclose_type, Some(Linkage::External));
+        module.add_function("fclose", fclose_type, Some(Linkage::External));
 
         // fseek: int fseek(FILE* stream, long offset, int whence);
         let fseek_type = i32_type.fn_type(
             &[file_ptr_type.into(), i64_type.into(), i32_type.into()],
             false,
         );
-        let fseek_func = module.add_function("fseek", fseek_type, Some(Linkage::External));
+        module.add_function("fseek", fseek_type, Some(Linkage::External));
 
         // ftell: long ftell(FILE* stream);
         let ftell_type = i64_type.fn_type(&[file_ptr_type.into()], false);
-        let ftell_func = module.add_function("ftell", ftell_type, Some(Linkage::External));
+        module.add_function("ftell", ftell_type, Some(Linkage::External));
 
         // fread: size_t fread(void* ptr, size_t size, size_t count, FILE* stream);
         let fread_type = i64_type.fn_type(
@@ -83,30 +75,22 @@ impl<'ctx> CodeGenerator<'ctx> {
             ],
             false,
         );
-        let fread_func = module.add_function("fread", fread_type, Some(Linkage::External));
+        module.add_function("fread", fread_type, Some(Linkage::External));
 
         // malloc: void* malloc(size_t size);
         let malloc_type = i8_ptr_type.fn_type(&[i64_type.into()], false);
-        let malloc_func = module.add_function("malloc", malloc_type, Some(Linkage::External));
+        module.add_function("malloc", malloc_type, Some(Linkage::External));
 
-        // Initialize the CodeGenerator struct
         CodeGenerator {
             context,
             module,
             builder,
             variables: HashMap::new(),
             last_value: None,
-            program: None,
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
-            fprintf_func,
-            fopen_func,
-            fclose_func,
-            fseek_func,
-            ftell_func,
-            fread_func,
-            malloc_func,
+            struct_definitions: HashMap::new()
         }
     }
 
@@ -146,6 +130,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 TopLevelDefinition::Struct(struct_def) => {
                     self.compile_struct(struct_def)?;
+                    self.struct_definitions.insert(struct_def.name.clone(), struct_def.clone());
                 }
                 // TODO: Handle enums
                 TopLevelDefinition::Enum(_) => todo!(),

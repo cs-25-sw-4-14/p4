@@ -8,6 +8,19 @@ impl<'ctx> CodeGenerator<'ctx> {
         &mut self,
         write_node: &Write,
     ) -> Result<BasicValueEnum<'ctx>> {
+        let fopen_func = self
+            .module
+            .get_function("fopen")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let fprintf_func = self
+            .module
+            .get_function("fprintf")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let fclose_func = self
+            .module
+            .get_function("fclose")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+
         // 1. Compile value (content) - Expecting i8* (string)
         let value_val = self.compile_expression(&write_node.value)?;
         let content_ptr = match value_val {
@@ -38,7 +51,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let file_handle = self
             .builder
             .build_call(
-                self.fopen_func,
+                fopen_func,
                 &[filename_ptr.into(), write_mode_ptr.into()],
                 "fopen_call",
             )?
@@ -49,7 +62,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // 5. Call fprintf(file_handle, "%s", content) -> returns int
         let _fprintf_ret = self.builder.build_call(
-            self.fprintf_func,
+            fprintf_func,
             &[
                 file_handle.into(),
                 format_str_ptr.into(),
@@ -61,7 +74,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // 6. Call fclose(file_handle) -> returns int
         let _fclose_ret =
             self.builder
-                .build_call(self.fclose_func, &[file_handle.into()], "fclose_call")?;
+                .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
 
         // Return placeholder i32(0) for void expression type
         Ok(self.context.i32_type().const_int(0, false).into())
