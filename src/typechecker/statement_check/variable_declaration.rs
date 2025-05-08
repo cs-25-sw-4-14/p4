@@ -1,7 +1,8 @@
 use crate::typechecker::expression_check;
 use crate::{
-    ast::VariableDeclaration,
+    ast::{VariableDeclaration, Type, Expression},
     typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
+    
 };
 use anyhow::Result;
 
@@ -23,14 +24,47 @@ pub fn check(
             value_type
         ));
     }
-
     semantic_check_variable_already_declared(declaration, v_table)?;
+    
+    
+    match &declaration.value {
+        Expression::VectorLiteral(args)  => {
+            let length= args.elements.len() as u64;
 
-    v_table
-        .variables
-        .insert(declaration.name.clone(), declaration.clone());
+            let var_type = match &declaration.var_type {
+                Type::Vector(t, _) => Type::Vector(t.clone(), length),
+                _ => unreachable!(),
+            };
 
-    Ok(())
+        
+
+            let vec_decl = VariableDeclaration {
+                trivial: None,
+                mutable: declaration.mutable,
+                var_type,
+                name: declaration.name.clone(),
+                value: declaration.value.clone(),
+            };
+            v_table
+                .variables
+                .insert(vec_decl.name.clone(), vec_decl);
+            return Ok(())
+            
+
+        }
+        _ => {
+            v_table
+            .variables
+            .insert(declaration.name.clone(), declaration.clone());
+    
+            Ok(())
+        }
+    }
+
+    
+
+
+   
 }
 
 pub fn semantic_check_variable_already_declared<'a>(
