@@ -15,6 +15,30 @@ impl<'ctx> CodeGenerator<'ctx> {
                 ));
             }
         };
+        let fopen_func = self
+            .module
+            .get_function("fopen")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let fread_func = self
+            .module
+            .get_function("fread")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let fseek_func = self
+            .module
+            .get_function("fseek")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let ftell_func = self
+            .module
+            .get_function("ftell")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let malloc_func = self
+            .module
+            .get_function("malloc")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+        let fclose_func = self
+            .module
+            .get_function("fclose")
+            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
 
         // 2. Get C string "r" for read mode and necessary types/constants
 
@@ -27,7 +51,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let file_handle = self
             .builder
             .build_call(
-                self.fopen_func,
+                fopen_func,
                 &[filename_ptr.into(), read_mode_ptr.into()],
                 "fopen_call",
             )?
@@ -42,7 +66,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let offset_zero_i64 = i64_type.const_int(0, false);
 
         self.builder.build_call(
-            self.fseek_func,
+            fseek_func,
             &[
                 file_handle.into(),
                 offset_zero_i64.into(),
@@ -53,14 +77,14 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let file_size_i64 = self
             .builder
-            .build_call(self.ftell_func, &[file_handle.into()], "ftell")?
+            .build_call(ftell_func, &[file_handle.into()], "ftell")?
             .try_as_basic_value()
             .left()
             .ok_or_else(|| anyhow!("ftell call failed to return a value"))?
             .into_int_value();
 
         self.builder.build_call(
-            self.fseek_func,
+            fseek_func,
             &[
                 file_handle.into(),
                 offset_zero_i64.into(),
@@ -77,7 +101,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let buffer_size_arg: BasicMetadataValueEnum = buffer_size.into();
         let buffer_ptr = self
             .builder
-            .build_call(self.malloc_func, &[buffer_size_arg], "malloc_call")?
+            .build_call(malloc_func, &[buffer_size_arg], "malloc_call")?
             .try_as_basic_value()
             .left()
             .ok_or_else(|| anyhow!("malloc call failed to return a basic value"))?
@@ -88,7 +112,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let _read_count = self
             .builder
             .build_call(
-                self.fread_func,
+                fread_func,
                 &[
                     buffer_ptr.into(),
                     size_one_i64.into(),
@@ -114,7 +138,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // 8. Close file
         let _fclose_ret =
             self.builder
-                .build_call(self.fclose_func, &[file_handle.into()], "fclose_call")?;
+                .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
 
         // 9. Return the pointer to the buffer (Type::String -> i8*)
         Ok(buffer_ptr.into())
