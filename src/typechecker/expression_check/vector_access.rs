@@ -2,7 +2,6 @@ use crate::ast::{Type, VectorAccess};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-
 impl Typechecker<'_> {
     pub fn check_vector_access(&self, vector_access: &VectorAccess) -> Result<Type> {
         let index_type = self.check_expression(&vector_access.index)?;
@@ -11,7 +10,7 @@ impl Typechecker<'_> {
             return Err(anyhow::anyhow!("Index must be of type I64"));
         }
         if let Some(var) = self.v_table.get(&vector_access.vector_name) {
-            if let Type::Vector(inner_type) = &var.var_type {
+            if let Type::Vector(inner_type, _) = &var.var_type {
                 Ok(*inner_type.clone())
             } else {
                 Err(anyhow::anyhow!(

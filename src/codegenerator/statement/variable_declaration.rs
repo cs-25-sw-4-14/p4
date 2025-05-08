@@ -1,6 +1,7 @@
 use super::CodeGenerator;
-use crate::ast::{Type, VariableDeclaration};
+use crate::ast::{Expression, Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
+use inkwell::types::{BasicTypeEnum, VectorType};
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
@@ -22,8 +23,40 @@ impl CodeGenerator<'_> {
                 )
             })?;
 
-        println!("Vary type: {:?}", var_type);
         match var_type {
+            Type::Vector(elem_type, _) => {
+                let vector_literal = match &decl.value {
+                    Expression::VectorLiteral(lit) => lit,
+                    _ => return Err(anyhow!("Expected vector literal for vector variable")),
+                };
+
+                let llvm_elem_type = self.get_llvm_type(elem_type)?;
+
+                let size = vector_literal.elements.len();
+
+                let vector_type: VectorType<'_> = match llvm_elem_type {
+                    BasicTypeEnum::IntType(t) => t.vec_type(size as u32),
+                    _ => return Err(anyhow!("Unsupported element type")),
+                };
+
+                let vector_ptr = self.builder.build_alloca(vector_type, "vector")?;
+
+                for (i, elem_expr) in vector_literal.elements.iter().enumerate().skip(1) {
+                    let elem_value = self.compile_expression(elem_expr)?;
+                    let elem_ptr = unsafe {
+                        self.builder.build_in_bounds_gep(
+                            vector_type,
+                            vector_ptr,
+                            &[
+                                self.context.i32_type().const_zero(),
+                                self.context.i32_type().const_int(i as u64, false),
+                            ],
+                            &format!("vector_elem_{}", i),
+                        )
+                    }?;
+                    self.builder.build_store(elem_ptr, elem_value)?;
+                }
+            }
             Type::Array(elem_type, size) => {
                 let array_literal_ptr = self.compile_expression(&decl.value)?.into_pointer_value();
                 let llvm_elem_type = self.get_llvm_type(elem_type)?;

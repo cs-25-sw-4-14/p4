@@ -3,7 +3,6 @@ use crate::ast::ArrayLiteral;
 use anyhow::Result;
 use inkwell::{types::BasicType, values::BasicValueEnum};
 
-
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_literal(
         &mut self,
@@ -32,7 +31,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             element_values.push(value);
         }
 
-       
         let array_type = element_type.array_type(element_values.len() as u32);
 
         let array_ptr = self.builder.build_alloca(array_type, "array_literal")?;

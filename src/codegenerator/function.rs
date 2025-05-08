@@ -66,6 +66,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // Compile the function body
         for statement in &function_def.body {
+            println!("Compiling statement: {:?}", statement);
             self.compile_statement(statement)?;
         }
 

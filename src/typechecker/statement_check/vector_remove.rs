@@ -7,21 +7,6 @@ impl Typechecker<'_> {
         let vector_name = vector_insert.vector_name.clone();
         let index = vector_insert.index.clone();
 
-<<<<<<< HEAD
-    // check if index is an expression
-    let index_type = expression_check::check(&index, v_table, f_table, s_table)?;
-    if index_type != Type::I64 {
-        return Err(anyhow::anyhow!("Index must be of type I64"));
-    }
-
-    // check if vector is defined and has type vector
-    if let Some(var) = v_table.get(&vector_name) {
-        if let Type::Vector(_inner_type, _) = &var.var_type {
-            // return the type of the vector
-            return Ok(());
-        } else {
-            return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
-=======
         // check if index is an expression
         let index_type = self.check_expression(&index)?;
         if index_type != Type::I64 {
@@ -30,7 +15,7 @@ impl Typechecker<'_> {
 
         // check if vector is defined and has type vector
         if let Some(var) = self.v_table.get(&vector_name) {
-            if let Type::Vector(_inner_type) = &var.var_type {
+            if let Type::Vector(_, _) = &var.var_type {
                 // return the type of the vector
                 Ok(())
             } else {
@@ -41,7 +26,6 @@ impl Typechecker<'_> {
                 "Variable {} not found in vtable",
                 vector_name
             ))
->>>>>>> main
         }
     }
 }
@@ -49,14 +33,7 @@ impl Typechecker<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
-<<<<<<< HEAD
-    use crate::typechecker::function_table::FTable;
-    use crate::typechecker::struct_table::STable;
-    use crate::typechecker::variable_table::VTable;
-=======
-    use crate::debugger::Debugger;
->>>>>>> main
+    use crate::{ast::{Expression, Literal, VariableDeclaration, VectorLiteral}, debugger::Debugger};
 
     #[test]
     fn test_vector_remove() {
