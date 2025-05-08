@@ -183,7 +183,7 @@ pub enum Expression {
     StructFieldAccess(StructFieldAccess),
     ArrayAccess(Box<ArrayAccess>),
     VectorAccess(Box<VectorAccess>),
-    VectorLiteral(Box<VectorLiteral>, Type),
+    VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Reference(Box<Expression>, bool), // (expression, is_mutable)
@@ -268,7 +268,6 @@ pub struct ArrayLiteral {
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct VectorLiteral {
-    pub element_type: Type,
     pub elements: Vec<Expression>,
 }
 #[derive(Debug, Clone, PartialEq)]
@@ -301,7 +300,7 @@ pub enum Type {
     Bool,
     Custom(String),
     Array(Box<Type>, u64),
-    Vector(Box<Type>, u64),
+    Vector(Box<Type>),
     Reference(Box<Type>, bool), // (type, is_mutable)
 }
 

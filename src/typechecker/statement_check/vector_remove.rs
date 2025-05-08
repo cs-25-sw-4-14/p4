@@ -15,7 +15,7 @@ impl Typechecker<'_> {
 
         // check if vector is defined and has type vector
         if let Some(var) = self.v_table.get(&vector_name) {
-            if let Type::Vector(_, _) = &var.var_type {
+            if let Type::Vector(_) = &var.var_type {
                 // return the type of the vector
                 Ok(())
             } else {
@@ -43,7 +43,7 @@ mod tests {
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
             VariableDeclaration {
-                var_type: Type::Vector(Box::new(Type::I64), 0),
+                var_type: Type::Vector(Box::new(Type::I64)),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,

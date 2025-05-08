@@ -5,7 +5,7 @@ use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
 use inkwell::values::{BasicValueEnum, PointerValue};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 
 use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
@@ -181,10 +181,6 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 llvm_element_type.array_type(*size as u32).into()
             }
-             Type::Vector(element_type, size) => {
-                 let llvm_element_type = self.get_basic_type(element_type);
-                 llvm_element_type.array_type(*size as u32).into()
-             }
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
@@ -210,7 +206,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 .as_basic_type_enum()),
             Type::Custom(name) => match self.module.get_struct_type(name) {
                 Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
-                None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
+                None => Err(anyhow!("Struct type '{}' not found", name)),
             },
             Type::Array(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
@@ -230,20 +226,20 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }
-            Type::Vector(elem_type, size) => {
+            Type::Vector(elem_type) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
                 match elem_llvm_type {
                     BasicTypeEnum::FloatType(ft) => {
-                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
+                        Ok(ft.vec_type(1).as_basic_type_enum())
                     }
                     BasicTypeEnum::IntType(it) => {
-                        Ok(it.array_type(*size as u32).as_basic_type_enum())
+                        Ok(it.vec_type(1).as_basic_type_enum())
                     }
                     BasicTypeEnum::PointerType(pt) => {
-                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
+                        Ok(pt.vec_type(1).as_basic_type_enum())
                     }
-                    BasicTypeEnum::StructType(st) => {
-                        Ok(st.array_type(*size as u32).as_basic_type_enum())
+                    BasicTypeEnum::StructType(_) => {
+                        Ok(self.context.ptr_type(AddressSpace::default()).vec_type(0).as_basic_type_enum())
                     }
                     _ => Err(anyhow::anyhow!("Unsupported vector element type")),
                 }
