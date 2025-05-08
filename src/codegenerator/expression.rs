@@ -45,6 +45,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::Read(read_node) => self.compile_read_file(read_node),
             // TODO: Handle enum initialization
             Expression::EnumLiteral(_) => todo!(),
+            Expression::Null => todo!(),
         }
     }
 }

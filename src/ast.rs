@@ -191,6 +191,7 @@ pub enum Expression {
     EnumLiteral(EnumLiteral),
     Write(Box<Write>),
     Read(Box<Read>),
+    Null,
 }
 
 #[derive(Debug, Clone, PartialEq)]
