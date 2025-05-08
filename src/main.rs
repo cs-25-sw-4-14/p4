@@ -71,9 +71,9 @@ fn main() -> Result<()> {
         })
         .expect("Failed to parse:");
 
-    let mut typechecker = typechecker::Typechecker::new();
+    let mut typechecker = typechecker::Typechecker::new(&debugger);
     typechecker
-        .walk(ast.clone(), debugger)
+        .walk(ast.clone())
         .map_err(|e| anyhow!("{}{}", &huttel, e))?;
 
     let ctx = inkwell::context::Context::create();

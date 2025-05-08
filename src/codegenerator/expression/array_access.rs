@@ -6,7 +6,7 @@ use inkwell::{types::BasicTypeEnum, values::BasicValueEnum};
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_access(
         &mut self,
-        array_access: &Box<ArrayAccess>,
+        array_access: &ArrayAccess,
     ) -> Result<BasicValueEnum<'ctx>> {
         let array_name = &array_access.array_name;
         let index_value = self.compile_expression(&array_access.index)?;

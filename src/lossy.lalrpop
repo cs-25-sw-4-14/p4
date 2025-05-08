@@ -68,7 +68,11 @@ extern {
     "void" => Token::KeywordVoid,
     "break" => Token::KeywordBreak,
     "continue" => Token::KeywordContinue,
+    "enum" => Token::KeywordEnum,
+    "match" => Token::KeywordMatch,
+    "::" => Token::Access,
     "_" => Token::Throwaway,
+    "=>" => Token::FatArrow,
     Identifier => Token::Identifier(<String>),
     IntLiteral => Token::IntLiteral(<u64>),
     StringLiteral => Token::StringLiteral(<String>),
@@ -85,6 +89,7 @@ pub Program: Program = {
 pub TopLevelDefinition: TopLevelDefinition = {
     FunctionDef  => TopLevelDefinition::Function(<>),
     StructDef    => TopLevelDefinition::Struct(<>),
+    EnumDef      => TopLevelDefinition::Enum(<>),
 };
 
 Comma<T>: Vec<T> = {
@@ -132,6 +137,43 @@ pub StructField: StructField = {
     }
 };
 
+pub EnumDef: EnumDef = {
+    "enum" <n:Identifier> "<" <g:Comma<Type>> ">" "{" <v:Comma<EnumVariant>> "}" => EnumDef {
+        name: n,
+        generics: g,
+        variants: v,
+    },
+    "enum" <n:Identifier> "{" <v:Comma<EnumVariant>> "}" => EnumDef {
+        name: n,
+        generics: Vec::new(),
+        variants: v,
+    }
+};
+
+pub EnumVariant: EnumVariant = {
+    <n:Identifier> => EnumVariant {
+        name: n,
+        inner_type: None,
+    },
+    <n:Identifier> "(" <t:Type> ")" => EnumVariant {
+        name: n,
+        inner_type: Some(t),
+    },
+};
+
+pub EnumLiteral: EnumLiteral = {
+    <n:Identifier> "::" <v:Identifier> => EnumLiteral {
+        name: n,
+        variant: v,
+        inner_value: None,
+    },
+    <n:Identifier> "::" <v:Identifier> "(" <e:Expression> ")" => EnumLiteral {
+        name: n,
+        variant: v,
+        inner_value: Some(Box::new(e)),
+    },
+};
+
 pub Statement: Statement = {
     <l:@L> <t:Throwaway> ";"=> Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> ";" => Statement::VariableDeclaration(t, l),
@@ -145,6 +187,21 @@ pub Statement: Statement = {
     <l:@L> <t:Return> ";" => Statement::Return(t, l),
     <l:@L> <t:Debug> ";" => Statement::Debug(t, l),
     <l:@L> <t:FunctionCall> ";" => Statement::FunctionCall(t, l),
+    <l:@L> <t:Match> => Statement::Match(t, l),
+};
+
+pub Match: Match = {
+    "match" "(" <e:Expression> ")" "{" <m:MatchCase*> "}" => Match {
+        expression: e,
+        cases: m,
+    }
+};
+
+pub MatchCase: MatchCase = {
+    <p:EnumVariant> "=>" "{" <b:Statement*> "}" => MatchCase {
+        enum_variant: p,
+        body: b,
+    }
 };
 
 pub Throwaway: Throwaway = {
@@ -424,7 +481,6 @@ pub VectorAccess: VectorAccess = {
     }
 };
 
-
 // Type - all possible data types in the language
 pub Type: Type = {
     "u8" => Type::U8,
@@ -443,7 +499,7 @@ pub Type: Type = {
     "bool" => Type::Bool,
     "Vec" "<" <t:Type> ">" => Type::Vector(Box::new(t)),
     "arr" <t:Type> "[" <l:IntLiteral> "]"=> Type::Array(Box::new(t), l),
-    <i:Identifier> => Type::Struct(i.to_string()),
+    <i:Identifier> => Type::Custom(i.to_string()),
     "&" <t:Type> => Type::Reference(Box::new(t), false),
     "&mut" <t:Type> => Type::Reference(Box::new(t), true),
 };

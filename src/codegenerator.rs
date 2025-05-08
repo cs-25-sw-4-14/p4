@@ -3,7 +3,7 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, FunctionValue, PointerValue};
+use inkwell::values::{BasicValueEnum, PointerValue};
 
 use anyhow::Result;
 use std::collections::HashMap;
@@ -25,7 +25,7 @@ pub struct CodeGenerator<'ctx> {
     pub current_function: Option<inkwell::values::FunctionValue<'ctx>>,
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
-    pub struct_definitions: HashMap<String, StructDef>
+    pub struct_definitions: HashMap<String, StructDef>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -90,7 +90,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             current_function: None,
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
-            struct_definitions: HashMap::new()
+            struct_definitions: HashMap::new(),
         }
     }
 
@@ -130,8 +130,11 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 TopLevelDefinition::Struct(struct_def) => {
                     self.compile_struct(struct_def)?;
-                    self.struct_definitions.insert(struct_def.name.clone(), struct_def.clone());
+                    self.struct_definitions
+                        .insert(struct_def.name.clone(), struct_def.clone());
                 }
+                // TODO: Handle enums
+                TopLevelDefinition::Enum(_) => todo!(),
             }
         }
         Ok(())
@@ -207,7 +210,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 .context
                 .ptr_type(AddressSpace::default())
                 .as_basic_type_enum()),
-            Type::Struct(name) => match self.module.get_struct_type(name) {
+            Type::Custom(name) => match self.module.get_struct_type(name) {
                 Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
                 None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
             },

@@ -56,7 +56,7 @@ impl CodeGenerator<'_> {
                     self.builder.build_store(var_elem_ptr, literal_elem_value)?;
                 }
             }
-            Type::Struct(struct_name) => {
+            Type::Custom(_) => {
                 let struct_value = self.compile_expression(&decl.value)?;
                 self.builder.build_store(array_ptr, struct_value)?;
             }

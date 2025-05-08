@@ -1,4 +1,4 @@
-use crate::{lexer::Lexer, typechecker};
+use crate::{debugger::Debugger, lexer::Lexer, typechecker};
 use anyhow::anyhow;
 use lalrpop_util::lalrpop_mod;
 
@@ -49,8 +49,9 @@ fn test_parser() {
         })
         .expect("Failed to parse:");
 
-    let mut typechecker = typechecker::Typechecker::new();
+    let debugger = Debugger::new(file.to_string());
+    let mut typechecker = typechecker::Typechecker::new(&debugger);
     typechecker
-        .walk(ast.clone(), debugger)
+        .walk(ast.clone())
         .expect("Failed to walk the AST");
 }

@@ -1,37 +1,29 @@
-use crate::typechecker::expression_check;
-use crate::{
-    ast::{Type, VectorAccess},
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
-};
+use crate::ast::{Type, VectorAccess};
+use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-pub fn check(
-    vector_access: &VectorAccess,
-    v_table: &VTable,
-    f_table: &FTable,
-    s_table: &STable,
-) -> Result<Type> {
-    //check if index is an expression
-    let index_type = expression_check::check(&vector_access.index, v_table, f_table, s_table)?;
-    if index_type != Type::I64 {
-        return Err(anyhow::anyhow!("Index must be of type I64"));
-    }
-    //check if vector is defined and has type vector
-    if let Some(var) = v_table.get(&vector_access.vector_name) {
-        if let Type::Vector(inner_type) = &var.var_type {
-            // return the type of the vector
-            Ok(*inner_type.clone())
+impl Typechecker<'_> {
+    pub fn check_vector_access(&self, vector_access: &VectorAccess) -> Result<Type> {
+        let index_type = self.check_expression(&vector_access.index)?;
+
+        if index_type != Type::I64 {
+            return Err(anyhow::anyhow!("Index must be of type I64"));
+        }
+        if let Some(var) = self.v_table.get(&vector_access.vector_name) {
+            if let Type::Vector(inner_type) = &var.var_type {
+                Ok(*inner_type.clone())
+            } else {
+                Err(anyhow::anyhow!(
+                    "Variable {} is not a vector",
+                    vector_access.vector_name
+                ))
+            }
         } else {
             Err(anyhow::anyhow!(
-                "Variable {} is not a vector",
+                "Variable {} not found in vtable",
                 vector_access.vector_name
             ))
         }
-    } else {
-        Err(anyhow::anyhow!(
-            "Variable {} not found in vtable",
-            vector_access.vector_name
-        ))
     }
 }
 
@@ -39,15 +31,15 @@ pub fn check(
 pub mod vector_access_tests {
     use super::*;
     use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
-    use crate::typechecker::expression_check;
+    use crate::debugger::Debugger;
+    
 
     #[test]
     fn test_vector_access() {
-        let mut v_table = VTable::new();
-        let f_table = FTable::new();
-        let s_table = STable::new();
+        let debugger = Debugger::new(String::from(""));
+        let mut typechecker = Typechecker::new(&debugger);
 
-        v_table.variables.insert(
+        typechecker.v_table.variables.insert(
             "my_vector".to_string(),
             VariableDeclaration {
                 trivial: None,
@@ -64,7 +56,7 @@ pub mod vector_access_tests {
             index: Expression::Literal(Literal::Int(0)),
         }));
 
-        let result = expression_check::check(&expression, &v_table, &f_table, &s_table);
+        let result = typechecker.check_expression(&expression);
         assert!(result.is_ok());
     }
 }

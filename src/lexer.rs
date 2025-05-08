@@ -5,7 +5,6 @@ use crate::tokens::{LexicalError, Token}; // your Token enum, as above
 pub type Spanned<Tok, Loc, Error> = Result<(Loc, Tok, Loc), Error>;
 
 pub struct Lexer<'input> {
-    // instead of an iterator over characters, we have a token iterator
     token_stream: SpannedIter<'input, Token>,
 }
 
@@ -17,7 +16,7 @@ impl<'input> Lexer<'input> {
     }
 }
 
-impl<'input> Iterator for Lexer<'input> {
+impl Iterator for Lexer<'_> {
     type Item = Spanned<Token, usize, LexicalError>;
 
     fn next(&mut self) -> Option<Self::Item> {
