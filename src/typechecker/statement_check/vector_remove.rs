@@ -23,26 +23,26 @@ pub fn check(
 
     // check if vector is defined and has type vector
     if let Some(var) = v_table.get(&vector_name) {
-        if let Type::Vector(inner_type) = &var.var_type {
+        if let Type::Vector(_inner_type) = &var.var_type {
             // return the type of the vector
-            return Ok(());
+            Ok(())
         } else {
-            return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
+            Err(anyhow::anyhow!("Variable {} is not a vector", vector_name))
         }
     } else {
-        return Err(anyhow::anyhow!(
+        Err(anyhow::anyhow!(
             "Variable {} not found in vtable",
             vector_name
-        ));
+        ))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Expression, Literal, Statement, VariableDeclaration, VectorLiteral};
+    use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
     use crate::typechecker::function_table::FTable;
-    use crate::typechecker::statement_check;
+    
     use crate::typechecker::struct_table::STable;
     use crate::typechecker::variable_table::VTable;
 
