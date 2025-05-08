@@ -21,9 +21,6 @@ impl CodeGenerator<'_> {
             Statement::Throwaway(throwaway, _) => {
                 self.compile_expression(&throwaway.expression)?;
             }
-            Statement::Write(_, _) => {
-                // Handle write statement
-            }
             Statement::Debug(expr, _) => {
                 self.compile_print_stmt(expr)?;
             }
@@ -46,8 +43,10 @@ impl CodeGenerator<'_> {
                 let continue_target = *self.continue_target_stack.last().unwrap();
                 _ = self.builder.build_unconditional_branch(continue_target);
             }
-            Statement::VectorInsert(_vector_insert, _) => todo!(),
-            Statement::VectorRemove(_vector_remove, _) => todo!(),
+            Statement::VectorInsert(_, _) => todo!(),
+            Statement::VectorRemove(_, _) => todo!(),
+            // TODO: Handle Match
+            Statement::Match(_, _) => todo!(),
         };
         Ok(())
     }

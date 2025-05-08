@@ -15,7 +15,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Create function return type
         let return_type = match &function_def.return_type {
             Some(ret_type) => {
-                if let Type::Struct(_) = ret_type {
+                if let Type::Custom(_) = ret_type {
                     return Err(anyhow::anyhow!(
                         "Returning struct by value not supported yet"
                     ));

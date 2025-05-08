@@ -1,25 +1,17 @@
-use crate::typechecker::expression_check;
-use crate::{
-    ast::Throwaway,
-    typechecker::{function_table::FTable, struct_table::STable, variable_table::VTable},
-};
+use crate::ast::Throwaway;
+use crate::typechecker::Typechecker;
 use anyhow::Result;
 
-pub fn check(
-    throwaway: &Throwaway,
-    v_table: &mut VTable,
-    f_table: &FTable,
-    s_table: &STable,
-    _debugger: &crate::debugger::Debugger,
-    l: usize,
-) -> Result<()> {
-    let expr = expression_check::check(&throwaway.expression, v_table, f_table, s_table);
-    if expr.is_err() {
-        return Err(anyhow::anyhow!(
-            "{}: Error in thrown away expression: {:?}",
-            _debugger.display(l),
-            expr
-        ));
+impl Typechecker<'_> {
+    pub fn check_throwaway(&mut self, throwaway: &Throwaway, l: usize) -> Result<()> {
+        let expr = self.check_expression(&throwaway.expression);
+        if expr.is_err() {
+            return Err(anyhow::anyhow!(
+                "{}: Error in thrown away expression: {:?}",
+                self.debugger.display(l),
+                expr
+            ));
+        }
+        Ok(())
     }
-    Ok(())
 }

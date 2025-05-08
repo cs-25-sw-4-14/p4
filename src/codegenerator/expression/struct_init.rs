@@ -1,5 +1,5 @@
 use super::CodeGenerator;
-use crate::ast::{StructDef, StructInit, TopLevelDefinition};
+use crate::ast::{StructDef, StructInit};
 use anyhow::Result;
 use inkwell::values::BasicValueEnum;
 
@@ -19,33 +19,32 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         for field_init in &struct_init.fields {
             let field_index = self.get_field_index(struct_name, &field_init.name)?;
+            let field_ptr = self.builder.build_struct_gep(
+                struct_type,
+                struct_ptr,
+                field_index as u32,
+                &format!("{}_field_ptr_{}", struct_name, field_init.name),
+            )?;
             let field_value = self.compile_expression(&field_init.value)?;
-
-            let field_ptr = {
-                self.builder.build_struct_gep(
-                    struct_type,
-                    struct_ptr,
-                    field_index as u32,
-                    &format!("{}_field_{}", struct_name, field_init.name),
-                )?
-            };
-
             self.builder.build_store(field_ptr, field_value)?;
         }
 
-        let result = BasicValueEnum::PointerValue(struct_ptr);
-        self.last_value = Some(result);
-        Ok(result)
+        let struct_value =
+            self.builder
+                .build_load(struct_type, struct_ptr, &format!("{}_value", struct_name))?;
+
+        println!("Debug: Struct value: {:?}", struct_value);
+        Ok(struct_value)
     }
 
-    fn get_struct_type(
+    pub fn get_struct_type(
         &self,
         struct_name: &str,
     ) -> Result<Option<inkwell::types::StructType<'ctx>>> {
         Ok(self.module.get_struct_type(struct_name))
     }
 
-    fn get_field_index(&self, struct_name: &str, field_name: &str) -> Result<usize> {
+    pub fn get_field_index(&self, struct_name: &str, field_name: &str) -> Result<usize> {
         let struct_def = self.find_struct_definition(struct_name)?;
         struct_def
             .fields
@@ -60,18 +59,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             })
     }
 
-    fn find_struct_definition(&self, struct_name: &str) -> Result<&StructDef> {
-        match &self.program {
-            Some(program) => program
-                .definitions
-                .iter()
-                .filter_map(|def| match def {
-                    TopLevelDefinition::Struct(s) => Some(s),
-                    _ => None,
-                })
-                .find(|s| s.name == struct_name)
-                .ok_or_else(|| anyhow::anyhow!("Struct definition '{}' not found", struct_name)),
-            None => Err(anyhow::anyhow!("No program loaded")),
-        }
+    pub fn find_struct_definition(&self, struct_name: &str) -> Result<&StructDef> {
+        self.struct_definitions
+            .get(struct_name)
+            .ok_or_else(|| anyhow::anyhow!("Struct definition '{}' not found", struct_name))
     }
 }

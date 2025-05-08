@@ -1,34 +1,31 @@
-use crate::{ast::Type, typechecker::variable_table::VTable};
+use crate::{ast::Type, typechecker::Typechecker};
 use anyhow::Result;
 
-pub fn check(name: &str, vtable: &VTable) -> Result<Type> {
-    if let Some(var) = vtable.get(name) {
-        Ok(var.var_type.clone())
-    } else {
-        Err(anyhow::anyhow!("Variable {} not found in vtable", name))
+impl Typechecker<'_> {
+    pub fn check_variable(&self, name: &str) -> Result<Type> {
+        if let Some(var) = self.v_table.get(name) {
+            Ok(var.var_type.clone())
+        } else {
+            Err(anyhow::anyhow!("Variable {} not found in vtable", name))
+        }
     }
 }
 
 #[cfg(test)]
 pub mod variable_tests {
     use super::*;
-    use crate::typechecker::expression_check;
-    use crate::{
-        ast::{Expression, Literal, VariableDeclaration},
-        typechecker::{function_table::FTable, struct_table::STable},
-    };
+    use crate::ast::{Expression, Literal, VariableDeclaration};
+    use crate::debugger::Debugger;
+    use crate::typechecker::Typechecker;
 
     #[test]
     fn check_variable_should_return_type() {
-        let mut v_table = VTable::new();
-        let f_table = FTable::new();
-        let s_table = STable::new();
+        let debugger = Debugger::new(String::from(""));
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::Variable("x".to_string());
 
-        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap_err();
-
-        v_table.variables.insert(
+        typechecker.v_table.variables.insert(
             "x".to_string(),
             VariableDeclaration {
                 trivial: None,
@@ -39,6 +36,6 @@ pub mod variable_tests {
             },
         );
 
-        expression_check::check(&expression, &v_table, &f_table, &s_table).unwrap();
+        typechecker.check_expression(&expression).unwrap();
     }
 }

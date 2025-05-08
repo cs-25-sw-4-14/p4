@@ -7,7 +7,7 @@ use inkwell::{types::BasicType, values::BasicValueEnum};
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_array_literal(
         &mut self,
-        array_literal: &Box<ArrayLiteral>,
+        array_literal: &ArrayLiteral,
     ) -> Result<BasicValueEnum<'ctx>> {
         // Make sure the array is not empty
         let first_element = array_literal

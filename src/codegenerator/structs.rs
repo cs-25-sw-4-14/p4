@@ -5,11 +5,6 @@ use inkwell::types::BasicTypeEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_struct(&mut self, struct_def: &StructDef) -> Result<()> {
-        // Store the program for reference if not already stored
-        if self.program.is_none() {
-            return Err(anyhow::anyhow!("Program not loaded"));
-        }
-
         // Create an opaque struct type first (with no body defined yet)
         let struct_type = self.context.opaque_struct_type(&struct_def.name);
 

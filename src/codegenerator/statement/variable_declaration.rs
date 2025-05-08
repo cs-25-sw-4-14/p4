@@ -22,6 +22,7 @@ impl CodeGenerator<'_> {
                 )
             })?;
 
+        println!("Vary type: {:?}", var_type);
         match var_type {
             Type::Array(elem_type, size) => {
                 let array_literal_ptr = self.compile_expression(&decl.value)?.into_pointer_value();
@@ -54,6 +55,10 @@ impl CodeGenerator<'_> {
                     }?;
                     self.builder.build_store(var_elem_ptr, literal_elem_value)?;
                 }
+            }
+            Type::Custom(_) => {
+                let struct_value = self.compile_expression(&decl.value)?;
+                self.builder.build_store(array_ptr, struct_value)?;
             }
             _ => {
                 self.builder.build_store(array_ptr, value)?;
