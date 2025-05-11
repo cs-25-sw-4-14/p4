@@ -15,6 +15,7 @@ pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
 pub mod write_file;
+pub mod null;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
@@ -45,7 +46,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::Read(read_node) => self.compile_read_file(read_node),
             // TODO: Handle enum initialization
             Expression::EnumLiteral(_) => todo!(),
-            Expression::Null => todo!(),
+            Expression::Null => self.compile_null_ptr(),
         }
     }
 }

@@ -55,7 +55,7 @@ impl Typechecker<'_> {
             Expression::Write(write_expr) => self.check_write_file(write_expr),
             // TODO: Handle enum literal
             Expression::EnumLiteral(_) => todo!(),
-            Expression::Null => Ok(),
+            Expression::Null => Ok(Type::Null),
         }
     }
 }
