@@ -11,6 +11,8 @@ pub mod print;
 pub mod return_statement;
 pub mod variable_declaration;
 pub mod while_statement;
+pub mod vector_remove;
+
 
 impl CodeGenerator<'_> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
@@ -44,7 +46,8 @@ impl CodeGenerator<'_> {
                 _ = self.builder.build_unconditional_branch(continue_target);
             }
             Statement::VectorInsert(_, _) => todo!(),
-            Statement::VectorRemove(_, _) => todo!(),
+            Statement::VectorRemove(vector_remove, _) =>
+                self.compile_vector_remove(vector_remove)?,
             // TODO: Handle Match
             Statement::Match(_, _) => todo!(),
         };
