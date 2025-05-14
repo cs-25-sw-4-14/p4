@@ -2,7 +2,7 @@ use super::CodeGenerator;
 use crate::ast::Literal;
 use crate::ast::{Expression, Type, TypeCast};
 use anyhow::{Result, anyhow};
-use inkwell::types::BasicTypeEnum;
+use inkwell::types::{BasicTypeEnum, VectorType};
 use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -25,7 +25,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Compile the expression to a value
         let expr_value = self.compile_expression(&type_cast.expression)?;
         // Get the target type for the cast
-        let target_type = self.get_basic_type(&type_cast.target_type);
+        let target_type = self.get_llvm_type(&type_cast.target_type)?;
 
         // Match on the types of expression and target type
         let casted_value = match (expr_value, target_type) {
@@ -111,6 +111,39 @@ impl<'ctx> CodeGenerator<'ctx> {
                     self.builder
                         .build_float_to_unsigned_int(value, int_type, "fptoui_tmp")?
                         .into()
+                }
+            }
+
+            // String literal (pointer) to i64 vec
+            (BasicValueEnum::PointerValue(ptr), BasicTypeEnum::VectorType(vector_type)) => {
+                println!("String pointer: {:?}", ptr);
+
+                if let Expression::Literal(Literal::String(ref s)) = *type_cast.expression {
+                    let element_type = vector_type.get_element_type();
+
+                    // Only support vector of i64 for now
+                    let int_type = match element_type {
+                        BasicTypeEnum::IntType(int_type) if int_type.get_bit_width() == 64 => {
+                            int_type
+                        }
+                        _ => return Err(anyhow!("Only <n x i64> vectors are supported")),
+                    };
+
+                    let values: Vec<i64> = s
+                        .split(',')
+                        .map(|num| num.trim().parse::<i64>())
+                        .collect::<std::result::Result<Vec<_>, _>>()
+                        .map_err(|e| anyhow!("Failed to parse string as i64 array: {}", e))?;
+
+                    let llvm_vals: Vec<BasicValueEnum> = values
+                        .iter()
+                        .map(|&v| int_type.const_int(v as u64, true).into())
+                        .collect();
+
+                    let vector_const = VectorType::const_vector(&llvm_vals);
+                    return Ok(vector_const.into());
+                } else {
+                    return Err(anyhow!("Expected string literal for cast to i64 vector"));
                 }
             }
 

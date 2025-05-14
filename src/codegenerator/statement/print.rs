@@ -67,6 +67,7 @@ impl CodeGenerator<'_> {
                 }
             }
             BasicValueEnum::PointerValue(ptr_val) => {
+                println!("Print: Pointer value: {:?}", ptr_val);
                 let fmt_str = self.builder.build_global_string_ptr("%s\n", "fmt")?;
                 vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
                 /*

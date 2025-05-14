@@ -140,50 +140,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         Ok(())
     }
 
-    // Helper function to get an LLVM basic type from your AST Type (simple version, doesn't handle all types)
-    pub fn get_basic_type(&self, ast_type: &Type) -> BasicTypeEnum<'ctx> {
-        match ast_type {
-            Type::Bool => self.context.bool_type().into(),
-            Type::U8 => self.context.i8_type().into(),
-            Type::U16 => self.context.i16_type().into(),
-            Type::U32 => self.context.i32_type().into(),
-            Type::U64 => self.context.i64_type().into(),
-            Type::I8 => self.context.i8_type().into(),
-            Type::I16 => self.context.i16_type().into(),
-            Type::I32 => self.context.i32_type().into(),
-            Type::I64 => self.context.i64_type().into(),
-            Type::F16 => self.context.f16_type().into(),
-            Type::F32 => self.context.f32_type().into(),
-            Type::F64 => self.context.f64_type().into(),
-            Type::Char => self.context.i8_type().into(),
-            // Type::String => self
-            //     .context
-            //     .i8_type()
-            //     .ptr_type(AddressSpace::Generic)
-            //     .into(), // Pointer to i8 (C-style string)
-            // Type::Struct(name) => {
-            //     // Ensure struct type exists
-            //     let struct_type = self
-            //         .module
-            //         .get_struct_type(name)
-            //         .expect(&format!("Struct type '{}' not found", name));
-            //     struct_type.into()
-            // }
-            Type::Array(element_type, size) => {
-                let llvm_element_type = self.get_basic_type(element_type);
-                // Handle array size overflow
-                if *size > u32::MAX as u64 {
-                    panic!(
-                        "Array size {} exceeds maximum supported size {}",
-                        size,
-                        u32::MAX
-                    );
-                }
-                llvm_element_type.array_type(*size as u32).into()
-            }
-            _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
-        }
-    }
     // Comprehensive helper method to get an LLVM type from an AST type, with error handling
     pub fn get_llvm_type(&self, ast_type: &Type) -> Result<BasicTypeEnum<'ctx>> {
         match ast_type {
