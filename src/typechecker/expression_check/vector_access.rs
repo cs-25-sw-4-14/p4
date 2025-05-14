@@ -32,7 +32,6 @@ pub mod vector_access_tests {
     use super::*;
     use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
     use crate::debugger::Debugger;
-    
 
     #[test]
     fn test_vector_access() {

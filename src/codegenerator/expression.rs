@@ -8,6 +8,7 @@ pub mod array_literal;
 pub mod binary_op;
 pub mod function_call;
 pub mod literal;
+pub mod null;
 pub mod read_file;
 pub mod struct_field_access;
 pub mod struct_init;
@@ -15,7 +16,6 @@ pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
 pub mod write_file;
-pub mod null;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {

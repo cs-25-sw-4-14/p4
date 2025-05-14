@@ -1,6 +1,6 @@
 use super::CodeGenerator;
-use inkwell::{values::BasicValueEnum, AddressSpace};
 use anyhow::Result;
+use inkwell::{AddressSpace, values::BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_null_ptr(&self) -> Result<BasicValueEnum<'ctx>> {

@@ -303,7 +303,7 @@ pub enum Type {
     Array(Box<Type>, u64),
     Vector(Box<Type>),
     Reference(Box<Type>, bool), // (type, is_mutable)
-    Null
+    Null,
 }
 
 impl From<Literal> for Type {
