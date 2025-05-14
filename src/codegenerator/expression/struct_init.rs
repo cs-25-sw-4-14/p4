@@ -33,7 +33,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             self.builder
                 .build_load(struct_type, struct_ptr, &format!("{}_value", struct_name))?;
 
-        println!("Debug: Struct value: {:?}", struct_value);
         Ok(struct_value)
     }
 

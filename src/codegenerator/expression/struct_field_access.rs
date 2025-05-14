@@ -9,6 +9,16 @@ impl<'ctx> CodeGenerator<'ctx> {
         &mut self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<BasicValueEnum<'ctx>> {
+        println!("Compiling struct field access: {:?}", struct_field_access);
+
+        //Check for nested struct field access
+        if let Expression::StructFieldAccess(nested_struct_field_access) =
+            &*struct_field_access.struct_expr
+        {
+            println!("Compiling nested struct field access: {:?}", nested_struct_field_access);
+            return self.compile_struct_field_access(nested_struct_field_access);
+        }
+
         let struct_name = if let Expression::Variable(var_name) = &*struct_field_access.struct_expr
         {
             var_name
@@ -66,8 +76,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             field_type,
             field_ptr,
             &format!(
-            "{}_field_value_{}",
-            struct_type_name, struct_field_access.field_name
+                "{}_field_value_{}",
+                struct_type_name, struct_field_access.field_name
             ),
         )?;
 

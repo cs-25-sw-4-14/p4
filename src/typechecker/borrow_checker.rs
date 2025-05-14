@@ -296,16 +296,18 @@ impl BorrowChecker {
         match stmt {
             Statement::Throwaway(_, _) => {}
             Statement::VariableDeclaration(decl, _) => {
-                self.check_expression(&decl.value)?;
-                if let Type::Reference(_, is_mutable) = &decl.var_type {
-                    if let Expression::Reference(_, ref_is_mutable) = decl.value {
-                        if *is_mutable != ref_is_mutable {
-                            return Err(anyhow!("Mismatched reference mutability"));
-                        }
-                    } else {
-                        return Err(anyhow!("Expected reference expression for reference type"));
-                    }
-                }
+                /*
+                                self.check_expression(&decl.value)?;
+                                if let Type::Reference(_, is_mutable) = &decl.var_type {
+                                    if let Expression::Reference(_, ref_is_mutable) = decl.value {
+                                        if *is_mutable != ref_is_mutable {
+                                            return Err(anyhow!("Mismatched reference mutability"));
+                                        }
+                                    } else {
+                                        return Err(anyhow!("Expected reference expression for reference type"));
+                                    }
+                                }
+                */
             }
 
             Statement::Assignment(assign, _) => {
