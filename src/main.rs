@@ -74,7 +74,7 @@ fn main() -> Result<()> {
     let mut typechecker = typechecker::Typechecker::new(&debugger);
     typechecker
         .walk(ast.clone())
-        .map_err(|e| anyhow!("{}{}", &huttel, e))?;
+        .map_err(|e| anyhow!("\n{}{}", &huttel, e))?;
 
     let ctx = inkwell::context::Context::create();
     let module = ctx.create_module("program");
