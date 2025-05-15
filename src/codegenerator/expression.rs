@@ -8,6 +8,7 @@ pub mod array_literal;
 pub mod binary_op;
 pub mod function_call;
 pub mod literal;
+pub mod null;
 pub mod read_file;
 pub mod struct_field_access;
 pub mod struct_init;
@@ -49,6 +50,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::Read(read_node) => self.compile_read_file(read_node),
             // TODO: Handle enum initialization
             Expression::EnumLiteral(_) => todo!(),
+            Expression::Null => self.compile_null_ptr(),
         }
     }
 }

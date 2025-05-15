@@ -13,10 +13,6 @@ impl Typechecker<'_> {
         Self::semantic_check_argument_length_are_equal(func, function_call)?;
         self.semantic_check_arguments_are_same_type(func, function_call)?;
 
-        println!(
-            "Function {} called with correct argument types",
-            function_call.name
-        );
         Ok(return_type)
     }
 

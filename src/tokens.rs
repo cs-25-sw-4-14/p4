@@ -83,6 +83,10 @@ pub enum Token {
     #[token("u8")]
     TypeU8,
 
+    // Great big null pointer
+    #[token("null")]
+    KeywordNull,
+
     // delimiters and operators
     #[token("(")]
     LParen,

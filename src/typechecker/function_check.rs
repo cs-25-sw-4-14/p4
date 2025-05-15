@@ -13,6 +13,9 @@ impl Typechecker<'_> {
             ));
         }
 
+        //Clear variables
+        self.v_table.variables.clear();
+
         //check for duplicate parameter names
         check_duplicate_params(function)?;
 

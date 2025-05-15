@@ -73,6 +73,7 @@ extern {
     "::" => Token::Access,
     "_" => Token::Throwaway,
     "=>" => Token::FatArrow,
+    "NULL" => Token::KeywordNull,
     Identifier => Token::Identifier(<String>),
     IntLiteral => Token::IntLiteral(<u64>),
     StringLiteral => Token::StringLiteral(<String>),
@@ -321,6 +322,7 @@ pub Term: Expression = {
     "&" <e:Term> => Expression::Reference(Box::new(e), false),
     "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
     "*" <e:Term> => Expression::Dereference(Box::new(e)),
+    <e:Null> => Expression::Null,
 };
 
 pub Expression: Expression = {
@@ -425,6 +427,10 @@ pub Expression: Expression = {
         right: Box::new(r),
     }),
         };
+
+pub Null: () = {
+    "NULL" => ()
+};
 
 pub VectorLiteral: VectorLiteral = {
     "{" <e:Comma<Expression>> "}" => VectorLiteral {
