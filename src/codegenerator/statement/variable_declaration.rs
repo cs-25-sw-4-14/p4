@@ -22,7 +22,6 @@ impl CodeGenerator<'_> {
                 )
             })?;
 
-        println!("Vary type: {:?}", var_type);
         match var_type {
             Type::Array(elem_type, size) => {
                 let array_literal_ptr = self.compile_expression(&decl.value)?.into_pointer_value();

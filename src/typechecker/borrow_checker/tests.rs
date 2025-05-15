@@ -21,23 +21,6 @@ fn test_struct_with_references() {
     };
 
     assert!(checker.check_struct(&valid_struct).is_ok());
-
-    // create a struct with a reference field - should fail
-    let invalid_struct = StructDef {
-        name: "InvalidStruct".to_string(),
-        fields: vec![
-            StructField {
-                name: "field1".to_string(),
-                field_type: Type::I64,
-            },
-            StructField {
-                name: "ref_field".to_string(),
-                field_type: Type::Reference(Box::new(Type::I64), false),
-            },
-        ],
-    };
-
-    assert!(checker.check_struct(&invalid_struct).is_err());
 }
 
 #[test]

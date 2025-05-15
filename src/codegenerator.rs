@@ -233,6 +233,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
             }
             Type::Vector(_) => Err(anyhow::anyhow!("Vector types not supported yet")),
+            Type::Null => Ok(self
+                .context
+                .ptr_type(AddressSpace::default())
+                .as_basic_type_enum()),
         }
     }
 }

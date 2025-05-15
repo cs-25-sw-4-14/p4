@@ -46,7 +46,6 @@ mod tests {
     use crate::ast::{Expression, Literal, Type, VariableDeclaration, VectorLiteral};
 
     use crate::debugger::Debugger;
-    
 
     #[test]
     fn test_vector_insert() {

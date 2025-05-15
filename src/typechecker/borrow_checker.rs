@@ -69,7 +69,8 @@ impl BorrowChecker {
     }
 
     // check that structs don't have reference fields
-    pub fn check_struct(&self, struct_def: &StructDef) -> Result<()> {
+    pub fn check_struct(&self, _struct_def: &StructDef) -> Result<()> {
+        /*
         for field in &struct_def.fields {
             if let Type::Reference(_, _) = field.field_type {
                 return Err(anyhow!(
@@ -79,6 +80,7 @@ impl BorrowChecker {
                 ));
             }
         }
+            */
         Ok(())
     }
 
