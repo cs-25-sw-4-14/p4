@@ -66,8 +66,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             field_type,
             field_ptr,
             &format!(
-            "{}_field_value_{}",
-            struct_type_name, struct_field_access.field_name
+                "{}_field_value_{}",
+                struct_type_name, struct_field_access.field_name
             ),
         )?;
 

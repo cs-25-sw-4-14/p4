@@ -244,6 +244,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported vector element type")),
                 }
             }
+            Type::Null => Ok(self
+                .context
+                .ptr_type(AddressSpace::default())
+                .as_basic_type_enum()),
         }
     }
 }

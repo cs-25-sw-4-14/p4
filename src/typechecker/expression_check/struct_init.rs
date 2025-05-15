@@ -32,10 +32,12 @@ impl Typechecker<'_> {
             let expected_type = struct_definition.fields[field].field_type.clone();
             let actual_type = self.check_expression(&struct_init.fields[field].value)?;
 
-            if expected_type != actual_type {
+            if expected_type != actual_type && actual_type != Type::Null {
                 return Err(anyhow::anyhow!(
-                    "Struct {} initialized with incorrect field types",
-                    struct_definition.name
+                    "Struct {} initialized with incorrect field types: {:?} expected, but found {:?}",
+                    struct_definition.name,
+                    expected_type,
+                    actual_type
                 ));
             }
         }
