@@ -228,7 +228,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
             Type::Vector(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
-                println!("Vector element type: {:?}", elem_type);
                 match elem_llvm_type {
                     BasicTypeEnum::FloatType(ft) => {
                         Ok(ft.vec_type(*size).as_basic_type_enum())

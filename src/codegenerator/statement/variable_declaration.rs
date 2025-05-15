@@ -1,6 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::{Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
+use inkwell::types::BasicTypeEnum;
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
@@ -53,6 +54,35 @@ impl CodeGenerator<'_> {
                         )
                     }?;
                     self.builder.build_store(var_elem_ptr, literal_elem_value)?;
+                }
+            }
+            Type::Vector(elem_type, _size) => {
+                let vec_val = self.compile_expression(&decl.value)?.into_vector_value();
+                let new_size = vec_val.get_type().get_size();
+
+                let llvm_elem_type = self.get_llvm_type(elem_type)?;
+
+                match llvm_elem_type {
+                    BasicTypeEnum::IntType(int_type) => {
+                        let vector_llvm_type = int_type.vec_type(new_size);
+
+                        let vec_ptr = self.builder.build_alloca(vector_llvm_type, var_name)?;
+                        self.builder.build_store(vec_ptr, vec_val)?;
+
+                        self.variables
+                            .insert(var_name.to_string(), (vector_llvm_type.into(), vec_ptr));
+                    }
+                    BasicTypeEnum::FloatType(float_type) => {
+                        let vector_llvm_type = float_type.vec_type(new_size);
+
+                        let vec_ptr = self.builder.build_alloca(vector_llvm_type, var_name)?;
+
+                        self.builder.build_store(vec_ptr, vec_val)?;
+
+                        self.variables
+                            .insert(var_name.to_string(), (vector_llvm_type.into(), vec_ptr));
+                    }
+                    _ => return Err(anyhow!("Unsupported vector type")),
                 }
             }
             Type::Custom(_) => {
