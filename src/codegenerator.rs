@@ -65,6 +65,18 @@ impl<'ctx> CodeGenerator<'ctx> {
         let ftell_type = i64_type.fn_type(&[file_ptr_type.into()], false);
         module.add_function("ftell", ftell_type, Some(Linkage::External));
 
+        let i32t = context.i32_type();
+        let ptr_i32 = context.ptr_type(AddressSpace::default());
+        let vec_ty = context.struct_type(&[ptr_i32.into(), i32t.into()], false);
+        let fn_ty = vec_ty.fn_type(
+            &[
+                context.ptr_type(AddressSpace::default()).into(),
+                i32t.into(),
+            ],
+            false,
+        );
+        module.add_function("to_chars", fn_ty, None);
+
         // fread: size_t fread(void* ptr, size_t size, size_t count, FILE* stream);
         let fread_type = i64_type.fn_type(
             &[

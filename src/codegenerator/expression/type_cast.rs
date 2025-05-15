@@ -2,8 +2,8 @@ use super::CodeGenerator;
 use crate::ast::Literal;
 use crate::ast::{Expression, Type, TypeCast};
 use anyhow::{Result, anyhow};
-use inkwell::types::{BasicTypeEnum, VectorType};
-use inkwell::values::BasicValueEnum;
+use inkwell::types::BasicTypeEnum;
+use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_float_bit_width(&self, float_type: inkwell::types::FloatType<'ctx>) -> Result<u32> {
@@ -114,36 +114,42 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
             }
 
-            // String literal (pointer) to i64 vec
+            // String literal (pointer) to u8 vec
             (BasicValueEnum::PointerValue(ptr), BasicTypeEnum::VectorType(vector_type)) => {
-                println!("String pointer: {:?}", ptr);
+                let element_type = vector_type.get_element_type();
 
-                if let Expression::Literal(Literal::String(ref s)) = *type_cast.expression {
-                    let element_type = vector_type.get_element_type();
+                match element_type {
+                    BasicTypeEnum::IntType(int_type) => {
+                        println!("Int type: {:?}", int_type);
+                        match int_type.get_bit_width() {
+                            8 => {
+                                let to_chars_fn = self.module.get_function("to_chars").ok_or_else(|| {
+                        anyhow!("Missing runtime function: to_chars(ptr: i8*, len: i64) -> Vec<char>")
+                    })?;
 
-                    // Only support vector of i64 for now
-                    let int_type = match element_type {
-                        BasicTypeEnum::IntType(int_type) if int_type.get_bit_width() == 64 => {
-                            int_type
+                                let len = BasicMetadataValueEnum::IntValue(
+                                    self.context.i32_type().const_int(2, false),
+                                ); //self.compute_string_length(ptr)?; // <-- You must implement this
+                                let call_site = self.builder.build_call(
+                                    to_chars_fn,
+                                    &[ptr.into(), len.into()],
+                                    "cast_to_char_vec",
+                                )?;
+                                let call_value = call_site.try_as_basic_value().left();
+
+                                println!("Call value: {:?}", call_value.unwrap());
+                                call_value.ok_or_else(|| {
+                                    anyhow!("Failed to cast pointer to Vec<char>")
+                                })?
+                            }
+                            _ => {
+                                return Err(anyhow!("Unsupported vector element width for cast"));
+                            }
                         }
-                        _ => return Err(anyhow!("Only <n x i64> vectors are supported")),
-                    };
-
-                    let values: Vec<i64> = s
-                        .split(',')
-                        .map(|num| num.trim().parse::<i64>())
-                        .collect::<std::result::Result<Vec<_>, _>>()
-                        .map_err(|e| anyhow!("Failed to parse string as i64 array: {}", e))?;
-
-                    let llvm_vals: Vec<BasicValueEnum> = values
-                        .iter()
-                        .map(|&v| int_type.const_int(v as u64, true).into())
-                        .collect();
-
-                    let vector_const = VectorType::const_vector(&llvm_vals);
-                    return Ok(vector_const.into());
-                } else {
-                    return Err(anyhow!("Expected string literal for cast to i64 vector"));
+                    }
+                    _ => {
+                        return Err(anyhow!("Unsupported vector element type for cast"));
+                    }
                 }
             }
 

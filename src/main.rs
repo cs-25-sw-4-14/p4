@@ -114,6 +114,7 @@ fn main() -> Result<()> {
 
     Command::new("clang")
         .arg(&object_file)
+        .arg("libruntime.a")
         .arg("-o")
         .arg(&output_file)
         .arg("-no-pie")
