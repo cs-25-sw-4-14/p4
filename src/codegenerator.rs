@@ -226,20 +226,21 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }
-            Type::Vector(elem_type) => {
+            Type::Vector(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
+                println!("Vector element type: {:?}", elem_type);
                 match elem_llvm_type {
                     BasicTypeEnum::FloatType(ft) => {
-                        Ok(ft.vec_type(1).as_basic_type_enum())
+                        Ok(ft.vec_type(*size).as_basic_type_enum())
                     }
                     BasicTypeEnum::IntType(it) => {
-                        Ok(it.vec_type(1).as_basic_type_enum())
+                        Ok(it.vec_type(*size).as_basic_type_enum())
                     }
                     BasicTypeEnum::PointerType(pt) => {
-                        Ok(pt.vec_type(1).as_basic_type_enum())
+                        Ok(pt.vec_type(*size).as_basic_type_enum())
                     }
                     BasicTypeEnum::StructType(_) => {
-                        Ok(self.context.ptr_type(AddressSpace::default()).vec_type(0).as_basic_type_enum())
+                        Ok(self.context.ptr_type(AddressSpace::default()).vec_type(*size).as_basic_type_enum())
                     }
                     _ => Err(anyhow::anyhow!("Unsupported vector element type")),
                 }

@@ -26,7 +26,7 @@ impl Typechecker<'_> {
                 ));
             }
         }
-        Ok(Type::Vector(Box::new(first_type)))
+        Ok(Type::Vector(Box::new(first_type), vector_literal.elements.len() as u32))
     }
 }
 

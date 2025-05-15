@@ -301,7 +301,7 @@ pub enum Type {
     Bool,
     Custom(String),
     Array(Box<Type>, u64),
-    Vector(Box<Type>),
+    Vector(Box<Type>, u32),
     Reference(Box<Type>, bool), // (type, is_mutable)
     Null,
 }

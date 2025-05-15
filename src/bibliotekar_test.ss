@@ -1,6 +1,6 @@
 i64 main() {
    
-   Vec<i64> a = {1,2};
+   Vec<i64> a = {1,2,3,4,5};
    
 
    debug(a.get(0));
@@ -13,6 +13,7 @@ i64 main() {
 
    debug(a.get(0));
    debug(a.get(1));
+   debug(a.get(2));
 
 
    

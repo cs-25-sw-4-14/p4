@@ -34,12 +34,19 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         println!("Vector value: {:?}", vector_value);
         // extract the number of elements from the vector type
-        let vector_type = vector_value.get_type();
-        let first_element_type = vector_type.get_element_type();
+        let new_vector_type = &vector_value.get_type();
+        let first_element_type = new_vector_type.get_element_type();
 
-        println!("Vector type: {:?}", vector_type);
+        println!("Vector type: {:?}", new_vector_type);
 
-        let nr_elements = vector_type.get_size() - (1 as u32);
+        println!("size of vector: {:?}", new_vector_type.get_size());
+
+
+        if new_vector_type.get_size() < 2 {
+            return Err(anyhow!("cannot remove element from vector with size < 2"));
+        }
+         
+        let nr_elements = new_vector_type.get_size() - (1 as u32);
         let new_vector_type = match first_element_type {
             BasicTypeEnum::FloatType(ft) => Ok(ft.vec_type(nr_elements)),
             BasicTypeEnum::IntType(it) => Ok(it.vec_type(nr_elements)),
@@ -53,18 +60,20 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let mut new_vector_value = new_vector_type.get_undef();
 
+        let mut count = 0;
         for i in 0..nr_elements + 1 {
-            let idx = self.context.i32_type().const_int(i as u64, false);
-
+            if u64::from(i) == index_value.get_zero_extended_constant().unwrap() {
+                continue;
+            }
+            let idx = self.context.i32_type().const_int(count, false);
+            count += 1;
             let value = self.builder.build_extract_element(
                 vector_value,
                 idx,
                 &format!("vector_extract_{}", i)
             )?;
 
-            if u64::from(i) == index_value.get_zero_extended_constant().unwrap() {
-                continue;
-            }
+            
 
             new_vector_value = self.builder.build_insert_element(
                 new_vector_value,
@@ -87,4 +96,8 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         Ok(())
     }
+
+
+    
+
 }
