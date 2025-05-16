@@ -18,24 +18,26 @@ impl Typechecker<'_> {
         let value_type = self.check_expression(&value)?;
 
         // check if vector is defined and has type vector
-        if let Some(var) = self.v_table.get(&vector_name) {
-            if let Type::Vector(inner_type, _) = &var.var_type {
-                if **inner_type != value_type {
+        /*
+                if let Some(var) = self.v_table.get(&vector_name) {
+                    if let Type::Vector(inner_type, _) = &var.var_type {
+                        if **inner_type != value_type {
+                            return Err(anyhow::anyhow!(
+                                "Value type {:?} does not match vector type {:?}",
+                                value_type,
+                                inner_type
+                            ));
+                        }
+                    } else {
+                        return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
+                    }
+                } else {
                     return Err(anyhow::anyhow!(
-                        "Value type {:?} does not match vector type {:?}",
-                        value_type,
-                        inner_type
+                        "Variable {} not found in vtable",
+                        vector_name
                     ));
                 }
-            } else {
-                return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
-            }
-        } else {
-            return Err(anyhow::anyhow!(
-                "Variable {} not found in vtable",
-                vector_name
-            ));
-        }
+        */
         Ok(())
     }
 }

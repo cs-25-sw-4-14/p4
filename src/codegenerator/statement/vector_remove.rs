@@ -1,10 +1,10 @@
+use crate::ast::VectorRemove;
 use crate::codegenerator::BasicValueEnum;
+use crate::codegenerator::CodeGenerator;
 use anyhow::Result;
 use anyhow::anyhow;
-use crate::ast::VectorRemove;
-use crate::codegenerator::CodeGenerator;
-use inkwell::types::BasicTypeEnum;
 use inkwell::AddressSpace;
+use inkwell::types::BasicTypeEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_vector_remove(&mut self, vector_remove: &VectorRemove) -> Result<()> {
@@ -19,11 +19,14 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
         };
 
-        let (vector_type, vector_ptr) = self.variables
+        let (vector_type, vector_ptr) = self
+            .variables
             .get(vector_name)
             .ok_or_else(|| anyhow!("Vector variable '{}' not found", vector_name))?;
 
-        let vector_value = self.builder.build_load(*vector_type, *vector_ptr, vector_name)?;
+        let vector_value = self
+            .builder
+            .build_load(*vector_type, *vector_ptr, vector_name)?;
 
         let vector_value = match vector_value {
             BasicValueEnum::VectorValue(val) => val,
@@ -32,31 +35,24 @@ impl<'ctx> CodeGenerator<'ctx> {
             }
         };
 
-        println!("Vector value: {:?}", vector_value);
-        // extract the number of elements from the vector type
         let new_vector_type = &vector_value.get_type();
         let first_element_type = new_vector_type.get_element_type();
-
-        println!("Vector type: {:?}", new_vector_type);
-
-        println!("size of vector: {:?}", new_vector_type.get_size());
-
 
         if new_vector_type.get_size() < 2 {
             return Err(anyhow!("cannot remove element from vector with size < 2"));
         }
-         
+
         let nr_elements = new_vector_type.get_size() - (1 as u32);
         let new_vector_type = match first_element_type {
             BasicTypeEnum::FloatType(ft) => Ok(ft.vec_type(nr_elements)),
             BasicTypeEnum::IntType(it) => Ok(it.vec_type(nr_elements)),
             BasicTypeEnum::PointerType(pt) => Ok(pt.vec_type(nr_elements)),
-            BasicTypeEnum::StructType(_) =>
-                Ok(self.context.ptr_type(AddressSpace::default()).vec_type(nr_elements)),
+            BasicTypeEnum::StructType(_) => Ok(self
+                .context
+                .ptr_type(AddressSpace::default())
+                .vec_type(nr_elements)),
             _ => Err(anyhow!("Unsupported vector element type")),
         }?;
-
-        println!("New vector type: {:?}", new_vector_type);
 
         let mut new_vector_value = new_vector_type.get_undef();
 
@@ -65,39 +61,34 @@ impl<'ctx> CodeGenerator<'ctx> {
             if u64::from(i) == index_value.get_zero_extended_constant().unwrap() {
                 continue;
             }
-            let idx = self.context.i32_type().const_int(count, false);
+            let src_idx = self.context.i32_type().const_int(i as u64, false);
+            let dst_idx = self.context.i32_type().const_int(count as u64, false);
+
             count += 1;
             let value = self.builder.build_extract_element(
                 vector_value,
-                idx,
-                &format!("vector_extract_{}", i)
+                src_idx,
+                &format!("vector_extract_{}", i),
             )?;
-
-            
 
             new_vector_value = self.builder.build_insert_element(
                 new_vector_value,
                 value,
-                idx,
-                &format!("vector_insert_{}", i)
+                dst_idx,
+                &format!("vector_insert_{}", i),
             )?;
         }
 
         self.builder.build_store(*vector_ptr, new_vector_value)?;
 
-        self.variables.insert(vector_name.clone(), (
-            inkwell::types::BasicTypeEnum::VectorType(new_vector_type),
-            *vector_ptr,
-        ));
-
-        println!("New vector value: {:?}", new_vector_value);
-
-        //
+        self.variables.insert(
+            vector_name.clone(),
+            (
+                inkwell::types::BasicTypeEnum::VectorType(new_vector_type),
+                *vector_ptr,
+            ),
+        );
 
         Ok(())
     }
-
-
-    
-
 }
