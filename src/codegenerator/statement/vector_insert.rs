@@ -20,6 +20,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 return Err(anyhow!("Vector index must be an integer"));
             }
         };
+        println!("Vector index: {:?}", index_value);
 
         let (vector_type, vector_ptr) = self
             .variables
@@ -40,7 +41,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         let new_vector_type = &vector_value.get_type();
         let first_element_type = new_vector_type.get_element_type();
 
-        let nr_elements = new_vector_type.get_size() + (1 as u32);
+        let nr_elements = new_vector_type.get_size() + 1;
         let new_vector_type = match first_element_type {
             BasicTypeEnum::FloatType(ft) => Ok(ft.vec_type(nr_elements)),
             BasicTypeEnum::IntType(it) => Ok(it.vec_type(nr_elements)),
@@ -52,47 +53,50 @@ impl<'ctx> CodeGenerator<'ctx> {
             _ => Err(anyhow!("Unsupported vector element type")),
         }?;
 
-        let insert_idx = index_value
-            .get_zero_extended_constant()
-            .ok_or_else(|| anyhow!("Vector insert index must be a constant"))? as u32;
-
         let mut new_vector_value = new_vector_type.get_undef();
-        let mut dst_pos = 0;
 
         for i in 0..new_vector_type.get_size() {
-            let dst_idx = self.context.i32_type().const_int(dst_pos as u64, false);
+            let idx = self.context.i64_type().const_int(i as u64, false);
 
-            let inserted_value = if i == insert_idx {
-                // insert the new value at this position
-                value_expr
-            } else {
-                // extract from the old vector, shifting elements >= insert_idx right
-                let src_pos = if i > insert_idx { i - 1 } else { i };
-                let src_idx = self.context.i32_type().const_int(src_pos as u64, false);
-                self.builder.build_extract_element(
-                    vector_value,
-                    src_idx,
-                    &format!("vector_extract_{}", i),
-                )?
-            };
+            let old_elem = self.builder.build_extract_element(
+                vector_value,
+                idx,
+                &format!("vector_extract_{}", i),
+            )?;
+
+            let should_insert = self.builder.build_int_compare(
+                inkwell::IntPredicate::EQ,
+                index_value,
+                idx,
+                &format!("cmp_idx_{}", i),
+            )?;
+
+            let new_elem = self.builder.build_select(
+                should_insert,
+                value_expr,
+                old_elem,
+                &format!("select_{}", i),
+            )?;
 
             new_vector_value = self.builder.build_insert_element(
                 new_vector_value,
-                inserted_value,
-                dst_idx,
+                new_elem,
+                idx,
                 &format!("vector_insert_{}", i),
             )?;
-
-            dst_pos += 1;
         }
 
-        self.builder.build_store(*vector_ptr, new_vector_value)?;
+        let new_vector_ptr = self
+            .builder
+            .build_alloca(new_vector_type, &format!("{}_new", vector_name))?;
+
+        self.builder.build_store(new_vector_ptr, new_vector_value)?;
 
         self.variables.insert(
             vector_name.clone(),
             (
                 inkwell::types::BasicTypeEnum::VectorType(new_vector_type),
-                *vector_ptr,
+                new_vector_ptr,
             ),
         );
 

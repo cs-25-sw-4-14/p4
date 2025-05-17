@@ -1,7 +1,6 @@
 use super::CodeGenerator;
 use crate::ast::{Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
-use inkwell::types::{BasicType, BasicTypeEnum};
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
