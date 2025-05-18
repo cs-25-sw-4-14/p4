@@ -75,7 +75,7 @@ impl CodeGenerator<'_> {
                     vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
                 }
             }
-            _ => return Err(anyhow!("not a valid type for print statement")),
+            _ => return Err(anyhow!("not a valid type for debug statement")),
         };
 
         let _ = self.builder.build_call(printf, &call_args, "printf_call");

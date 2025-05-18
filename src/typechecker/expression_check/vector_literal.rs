@@ -14,6 +14,10 @@ impl Typechecker<'_> {
         &self,
         vector_literal: &VectorLiteral,
     ) -> Result<Type> {
+        // Allow empty vectors
+        if vector_literal.elements.is_empty() {
+            return Ok(Type::Vector(Box::new(Type::I64), 0));
+        }
         let first_type = self.check_expression(&vector_literal.elements[0])?;
 
         for element in &vector_literal.elements[1..] {
@@ -26,7 +30,7 @@ impl Typechecker<'_> {
                 ));
             }
         }
-        Ok(Type::Vector(Box::new(first_type), vector_literal.elements.len() as u32))
+        Ok(Type::Vector(Box::new(first_type), vector_literal.elements.len() as u64))
     }
 }
 

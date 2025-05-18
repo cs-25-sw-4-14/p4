@@ -3,9 +3,9 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, PointerValue};
+use inkwell::values::{BasicValueEnum, IntValue, PointerValue};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use std::collections::HashMap;
 
 use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
@@ -26,6 +26,7 @@ pub struct CodeGenerator<'ctx> {
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub struct_definitions: HashMap<String, StructDef>,
+    pub heap_sizes: HashMap<PointerValue<'ctx>, IntValue<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -81,6 +82,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         let malloc_type = i8_ptr_type.fn_type(&[i64_type.into()], false);
         module.add_function("malloc", malloc_type, Some(Linkage::External));
 
+        // free: void free(void* ptr);
+        let free_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
+        module.add_function("free", free_type, Some(Linkage::External));
+
         CodeGenerator {
             context,
             module,
@@ -91,6 +96,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
             struct_definitions: HashMap::new(),
+            heap_sizes: HashMap::new(),
         }
     }
 
@@ -230,16 +236,16 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
                 match elem_llvm_type {
                     BasicTypeEnum::FloatType(ft) => {
-                        Ok(ft.vec_type(*size).as_basic_type_enum())
+                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
                     }
                     BasicTypeEnum::IntType(it) => {
-                        Ok(it.vec_type(*size).as_basic_type_enum())
+                        Ok(it.array_type(*size as u32).as_basic_type_enum())
                     }
                     BasicTypeEnum::PointerType(pt) => {
-                        Ok(pt.vec_type(*size).as_basic_type_enum())
+                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
                     }
-                    BasicTypeEnum::StructType(_) => {
-                        Ok(self.context.ptr_type(AddressSpace::default()).vec_type(*size).as_basic_type_enum())
+                    BasicTypeEnum::StructType(st) => {
+                        Ok(st.array_type(*size as u32).as_basic_type_enum())
                     }
                     _ => Err(anyhow::anyhow!("Unsupported vector element type")),
                 }

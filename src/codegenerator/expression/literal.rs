@@ -25,7 +25,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let string_value = self
                     .builder
                     .build_global_string_ptr(value, "string_literal")?;
-                BasicValueEnum::PointerValue(string_value.as_pointer_value())
+                let ptr = string_value.as_pointer_value();
+                let length = self.context.i64_type().const_int(value.len() as u64 + 1, false);
+                self.heap_sizes.insert(ptr, length);
+                BasicValueEnum::PointerValue(ptr)
             }
             Literal::Char(value) => {
                 let char_type = self.context.i32_type();
