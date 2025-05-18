@@ -42,18 +42,14 @@ impl<'ctx> CodeGenerator<'ctx> {
 
             let value = self.compile_expression(value)?;
             if value.get_type() != element_type {
-                return Err(anyhow::anyhow!(
-                    "Array elements must be of the same type"
-                ));
+                return Err(anyhow::anyhow!("Array elements must be of the same type"));
             }
             self.builder.build_store(element_ptr, value)?;
         }
 
-        let array_value = self.builder.build_load(
-            array_type,
-            array_ptr,
-            "array_literal_value",
-        )?;
+        let array_value = self
+            .builder
+            .build_load(array_type, array_ptr, "array_literal_value")?;
 
         Ok(array_value)
     }

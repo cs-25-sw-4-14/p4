@@ -30,7 +30,10 @@ impl Typechecker<'_> {
                 ));
             }
         }
-        Ok(Type::Vector(Box::new(first_type), vector_literal.elements.len() as u64))
+        Ok(Type::Vector(
+            Box::new(first_type),
+            vector_literal.elements.len() as u64,
+        ))
     }
 }
 

@@ -15,8 +15,8 @@ pub mod struct_init;
 pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
-pub mod vector_literal;
 pub mod vector_access;
+pub mod vector_literal;
 pub mod write_file;
 
 impl<'ctx> CodeGenerator<'ctx> {

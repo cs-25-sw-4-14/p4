@@ -10,9 +10,9 @@ pub mod if_else;
 pub mod print;
 pub mod return_statement;
 pub mod variable_declaration;
-pub mod while_statement;
-pub mod vector_remove;
 pub mod vector_insert;
+pub mod vector_remove;
+pub mod while_statement;
 
 impl CodeGenerator<'_> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
@@ -47,9 +47,10 @@ impl CodeGenerator<'_> {
             }
             Statement::VectorInsert(vector_insert, _) => {
                 self.compile_vector_insert(vector_insert)?
-            },
-            Statement::VectorRemove(vector_remove, _) =>
-                self.compile_vector_remove(vector_remove)?,
+            }
+            Statement::VectorRemove(vector_remove, _) => {
+                self.compile_vector_remove(vector_remove)?
+            }
             // TODO: Handle Match
             Statement::Match(_, _) => todo!(),
         };

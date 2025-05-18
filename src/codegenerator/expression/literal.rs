@@ -26,7 +26,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                     .builder
                     .build_global_string_ptr(value, "string_literal")?;
                 let ptr = string_value.as_pointer_value();
-                let length = self.context.i64_type().const_int(value.len() as u64 + 1, false);
+                let length = self
+                    .context
+                    .i64_type()
+                    .const_int(value.len() as u64 + 1, false);
                 self.heap_sizes.insert(ptr, length);
                 BasicValueEnum::PointerValue(ptr)
             }

@@ -182,11 +182,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             .get_function("free")
             .ok_or_else(|| anyhow!("'free' function not declared in module"))?;
 
-        self.builder.build_call(
-            free_fn,
-            &[old_heap_ptr.into()],
-            "free_old_heap",
-        )?;
+        self.builder
+            .build_call(free_fn, &[old_heap_ptr.into()], "free_old_heap")?;
 
         self.builder.build_store(data_ptr_ptr, new_heap_ptr)?;
         self.builder.build_store(size_ptr, new_size)?;

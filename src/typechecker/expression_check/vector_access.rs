@@ -23,7 +23,6 @@ impl Typechecker<'_> {
                 "Variable {} not found in vtable",
                 vector_access.vector_name
             ))
-
         }
     }
 }
@@ -44,7 +43,7 @@ pub mod vector_access_tests {
             VariableDeclaration {
                 trivial: None,
                 mutable: None,
-                var_type: Type::Vector(Box::new(Type::I64),1),
+                var_type: Type::Vector(Box::new(Type::I64), 1),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral {
                     elements: vec![Expression::Literal(Literal::Int(0))],

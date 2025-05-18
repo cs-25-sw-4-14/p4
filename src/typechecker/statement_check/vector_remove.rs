@@ -33,7 +33,10 @@ impl Typechecker<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ast::{Expression, Literal, VariableDeclaration, VectorLiteral}, debugger::Debugger};
+    use crate::{
+        ast::{Expression, Literal, VariableDeclaration, VectorLiteral},
+        debugger::Debugger,
+    };
 
     #[test]
     fn test_vector_remove() {
