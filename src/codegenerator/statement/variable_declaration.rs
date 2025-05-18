@@ -24,7 +24,7 @@ impl CodeGenerator<'_> {
                 let malloc_fn = self
                     .module
                     .get_function("malloc")
-                    .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
+                    .ok_or_else(|| anyhow!("'malloc' function not declared in module"))?;
 
                 let raw_ptr = self
                     .builder

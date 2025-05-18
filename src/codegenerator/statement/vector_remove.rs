@@ -51,7 +51,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let element_type = vector_type
             .into_struct_type()
-            .get_field_type_at_index(0)
+            .get_field_type_at_index(1)
             .unwrap();
 
         let element_size_bytes = (match element_type {

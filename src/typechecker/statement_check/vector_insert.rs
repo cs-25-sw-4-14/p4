@@ -4,7 +4,7 @@ use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_vector_insert(&self, vector_insert: &VectorInsert, _l: usize) -> Result<()> {
-        let vector_name = vector_insert.vector_name.clone();
+        let _vector_name = vector_insert.vector_name.clone();
         let index = vector_insert.index.clone();
         let value = vector_insert.value.clone();
 
@@ -15,7 +15,7 @@ impl Typechecker<'_> {
         }
 
         // check if value is an expression
-        let value_type = self.check_expression(&value)?;
+        let _value_type = self.check_expression(&value)?;
 
         // check if vector is defined and has type vector
         /*
