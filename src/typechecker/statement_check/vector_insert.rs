@@ -4,7 +4,7 @@ use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_vector_insert(&self, vector_insert: &VectorInsert, _l: usize) -> Result<()> {
-        let vector_name = vector_insert.vector_name.clone();
+        let _vector_name = vector_insert.vector_name.clone();
         let index = vector_insert.index.clone();
         let value = vector_insert.value.clone();
 
@@ -15,27 +15,29 @@ impl Typechecker<'_> {
         }
 
         // check if value is an expression
-        let value_type = self.check_expression(&value)?;
+        let _value_type = self.check_expression(&value)?;
 
         // check if vector is defined and has type vector
-        if let Some(var) = self.v_table.get(&vector_name) {
-            if let Type::Vector(inner_type) = &var.var_type {
-                if **inner_type != value_type {
+        /*
+                if let Some(var) = self.v_table.get(&vector_name) {
+                    if let Type::Vector(inner_type, _) = &var.var_type {
+                        if **inner_type != value_type {
+                            return Err(anyhow::anyhow!(
+                                "Value type {:?} does not match vector type {:?}",
+                                value_type,
+                                inner_type
+                            ));
+                        }
+                    } else {
+                        return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
+                    }
+                } else {
                     return Err(anyhow::anyhow!(
-                        "Value type {:?} does not match vector type {:?}",
-                        value_type,
-                        inner_type
+                        "Variable {} not found in vtable",
+                        vector_name
                     ));
                 }
-            } else {
-                return Err(anyhow::anyhow!("Variable {} is not a vector", vector_name));
-            }
-        } else {
-            return Err(anyhow::anyhow!(
-                "Variable {} not found in vtable",
-                vector_name
-            ));
-        }
+        */
         Ok(())
     }
 }
@@ -55,7 +57,7 @@ mod tests {
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
             VariableDeclaration {
-                var_type: Type::Vector(Box::new(Type::I64)),
+                var_type: Type::Vector(Box::new(Type::I64), 1),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,

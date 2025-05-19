@@ -10,6 +10,8 @@ pub mod if_else;
 pub mod print;
 pub mod return_statement;
 pub mod variable_declaration;
+pub mod vector_insert;
+pub mod vector_remove;
 pub mod while_statement;
 
 impl CodeGenerator<'_> {
@@ -43,8 +45,12 @@ impl CodeGenerator<'_> {
                 let continue_target = *self.continue_target_stack.last().unwrap();
                 _ = self.builder.build_unconditional_branch(continue_target);
             }
-            Statement::VectorInsert(_, _) => todo!(),
-            Statement::VectorRemove(_, _) => todo!(),
+            Statement::VectorInsert(vector_insert, _) => {
+                self.compile_vector_insert(vector_insert)?
+            }
+            Statement::VectorRemove(vector_remove, _) => {
+                self.compile_vector_remove(vector_remove)?
+            }
             // TODO: Handle Match
             Statement::Match(_, _) => todo!(),
         };

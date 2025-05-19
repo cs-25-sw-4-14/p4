@@ -71,6 +71,9 @@ fn main() -> Result<()> {
         })
         .expect("Failed to parse:");
 
+    //Print AST
+    println!("\nAST:\n{:#?}", ast);
+
     let mut typechecker = typechecker::Typechecker::new(&debugger);
     typechecker
         .walk(ast.clone())

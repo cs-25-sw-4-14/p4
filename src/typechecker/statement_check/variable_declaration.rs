@@ -1,3 +1,4 @@
+use crate::ast::Type;
 use crate::ast::VariableDeclaration;
 use crate::typechecker::Typechecker;
 use anyhow::Result;
@@ -9,23 +10,52 @@ impl Typechecker<'_> {
         l: usize,
     ) -> Result<()> {
         // Check if the type of the value matches the declared type
+
         let value_type = self.check_expression(&declaration.value)?;
-        if value_type != declaration.var_type {
-            return Err(anyhow::anyhow!(
-                "{}: Type mismatch: expected {:?}, found {:?}",
-                self.debugger.display(l),
-                declaration.var_type,
-                value_type
-            ));
+
+        match &declaration.var_type {
+            Type::Vector(_, _) => {
+                if let Type::Vector(_, len) = value_type {
+                    let mut new_declaration = declaration.clone();
+                    new_declaration.var_type = match new_declaration.var_type {
+                        Type::Vector(inner_type, _) => Type::Vector(inner_type, len),
+                        _ => Type::Vector(Box::new(new_declaration.var_type), len),
+                    };
+                    self.semantic_check_variable_already_declared_variable_declaration(
+                        declaration,
+                    )?;
+
+                    self.v_table
+                        .variables
+                        .insert(declaration.name.clone(), new_declaration);
+
+                    Ok(())
+                } else {
+                    return Err(anyhow::anyhow!(
+                        "{}: Type mismatch: expected vector, found {:?}",
+                        self.debugger.display(l),
+                        value_type
+                    ));
+                }
+            }
+            _ => {
+                if value_type != declaration.var_type {
+                    return Err(anyhow::anyhow!(
+                        "{}: Type mismatch: expected {:?}, found {:?}",
+                        self.debugger.display(l),
+                        declaration.var_type,
+                        value_type
+                    ));
+                }
+                self.semantic_check_variable_already_declared_variable_declaration(declaration)?;
+
+                self.v_table
+                    .variables
+                    .insert(declaration.name.clone(), declaration.clone());
+
+                Ok(())
+            }
         }
-
-        self.semantic_check_variable_already_declared_variable_declaration(declaration)?;
-
-        self.v_table
-            .variables
-            .insert(declaration.name.clone(), declaration.clone());
-
-        Ok(())
     }
 
     pub fn semantic_check_variable_already_declared_variable_declaration(

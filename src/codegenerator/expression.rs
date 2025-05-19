@@ -15,6 +15,8 @@ pub mod struct_init;
 pub mod type_cast;
 pub mod unary_op;
 pub mod variable;
+pub mod vector_access;
+pub mod vector_literal;
 pub mod write_file;
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -29,8 +31,10 @@ impl<'ctx> CodeGenerator<'ctx> {
             Expression::FunctionCall(function_call) => {
                 self.compile_function_call_expr(function_call)
             }
-            Expression::VectorAccess(_vector_access) => todo!(),
-            Expression::VectorLiteral(_vector_literal) => todo!(),
+            Expression::VectorAccess(vector_access) => self.compile_vector_access(vector_access),
+            Expression::VectorLiteral(vector_literal) => {
+                self.compile_vector_literal(vector_literal)
+            }
             Expression::StructInit(struct_init) => self.compile_struct_init(struct_init),
             Expression::StructFieldAccess(struct_field_access) => {
                 self.compile_struct_field_access(struct_field_access)

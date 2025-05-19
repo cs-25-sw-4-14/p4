@@ -704,7 +704,7 @@ fn test_type() {
         lossy::TypeParser::new().parse(Lexer::new("bool")).unwrap()
     );
     assert_eq!(
-        Type::Vector(Box::new(Type::U8)),
+        Type::Vector(Box::new(Type::U8), 1),
         lossy::TypeParser::new()
             .parse(Lexer::new("Vec<u8>"))
             .unwrap()

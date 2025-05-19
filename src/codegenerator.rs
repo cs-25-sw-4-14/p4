@@ -3,9 +3,9 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, PointerValue};
+use inkwell::values::{BasicValueEnum, IntValue, PointerValue};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use std::collections::HashMap;
 
 use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
@@ -26,6 +26,7 @@ pub struct CodeGenerator<'ctx> {
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub struct_definitions: HashMap<String, StructDef>,
+    pub heap_sizes: HashMap<PointerValue<'ctx>, IntValue<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -81,6 +82,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         let malloc_type = i8_ptr_type.fn_type(&[i64_type.into()], false);
         module.add_function("malloc", malloc_type, Some(Linkage::External));
 
+        // free: void free(void* ptr);
+        let free_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
+        module.add_function("free", free_type, Some(Linkage::External));
+
         CodeGenerator {
             context,
             module,
@@ -91,6 +96,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
             struct_definitions: HashMap::new(),
+            heap_sizes: HashMap::new(),
         }
     }
 
@@ -181,15 +187,9 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
                 llvm_element_type.array_type(*size as u32).into()
             }
-            // Type::Vector(element_type) => {
-            //     let llvm_element_type = self.get_basic_type(element_type);
-            //     // If the vector length is dynamic, pass that as a parameter
-            //     llvm_element_type.array_type(4).into() // Example: Fixed length of 4, adjust dynamically if needed
-            // }
             _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
         }
     }
-
     // Comprehensive helper method to get an LLVM type from an AST type, with error handling
     pub fn get_llvm_type(&self, ast_type: &Type) -> Result<BasicTypeEnum<'ctx>> {
         match ast_type {
@@ -212,7 +212,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 .as_basic_type_enum()),
             Type::Custom(name) => match self.module.get_struct_type(name) {
                 Some(struct_ty) => Ok(struct_ty.as_basic_type_enum()),
-                None => Err(anyhow::anyhow!("Struct type '{}' not found", name)),
+                None => Err(anyhow!("Struct type '{}' not found", name)),
             },
             Type::Array(elem_type, size) => {
                 let elem_llvm_type = self.get_llvm_type(elem_type)?;
@@ -232,7 +232,24 @@ impl<'ctx> CodeGenerator<'ctx> {
                     _ => Err(anyhow::anyhow!("Unsupported array element type")),
                 }
             }
-            Type::Vector(_) => Err(anyhow::anyhow!("Vector types not supported yet")),
+            Type::Vector(elem_type, size) => {
+                let elem_llvm_type = self.get_llvm_type(elem_type)?;
+                match elem_llvm_type {
+                    BasicTypeEnum::FloatType(ft) => {
+                        Ok(ft.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::IntType(it) => {
+                        Ok(it.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::PointerType(pt) => {
+                        Ok(pt.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    BasicTypeEnum::StructType(st) => {
+                        Ok(st.array_type(*size as u32).as_basic_type_enum())
+                    }
+                    _ => Err(anyhow::anyhow!("Unsupported vector element type")),
+                }
+            }
             Type::Null => Ok(self
                 .context
                 .ptr_type(AddressSpace::default())
