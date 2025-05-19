@@ -4,26 +4,24 @@ use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_vector_access(&self, vector_access: &VectorAccess) -> Result<Type> {
+        let access_type = self.check_expression(&vector_access.vector_expr)?;
         let index_type = self.check_expression(&vector_access.index)?;
+
+        let vec_type = match access_type {
+            Type::Vector(vec_type) => vec_type,
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Vector access on non-vector type: {:?}",
+                    access_type
+                ));
+            }
+        };
 
         if index_type != Type::I64 {
             return Err(anyhow::anyhow!("Index must be of type I64"));
         }
-        if let Some(var) = self.v_table.get(&vector_access.vector_name) {
-            if let Type::Vector(inner_type) = &var.var_type {
-                Ok(*inner_type.clone())
-            } else {
-                Err(anyhow::anyhow!(
-                    "Variable {} is not a vector",
-                    vector_access.vector_name
-                ))
-            }
-        } else {
-            Err(anyhow::anyhow!(
-                "Variable {} not found in vtable",
-                vector_access.vector_name
-            ))
-        }
+
+        Ok(vec_type)
     }
 }
 
@@ -32,7 +30,6 @@ pub mod vector_access_tests {
     use super::*;
     use crate::ast::{Expression, Literal, VariableDeclaration, VectorLiteral};
     use crate::debugger::Debugger;
-    
 
     #[test]
     fn test_vector_access() {
@@ -52,7 +49,7 @@ pub mod vector_access_tests {
             },
         );
         let expression = Expression::VectorAccess(Box::new(VectorAccess {
-            vector_name: "my_vector".to_string(),
+            vector_expr: Expression::Variable("my_vector".to_string()),
             index: Expression::Literal(Literal::Int(0)),
         }));
 
