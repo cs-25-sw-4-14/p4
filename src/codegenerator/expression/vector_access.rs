@@ -21,11 +21,9 @@ impl<'ctx> CodeGenerator<'ctx> {
             .get(vector_name)
             .ok_or_else(|| anyhow!("Vector variable '{}' not found", vector_name))?;
 
-        println!("Compiling vec access: {:?}\n{:?}", vector_access, vector_type);
-
         let element_type = vector_type
             .into_struct_type()
-            .get_field_type_at_index(1)
+            .get_field_type_at_index(0)
             .unwrap();
 
         println!("Element type: {:?}", element_type);
@@ -52,7 +50,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             .builder
             .build_load(element_type, element_ptr, "element_load")?;
 
-        println!("Element value: {:?}", element_value);
         Ok(element_value)
     }
 }

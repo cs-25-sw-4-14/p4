@@ -3,7 +3,6 @@ use crate::codegenerator::BasicValueEnum;
 use crate::codegenerator::CodeGenerator;
 use anyhow::Result;
 use anyhow::anyhow;
-use inkwell::values::BasicValue;
 use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
 
@@ -52,13 +51,13 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let element_type = vector_type
             .into_struct_type()
-            .get_field_type_at_index(1)
+            .get_field_type_at_index(0)
             .unwrap();
 
         let element_size_bytes = (match element_type {
             BasicTypeEnum::IntType(it) => it.get_bit_width(),
             BasicTypeEnum::FloatType(ft) => self.get_float_bit_width(ft)?,
-            _ => 8,
+            _ => 64,
         } + 7)
             / 8;
 
@@ -188,7 +187,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         self.builder.build_store(data_ptr_ptr, new_heap_ptr)?;
         self.builder.build_store(size_ptr, new_size)?;
-        self.heap_sizes.insert(vector_struct_ptr.as_basic_value_enum(), new_size);
+        self.heap_sizes.insert(*vector_struct_ptr, new_size);
 
         Ok(())
     }
