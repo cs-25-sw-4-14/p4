@@ -1,87 +1,26 @@
 use crate::{
-    ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration},
+    ast::{ArrayAccess, BaseType, Type},
     typechecker::Typechecker,
 };
 use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_array_access(&self, array_access: &ArrayAccess) -> Result<Type> {
-        let array = self.semantic_check_array_definition(array_access)?;
-        let array_type = Self::semantic_check_array_type(array)?;
-        let array_length = Self::semantic_check_array_length(array)?;
-        self.semantic_check_array_index(&array_access.index, *array_length)?;
+        let access_type = self.check_expression(&array_access.array_expr)?;
+        let array_index = self.check_expression(&array_access.index)?;
 
-        Ok(array_type.clone())
-    }
+        if array_index.base != BaseType::I64 {
+            return Err(anyhow::anyhow!("Array index must be of type I64"));
+        }
 
-    pub fn semantic_check_array_definition(
-        &self,
-        array_access: &ArrayAccess,
-    ) -> Result<&VariableDeclaration> {
-        let array = self
-            .v_table
-            .get(&array_access.array_name)
-            .ok_or_else(|| anyhow::anyhow!("array: {}, not defined", array_access.array_name))?;
-
-        match &array.var_type {
-            Type::Array(_, _) => Ok(array),
-            _ => Err(anyhow::anyhow!(
+        if let BaseType::Array(_, _) = access_type.base {
+            return Ok(access_type.clone());
+        } else {
+            return Err(anyhow::anyhow!(
                 "Array access on non-array type: {:?}",
-                array.var_type
-            )),
+                access_type.base
+            ));
         }
-    }
-
-    pub fn semantic_check_array_type(array: &VariableDeclaration) -> Result<&Type> {
-        let array_type = match &array.var_type {
-            Type::Array(ty, _) => ty,
-            _ => {
-                return Err(anyhow::anyhow!(
-                    "Array access on non-array type: {:?}",
-                    array.var_type
-                ));
-            }
-        };
-        Ok(array_type)
-    }
-
-    pub fn semantic_check_array_length(array: &VariableDeclaration) -> Result<&u64> {
-        let array_length = match &array.var_type {
-            Type::Array(_, length) => length,
-            _ => {
-                return Err(anyhow::anyhow!(
-                    "Array access on non-array type: {:?}",
-                    array.var_type
-                ));
-            }
-        };
-        Ok(array_length)
-    }
-
-    pub fn semantic_check_array_index(
-        &self,
-        array_index: &Expression,
-        array_length: u64,
-    ) -> Result<()> {
-        match self.check_expression(array_index)? {
-            Type::I64 => {
-                if let Expression::Literal(Literal::Int(index)) = array_index {
-                    if *index >= array_length {
-                        return Err(anyhow::anyhow!(
-                            "Array access index out of bounds: {}",
-                            index
-                        ));
-                    }
-                }
-            }
-            _ => {
-                return Err(anyhow::anyhow!(
-                    "Array access by non-integer expression: {:?}",
-                    array_index
-                ));
-            }
-        }
-        Ok(())
     }
 }
 
@@ -94,14 +33,26 @@ pub mod tests {
     #[test]
     fn check_literal_should_return_type() {
         let tests = vec![
-            (Expression::Literal(Literal::Char('b')), Type::Char),
+            (
+                Expression::Literal(Literal::Char('b')),
+                Type::owned(BaseType::Char),
+            ),
             (
                 Expression::Literal(Literal::String("test".to_string())),
-                Type::String,
+                Type::owned(BaseType::String),
             ),
-            (Expression::Literal(Literal::Bool(true)), Type::Bool),
-            (Expression::Literal(Literal::Float(0.1)), Type::F64),
-            (Expression::Literal(Literal::Int(0)), Type::I64),
+            (
+                Expression::Literal(Literal::Bool(true)),
+                Type::owned(BaseType::Bool),
+            ),
+            (
+                Expression::Literal(Literal::Float(0.1)),
+                Type::owned(BaseType::F64),
+            ),
+            (
+                Expression::Literal(Literal::Int(0)),
+                Type::owned(BaseType::I64),
+            ),
         ];
 
         let debugger = Debugger::new(String::from(""));
