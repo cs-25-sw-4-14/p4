@@ -71,7 +71,7 @@ impl BorrowChecker {
     // check that structs don't have reference fields
     pub fn check_struct(&self, struct_def: &StructDef) -> Result<()> {
         for field in &struct_def.fields {
-            if let Type::Reference(_, _) = field.field_type {
+            if let Type::Ref(_, _) = field.field_type {
                 return Err(anyhow!(
                     "Struct {} cannot have reference field {}. References are not allowed in struct definitions.",
                     struct_def.name,
@@ -84,7 +84,7 @@ impl BorrowChecker {
 
     // check that functions don't return references
     pub fn check_function_return(&self, func: &FunctionDef) -> Result<()> {
-        if let Some(Type::Reference(_, _)) = func.return_type {
+        if let Some(Type::Ref(_, _)) = func.return_type {
             return Err(anyhow!(
                 "Function {} cannot return a reference. Reference returns are not supported.",
                 func.name
@@ -295,7 +295,7 @@ impl BorrowChecker {
             Statement::Throwaway(_, _) => {}
             Statement::VariableDeclaration(decl, _) => {
                 self.check_expression(&decl.value)?;
-                if let Type::Reference(_, is_mutable) = &decl.var_type {
+                if let Type::Ref(_, is_mutable) = &decl.var_type {
                     if let Expression::Reference(_, ref_is_mutable) = decl.value {
                         if *is_mutable != ref_is_mutable {
                             return Err(anyhow!("Mismatched reference mutability"));
