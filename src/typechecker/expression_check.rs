@@ -38,13 +38,13 @@ impl Typechecker<'_> {
             // TODO: Move into seperate module
             Expression::Reference(expr, is_mutable) => {
                 let inner_type = self.check_expression(expr)?;
-                Ok(Type::Reference(Box::new(inner_type), *is_mutable))
+                Ok(Type::Ref(Box::new(inner_type), *is_mutable))
             }
             // TODO: Move into seperate module
             Expression::Dereference(expr) => {
                 let expr_type = self.check_expression(expr)?;
                 match expr_type {
-                    Type::Reference(inner_type, _) => Ok(*inner_type),
+                    Type::Ref(inner_type, _) => Ok(*inner_type),
                     _ => Err(anyhow::anyhow!(
                         "Cannot dereference non-reference type: {:?}",
                         expr_type
