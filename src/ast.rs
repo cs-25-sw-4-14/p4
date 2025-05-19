@@ -253,12 +253,12 @@ pub struct StructFieldInit {
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldAccess {
     pub struct_expr: Box<Expression>,
-    pub field_name: String,
+    pub field: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayAccess {
-    pub array_name: String,
+    pub array_expr: Box<Expression>,
     pub index: Expression,
 }
 
@@ -272,7 +272,7 @@ pub struct VectorLiteral {
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct VectorAccess {
-    pub vector_name: String,
+    pub vector_expr: Box<Expression>,
     pub index: Expression,
 }
 
