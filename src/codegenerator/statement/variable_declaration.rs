@@ -12,14 +12,13 @@ impl CodeGenerator<'_> {
             Type::String => {
                 let string_ptr = value.into_pointer_value();
 
-                println!("current heap sizes: {:?}", self.heap_sizes);
-                println!("Value to lookup: {:?}", value);
                 let str_len: BasicValueEnum = self
                     .heap_sizes
                     .get(&value)
                     .ok_or_else(|| anyhow::anyhow!("String length not found in heap_sizes"))?
                     .clone()
                     .into();
+
                 // Call malloc with size = length + 1 (for null terminator)
                 let i8_ptr_type = self.context.ptr_type(inkwell::AddressSpace::default());
                 let malloc_fn = self
@@ -70,6 +69,9 @@ impl CodeGenerator<'_> {
                 let llvm_var_type = i8_ptr_type;
                 let var_ptr = self.builder.build_alloca(llvm_var_type, var_name)?;
                 self.builder.build_store(var_ptr, raw_ptr)?;
+
+                println!("Inserting string variable: {:?}", var_ptr);
+                self.heap_sizes.insert(var_ptr.as_basic_value_enum(), str_len.into_int_value());
 
                 self.variables
                     .insert(var_name.clone(), (llvm_var_type.into(), var_ptr));

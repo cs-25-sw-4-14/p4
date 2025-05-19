@@ -4,7 +4,7 @@ use crate::ast::{Expression, Type, TypeCast};
 use anyhow::{Result, anyhow};
 use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
-use inkwell::values::{BasicMetadataValueEnum, BasicValue, BasicValueEnum};
+use inkwell::values::{BasicValue, BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_float_bit_width(&self, float_type: inkwell::types::FloatType<'ctx>) -> Result<u32> {
@@ -115,24 +115,21 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
             }
 
-            (BasicValueEnum::PointerValue(ptr_val), BasicTypeEnum::ArrayType(array_ty)) => {
-                let byte_len = 10;
+            // String to vec
+            (BasicValueEnum::PointerValue(ptr_val), BasicTypeEnum::ArrayType(_array_ty)) => {
+                let len = 6;
 
-                let i8_ptr = self.builder.build_pointer_cast(
+                let ptr = self.builder.build_pointer_cast(
                     ptr_val,
                     self.context.ptr_type(AddressSpace::default()),
-                    "str_to_i8ptr",
+                    "str_to_ptr",
                 )?;
 
-                let len_val = self
-                    .context
-                    .i64_type()
-                    .const_int((byte_len - 1) as u64, false);
+                let len_val = self.context.i64_type().const_int((len - 1) as u64, false);
 
-                self.heap_sizes
-                    .insert(i8_ptr.as_basic_value_enum(), len_val);
+                self.heap_sizes.insert(ptr.as_basic_value_enum(), len_val);
 
-                return Ok(i8_ptr.into());
+                return Ok(ptr.into());
             }
 
             // If no supported type cast matches, return an error

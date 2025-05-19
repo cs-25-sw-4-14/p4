@@ -141,7 +141,8 @@ impl<'ctx> CodeGenerator<'ctx> {
                 .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
 
         //Insert into heap_sizes
-        self.heap_sizes.insert(buffer_ptr.as_basic_value_enum(), read_count);
+        self.heap_sizes.insert(buffer_ptr.into(), read_count);
+
         // 9. Return the pointer to the buffer (Type::String -> i8*)
         Ok(buffer_ptr.into())
     }
