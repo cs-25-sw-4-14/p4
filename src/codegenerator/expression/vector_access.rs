@@ -23,8 +23,10 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let element_type = vector_type
             .into_struct_type()
-            .get_field_type_at_index(1)
+            .get_field_type_at_index(0)
             .unwrap();
+
+        println!("Element type: {:?}", element_type);
 
         let loaded_vector_ptr = self
             .builder

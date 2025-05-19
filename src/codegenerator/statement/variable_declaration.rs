@@ -74,7 +74,7 @@ impl CodeGenerator<'_> {
                     .insert(var_name.clone(), (llvm_var_type.into(), var_ptr));
                 return Ok(());
             }
-            Type::Vector(_, _) => {
+            Type::Vector(element_type, _) => {
                 let nr_elements = self
                     .heap_sizes
                     .get(&value.into_pointer_value())
@@ -84,9 +84,10 @@ impl CodeGenerator<'_> {
 
                 let ptr_type = self.context.ptr_type(inkwell::AddressSpace::default());
                 let size_type = self.context.i64_type();
+                let llvm_element_type = self.get_llvm_type(element_type)?;
                 let vector_struct_type = self
                     .context
-                    .struct_type(&[ptr_type.into(), size_type.into()], false);
+                    .struct_type(&[llvm_element_type.into(), size_type.into()], false);
 
                 let var_ptr = self.builder.build_alloca(vector_struct_type, var_name)?;
 

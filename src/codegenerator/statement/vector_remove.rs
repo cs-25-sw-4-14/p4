@@ -51,13 +51,13 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let element_type = vector_type
             .into_struct_type()
-            .get_field_type_at_index(1)
+            .get_field_type_at_index(0)
             .unwrap();
 
         let element_size_bytes = (match element_type {
             BasicTypeEnum::IntType(it) => it.get_bit_width(),
             BasicTypeEnum::FloatType(ft) => self.get_float_bit_width(ft)?,
-            _ => 8,
+            _ => 64,
         } + 7)
             / 8;
 
