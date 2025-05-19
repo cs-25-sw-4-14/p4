@@ -10,14 +10,11 @@ impl<'ctx> CodeGenerator<'ctx> {
     ) -> Result<BasicValueEnum<'ctx>> {
         let array_name = &array_access.array_name;
         let index_value = self.compile_expression(&array_access.index)?;
-        println!("Array access: {}[{}]", array_name, index_value);
 
         let (array_type, array_ptr) = self
             .variables
             .get(array_name)
             .ok_or_else(|| anyhow::anyhow!("Array variable '{}' not found", array_name))?;
-
-        println!("Array type: {:?}", array_type);
 
         let index_value = match index_value {
             BasicValueEnum::IntValue(val) => val,

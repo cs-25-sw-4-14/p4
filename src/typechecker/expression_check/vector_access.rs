@@ -10,7 +10,7 @@ impl Typechecker<'_> {
             return Err(anyhow::anyhow!("Index must be of type I64"));
         }
         if let Some(var) = self.v_table.get(&vector_access.vector_name) {
-            if let Type::Vector(inner_type) = &var.var_type {
+            if let Type::Vector(inner_type, _) = &var.var_type {
                 Ok(*inner_type.clone())
             } else {
                 Err(anyhow::anyhow!(
@@ -23,7 +23,6 @@ impl Typechecker<'_> {
                 "Variable {} not found in vtable",
                 vector_access.vector_name
             ))
-
         }
     }
 }
@@ -44,7 +43,7 @@ pub mod vector_access_tests {
             VariableDeclaration {
                 trivial: None,
                 mutable: None,
-                var_type: Type::Vector(Box::new(Type::I64)),
+                var_type: Type::Vector(Box::new(Type::I64), 1),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral {
                     elements: vec![Expression::Literal(Literal::Int(0))],

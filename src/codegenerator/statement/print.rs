@@ -14,19 +14,19 @@ impl CodeGenerator<'_> {
         let call_args = match value {
             BasicValueEnum::IntValue(int_val) => match int_val.get_type().get_bit_width() {
                 8 => {
-                    let fmt_str = self.builder.build_global_string_ptr("%hhi\n", "fmt_i8")?;
+                    let fmt_str = self.builder.build_global_string_ptr("%hhi", "fmt_i8")?;
                     vec![fmt_str.as_pointer_value().into(), int_val.into()]
                 }
                 16 => {
-                    let fmt_str = self.builder.build_global_string_ptr("%hi\n", "fmt_i16")?;
+                    let fmt_str = self.builder.build_global_string_ptr("%hi", "fmt_i16")?;
                     vec![fmt_str.as_pointer_value().into(), int_val.into()]
                 }
                 32 => {
-                    let fmt_str = self.builder.build_global_string_ptr("%d\n", "fmt_i32")?;
+                    let fmt_str = self.builder.build_global_string_ptr("%d", "fmt_i32")?;
                     vec![fmt_str.as_pointer_value().into(), int_val.into()]
                 }
                 64 => {
-                    let fmt_str = self.builder.build_global_string_ptr("%lld\n", "fmt_i64")?;
+                    let fmt_str = self.builder.build_global_string_ptr("%lld", "fmt_i64")?;
                     vec![fmt_str.as_pointer_value().into(), int_val.into()]
                 }
                 other => {
@@ -38,7 +38,7 @@ impl CodeGenerator<'_> {
                     Ok(16) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("16: %0.40f\n", "fmt_f16")?;
+                            .build_global_string_ptr("16: %0.40f", "fmt_f16")?;
                         let extended = self.builder.build_float_ext(
                             float_val,
                             self.context.f32_type(),
@@ -49,13 +49,13 @@ impl CodeGenerator<'_> {
                     Ok(32) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("32: %0.40f\n", "fmt_f32")?;
+                            .build_global_string_ptr("32: %0.40f", "fmt_f32")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Ok(64) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("64: %.040lf\n", "fmt_f64")?;
+                            .build_global_string_ptr("64: %.040lf", "fmt_f64")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Err(e) => {
@@ -67,24 +67,15 @@ impl CodeGenerator<'_> {
                 }
             }
             BasicValueEnum::PointerValue(ptr_val) => {
-                println!("Print: Pointer value: {:?}", ptr_val);
-                let fmt_str = self.builder.build_global_string_ptr("%s\n", "fmt")?;
-                vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
-                /*
-                println!("Print: Pointer value: {:?}", ptr_val);
-                let deref_val = self.builder.build_load(ptr_val.get_type(), ptr_val, "deref_val")?;
-                println!("Print: Deref value: {:?}", deref_val);
-                let value = match deref_val {
-                BasicValueEnum::IntValue(val) => val,
-                _ => return Err(anyhow!("Unsupported pointer type")),
-                };
-                println!("Print: Value: {:?}", value);
-
-                let fmt_str = self.builder.build_global_string_ptr("%lld\n", "fmt_i64")?;
-                vec![fmt_str.as_pointer_value().into(), value.into()]
-                */
+                if ptr_val.is_null() {
+                    let fmt_str = self.builder.build_global_string_ptr("\n", "fmt")?;
+                    vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
+                } else {
+                    let fmt_str = self.builder.build_global_string_ptr("%s", "fmt")?;
+                    vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
+                }
             }
-            _ => return Err(anyhow!("not a valid type for print statement")),
+            _ => return Err(anyhow!("not a valid type for debug statement")),
         };
 
         let _ = self.builder.build_call(printf, &call_args, "printf_call");
