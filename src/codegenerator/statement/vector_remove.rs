@@ -3,6 +3,7 @@ use crate::codegenerator::BasicValueEnum;
 use crate::codegenerator::CodeGenerator;
 use anyhow::Result;
 use anyhow::anyhow;
+use inkwell::values::BasicValue;
 use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
 
@@ -187,7 +188,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         self.builder.build_store(data_ptr_ptr, new_heap_ptr)?;
         self.builder.build_store(size_ptr, new_size)?;
-        self.heap_sizes.insert(*vector_struct_ptr, new_size);
+        self.heap_sizes.insert(vector_struct_ptr.as_basic_value_enum(), new_size);
 
         Ok(())
     }

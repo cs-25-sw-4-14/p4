@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::Literal;
 use anyhow::Result;
-use inkwell::values::BasicValueEnum;
+use inkwell::values::{BasicValue, BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_literal(&mut self, literal: &Literal) -> Result<BasicValueEnum<'ctx>> {
@@ -30,7 +30,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                     .context
                     .i64_type()
                     .const_int(value.len() as u64 + 1, false);
-                self.heap_sizes.insert(ptr, length);
+                self.heap_sizes.insert(ptr.as_basic_value_enum(), length);
                 BasicValueEnum::PointerValue(ptr)
             }
             Literal::Char(value) => {

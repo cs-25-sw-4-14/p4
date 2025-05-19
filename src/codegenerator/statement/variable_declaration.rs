@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::{Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
-use inkwell::{types::BasicTypeEnum, values::BasicValueEnum};
+use inkwell::{types::BasicTypeEnum, values::{BasicValue, BasicValueEnum}};
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_declaration(&mut self, decl: &VariableDeclaration) -> Result<()> {
@@ -12,9 +12,11 @@ impl CodeGenerator<'_> {
             Type::String => {
                 let string_ptr = value.into_pointer_value();
 
+                println!("current heap sizes: {:?}", self.heap_sizes);
+                println!("Value to lookup: {:?}", value);
                 let str_len: BasicValueEnum = self
                     .heap_sizes
-                    .get(&value.into_pointer_value())
+                    .get(&value)
                     .ok_or_else(|| anyhow::anyhow!("String length not found in heap_sizes"))?
                     .clone()
                     .into();
@@ -73,16 +75,16 @@ impl CodeGenerator<'_> {
                     .insert(var_name.clone(), (llvm_var_type.into(), var_ptr));
                 return Ok(());
             }
-            Type::Vector(_, _) => {
+            Type::Vector(v_type, _) => {
                 let nr_elements = self
                     .heap_sizes
-                    .get(&value.into_pointer_value())
+                    .get(&value)
                     .ok_or_else(|| anyhow::anyhow!("Vector length not found in heap_sizes"))?
                     .get_zero_extended_constant()
                     .ok_or_else(|| anyhow::anyhow!("Failed to get zero extended constant"))?;
 
                 let ptr_type = self.context.ptr_type(inkwell::AddressSpace::default());
-                let size_type = self.context.i64_type();
+                let size_type = self.get_llvm_type(v_type)?;
                 let vector_struct_type = self
                     .context
                     .struct_type(&[ptr_type.into(), size_type.into()], false);
@@ -106,7 +108,7 @@ impl CodeGenerator<'_> {
                 let length = self.context.i64_type().const_int(nr_elements, false);
                 self.builder.build_store(size_ptr, length)?;
 
-                self.heap_sizes.insert(var_ptr, length);
+                self.heap_sizes.insert(var_ptr.as_basic_value_enum(), length);
 
                 let llvm_struct_type = BasicTypeEnum::StructType(vector_struct_type);
                 self.variables

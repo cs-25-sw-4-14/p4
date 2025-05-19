@@ -2,8 +2,9 @@ use super::CodeGenerator;
 use crate::ast::Literal;
 use crate::ast::{Expression, Type, TypeCast};
 use anyhow::{Result, anyhow};
+use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
-use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum};
+use inkwell::values::{BasicMetadataValueEnum, BasicValue, BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_float_bit_width(&self, float_type: inkwell::types::FloatType<'ctx>) -> Result<u32> {
@@ -114,43 +115,24 @@ impl<'ctx> CodeGenerator<'ctx> {
                 }
             }
 
-            // String literal (pointer) to u8 vec
-            (BasicValueEnum::PointerValue(ptr), BasicTypeEnum::VectorType(vector_type)) => {
-                let element_type = vector_type.get_element_type();
+            (BasicValueEnum::PointerValue(ptr_val), BasicTypeEnum::ArrayType(array_ty)) => {
+                let byte_len = 10;
 
-                match element_type {
-                    BasicTypeEnum::IntType(int_type) => {
-                        println!("Int type: {:?}", int_type);
-                        match int_type.get_bit_width() {
-                            8 => {
-                                let to_chars_fn = self.module.get_function("to_chars").ok_or_else(|| {
-                        anyhow!("Missing runtime function: to_chars(ptr: i8*, len: i64) -> Vec<char>")
-                    })?;
+                let i8_ptr = self.builder.build_pointer_cast(
+                    ptr_val,
+                    self.context.ptr_type(AddressSpace::default()),
+                    "str_to_i8ptr",
+                )?;
 
-                                let len = BasicMetadataValueEnum::IntValue(
-                                    self.context.i32_type().const_int(2, false),
-                                ); //self.compute_string_length(ptr)?; // <-- You must implement this
-                                let call_site = self.builder.build_call(
-                                    to_chars_fn,
-                                    &[ptr.into(), len.into()],
-                                    "cast_to_char_vec",
-                                )?;
-                                let call_value = call_site.try_as_basic_value().left();
+                let len_val = self
+                    .context
+                    .i64_type()
+                    .const_int((byte_len - 1) as u64, false);
 
-                                println!("Call value: {:?}", call_value.unwrap());
-                                call_value.ok_or_else(|| {
-                                    anyhow!("Failed to cast pointer to Vec<char>")
-                                })?
-                            }
-                            _ => {
-                                return Err(anyhow!("Unsupported vector element width for cast"));
-                            }
-                        }
-                    }
-                    _ => {
-                        return Err(anyhow!("Unsupported vector element type for cast"));
-                    }
-                }
+                self.heap_sizes
+                    .insert(i8_ptr.as_basic_value_enum(), len_val);
+
+                return Ok(i8_ptr.into());
             }
 
             // If no supported type cast matches, return an error

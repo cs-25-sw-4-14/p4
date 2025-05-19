@@ -26,7 +26,7 @@ pub struct CodeGenerator<'ctx> {
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub struct_definitions: HashMap<String, StructDef>,
-    pub heap_sizes: HashMap<PointerValue<'ctx>, IntValue<'ctx>>,
+    pub heap_sizes: HashMap<BasicValueEnum<'ctx>, IntValue<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {

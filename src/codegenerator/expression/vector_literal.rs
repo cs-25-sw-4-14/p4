@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::VectorLiteral;
 use anyhow::{Result, anyhow};
-use inkwell::{AddressSpace, types::BasicTypeEnum, values::BasicValueEnum};
+use inkwell::{types::BasicTypeEnum, values::{BasicValue, BasicValueEnum}, AddressSpace};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_vector_literal(
@@ -11,7 +11,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         if vector_literal.elements.is_empty() {
             let null_ptr = self.context.ptr_type(AddressSpace::default()).const_null();
             let length = self.context.i64_type().const_int(0, false);
-            self.heap_sizes.insert(null_ptr, length);
+            self.heap_sizes.insert(null_ptr.as_basic_value_enum(), length);
             return Ok(null_ptr.into());
         }
         let first_element = vector_literal.elements.first().unwrap();
@@ -73,7 +73,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             .context
             .i64_type()
             .const_int(nr_elements as u64 + 1, false);
-        self.heap_sizes.insert(array_ptr, length);
+        self.heap_sizes.insert(array_ptr.as_basic_value_enum(), length);
 
         Ok(array_ptr.into())
     }
