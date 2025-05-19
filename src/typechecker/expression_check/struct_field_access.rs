@@ -1,4 +1,4 @@
-use crate::ast::StructDef;
+use crate::ast::BaseType;
 use crate::ast::{StructFieldAccess, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
@@ -8,57 +8,35 @@ impl Typechecker<'_> {
         &self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<Type> {
-        let _struct_definition = self.semantic_check_struct_defined(struct_field_access)?;
-        let resulting_type = self.semantic_check_field_access_type(struct_field_access)?;
+        let access_type = self.check_expression(&struct_field_access.struct_expr)?;
+        let field_name = struct_field_access.field.clone();
 
-        Ok(resulting_type)
-    }
+        Ok(match access_type.base {
+            BaseType::Custom(name) => {
+                if let Some(struct_def) = self.s_table.structs.get(&name) {
+                    let field = struct_def.fields.iter().find(|f| f.name == field_name);
 
-    pub fn semantic_check_struct_defined(
-        &self,
-        struct_field_access: &StructFieldAccess,
-    ) -> Result<&StructDef> {
-        let expr_type = self.check_expression(&struct_field_access.struct_expr)?;
-
-        // Check if the expression type is a struct
-        let Type::Custom(name) = expr_type else {
-            return Err(anyhow::anyhow!(
-                "struct field access must be on a struct type"
-            ));
-        };
-
-        // Check if the struct is defined in the symbol table
-        let struct_definition = self
-            .s_table
-            .structs
-            .get(&name)
-            .ok_or_else(|| anyhow::anyhow!("struct: {}, not defined", name))?;
-
-        Ok(struct_definition)
-    }
-
-    pub fn semantic_check_field_access_type(
-        &self,
-        struct_field_access: &StructFieldAccess,
-    ) -> Result<Type> {
-        let struct_definition = self.semantic_check_struct_defined(struct_field_access)?;
-
-        // Check if the field is defined in the struct
-        let field_type = struct_definition
-            .fields
-            .iter()
-            .find(|field| field.name == struct_field_access.field_name)
-            .ok_or_else(|| {
-                anyhow::anyhow!(
-                    "field: {}, not defined in struct: {}",
-                    struct_field_access.field_name,
-                    struct_definition.name
-                )
-            })?
-            .field_type
-            .clone();
-
-        Ok(field_type)
+                    match field {
+                        Some(field) => field.field_type.clone(),
+                        None => {
+                            return Err(anyhow::anyhow!(
+                                "Field {} not found in struct {}",
+                                field_name,
+                                name
+                            ));
+                        }
+                    }
+                } else {
+                    return Err(anyhow::anyhow!("Struct {} not found", name));
+                }
+            }
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Struct field access on non-struct type: {:?}",
+                    access_type
+                ));
+            }
+        })
     }
 }
 
@@ -67,7 +45,7 @@ pub mod tests {
 
     use super::*;
     use crate::ast::{
-        Expression, Literal, StructDef, StructField, StructFieldInit, StructInit,
+        Expression, Literal, Ownership, StructDef, StructField, StructFieldInit, StructInit,
         VariableDeclaration,
     };
     use crate::debugger::Debugger;
@@ -79,7 +57,7 @@ pub mod tests {
 
         let expression = Expression::StructFieldAccess(StructFieldAccess {
             struct_expr: Box::new(Expression::Variable("test".to_string())),
-            field_name: "ey".to_string(),
+            field: "ey".to_string(),
         });
 
         typechecker.v_table.variables.insert(
@@ -87,7 +65,10 @@ pub mod tests {
             VariableDeclaration {
                 trivial: None,
                 mutable: None,
-                var_type: Type::Custom("Test".to_string()),
+                var_type: Type {
+                    base: BaseType::Custom("Test".to_string()),
+                    ownership: Ownership::Owned,
+                },
                 name: "test".to_string(),
                 value: Expression::StructInit(StructInit {
                     name: "Test".to_string(),
@@ -105,13 +86,22 @@ pub mod tests {
                 name: "Test".to_string(),
                 fields: vec![StructField {
                     name: String::from("ey"),
-                    field_type: Type::I64,
+                    field_type: Type {
+                        base: BaseType::I64,
+                        ownership: Ownership::Owned,
+                    },
                 }],
             },
         );
 
         let returned_type = typechecker.check_expression(&expression).unwrap();
 
-        assert_eq!(returned_type, Type::I64);
+        assert_eq!(
+            returned_type,
+            Type {
+                base: BaseType::I64,
+                ownership: Ownership::Owned,
+            }
+        );
     }
 }
