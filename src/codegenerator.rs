@@ -205,7 +205,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::F32 => Ok(self.context.f32_type().as_basic_type_enum()),
             Type::F64 => Ok(self.context.f64_type().as_basic_type_enum()),
             Type::Bool => Ok(self.context.bool_type().as_basic_type_enum()),
-            Type::Reference(_, _) => todo!(),
+            Type::Ref(_, _) => todo!(),
             Type::String => Ok(self
                 .context
                 .ptr_type(AddressSpace::default())
