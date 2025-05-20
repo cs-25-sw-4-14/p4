@@ -5,7 +5,7 @@ use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_struct_field_access(
-        &self,
+        &mut self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<Type> {
         let _struct_definition = self.semantic_check_struct_defined(struct_field_access)?;
@@ -15,7 +15,7 @@ impl Typechecker<'_> {
     }
 
     pub fn semantic_check_struct_defined(
-        &self,
+        &mut self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<&StructDef> {
         let expr_type = self.check_expression(&struct_field_access.struct_expr)?;
@@ -38,7 +38,7 @@ impl Typechecker<'_> {
     }
 
     pub fn semantic_check_field_access_type(
-        &self,
+        &mut self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<Type> {
         let struct_definition = self.semantic_check_struct_defined(struct_field_access)?;
@@ -71,6 +71,7 @@ pub mod tests {
         VariableDeclaration,
     };
     use crate::debugger::Debugger;
+    use crate::typechecker::variable_table::Inner;
 
     #[test]
     fn check_struct_field_access_should_be_ok_if_in_s_table() {
@@ -84,18 +85,22 @@ pub mod tests {
 
         typechecker.v_table.variables.insert(
             "test".to_string(),
-            VariableDeclaration {
-                trivial: None,
-                mutable: None,
-                var_type: Type::Custom("Test".to_string()),
-                name: "test".to_string(),
-                value: Expression::StructInit(StructInit {
-                    name: "Test".to_string(),
-                    fields: vec![StructFieldInit {
-                        name: String::from("ey"),
-                        value: Expression::Literal(Literal::Int(4)),
-                    }],
-                }),
+            Inner {
+                variable_declaration: VariableDeclaration {
+                    trivial: None,
+                    mutable: None,
+                    var_type: Type::Custom("Test".to_string()),
+                    name: "test".to_string(),
+                    value: Expression::StructInit(StructInit {
+                        name: "Test".to_string(),
+                        fields: vec![StructFieldInit {
+                            name: String::from("ey"),
+                            value: Expression::Literal(Literal::Int(4)),
+                        }],
+                    }),
+                },
+                immut_count: 0,
+                mut_active: false,
             },
         );
 

@@ -84,7 +84,11 @@ impl Typechecker<'_> {
         Ok(())
     }
 
-    fn check_return_type(&self, ret: &ReturnStatement, expected_type: &Option<Type>) -> Result<()> {
+    fn check_return_type(
+        &mut self,
+        ret: &ReturnStatement,
+        expected_type: &Option<Type>,
+    ) -> Result<()> {
         match (expected_type, &ret.value) {
             // Case 1: Function returns void, return statement should be empty
             (None, Some(_)) => Err(anyhow!("Function has void return type but returns a value")),

@@ -1,48 +1,47 @@
-use crate::ast::StructDef;
 use crate::ast::{StructInit, Type};
 use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_struct_init(&self, struct_init: &StructInit) -> Result<Type> {
-        let struct_definition = self.semantic_check_struct_defined_init(struct_init)?;
-        self.semantic_check_field_types(struct_init, struct_definition)?;
-
-        Ok(Type::Custom(struct_definition.name.clone()))
-    }
-
-    pub fn semantic_check_struct_defined_init(
-        &self,
-        struct_init: &StructInit,
-    ) -> Result<&StructDef> {
+    pub fn check_struct_init(&mut self, struct_init: &StructInit) -> Result<Type> {
+        // Step 1: Get struct definition and clone needed info
         let struct_definition = self
             .s_table
             .get(&struct_init.name)
             .ok_or_else(|| anyhow::anyhow!("struct: {}, not defined", struct_init.name))?;
 
-        Ok(struct_definition)
-    }
+        let struct_name = struct_definition.name.clone();
+        let expected_fields = struct_definition
+            .fields
+            .iter()
+            .map(|f| f.field_type.clone())
+            .collect::<Vec<_>>();
 
-    pub fn semantic_check_field_types(
-        &self,
-        struct_init: &StructInit,
-        struct_definition: &StructDef,
-    ) -> Result<()> {
-        for field in 0..struct_definition.fields.len() {
-            let expected_type = struct_definition.fields[field].field_type.clone();
-            let actual_type = self.check_expression(&struct_init.fields[field].value)?;
+        // Step 2: Check field types against expected
+        if expected_fields.len() != struct_init.fields.len() {
+            return Err(anyhow::anyhow!(
+                "Struct {} initialized with incorrect number of fields (expected {}, got {})",
+                struct_name,
+                expected_fields.len(),
+                struct_init.fields.len()
+            ));
+        }
 
-            if expected_type != actual_type && actual_type != Type::Null {
+        for (i, field_init) in struct_init.fields.iter().enumerate() {
+            let actual_type = self.check_expression(&field_init.value)?;
+            let expected_type = &expected_fields[i];
+            if actual_type != *expected_type && actual_type != Type::Null {
                 return Err(anyhow::anyhow!(
-                    "Struct {} initialized with incorrect field types: {:?} expected, but found {:?}",
-                    struct_definition.name,
+                    "Struct {} initialized with incorrect type for field '{}': expected {:?}, got {:?}",
+                    struct_name,
+                    field_init.name,
                     expected_type,
                     actual_type
                 ));
             }
         }
 
-        Ok(())
+        Ok(Type::Custom(struct_name))
     }
 }
 
@@ -56,7 +55,7 @@ pub mod tests {
     #[test]
     fn check_struct_init_should_fail_if_not_in_s_table() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::StructInit(StructInit {
             name: "Test".to_string(),

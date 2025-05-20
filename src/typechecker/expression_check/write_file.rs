@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::{Result, anyhow};
 
 impl Typechecker<'_> {
-    pub fn check_write_file(&self, write_expr: &Write) -> Result<Type> {
+    pub fn check_write_file(&mut self, write_expr: &Write) -> Result<Type> {
         // Check the type of the 'value' expression (the content to write)
         let value_type = self.check_expression(&write_expr.value)?;
 

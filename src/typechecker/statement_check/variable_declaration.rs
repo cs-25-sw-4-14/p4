@@ -1,6 +1,7 @@
 use crate::ast::Type;
 use crate::ast::VariableDeclaration;
 use crate::typechecker::Typechecker;
+use crate::typechecker::variable_table::Inner;
 use anyhow::Result;
 
 impl Typechecker<'_> {
@@ -25,9 +26,14 @@ impl Typechecker<'_> {
                         declaration,
                     )?;
 
-                    self.v_table
-                        .variables
-                        .insert(declaration.name.clone(), new_declaration);
+                    self.v_table.variables.insert(
+                        declaration.name.clone(),
+                        Inner {
+                            variable_declaration: new_declaration.clone(),
+                            immut_count: 0,
+                            mut_active: false,
+                        },
+                    );
 
                     Ok(())
                 } else {
@@ -49,10 +55,14 @@ impl Typechecker<'_> {
                 }
                 self.semantic_check_variable_already_declared_variable_declaration(declaration)?;
 
-                self.v_table
-                    .variables
-                    .insert(declaration.name.clone(), declaration.clone());
-
+                self.v_table.variables.insert(
+                    declaration.name.clone(),
+                    Inner {
+                        variable_declaration: declaration.clone(),
+                        immut_count: 0,
+                        mut_active: false,
+                    },
+                );
                 Ok(())
             }
         }

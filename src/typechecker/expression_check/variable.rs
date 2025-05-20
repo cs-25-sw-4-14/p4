@@ -4,7 +4,7 @@ use anyhow::Result;
 impl Typechecker<'_> {
     pub fn check_variable(&self, name: &str) -> Result<Type> {
         if let Some(var) = self.v_table.get(name) {
-            Ok(var.var_type.clone())
+            Ok(var.variable_declaration.var_type.clone())
         } else {
             Err(anyhow::anyhow!("Variable {} not found in vtable", name))
         }
@@ -17,6 +17,7 @@ pub mod variable_tests {
     use crate::ast::{Expression, Literal, VariableDeclaration};
     use crate::debugger::Debugger;
     use crate::typechecker::Typechecker;
+    use crate::typechecker::variable_table::Inner;
 
     #[test]
     fn check_variable_should_return_type() {
@@ -27,12 +28,16 @@ pub mod variable_tests {
 
         typechecker.v_table.variables.insert(
             "x".to_string(),
-            VariableDeclaration {
-                trivial: None,
-                mutable: None,
-                var_type: Type::I64,
-                name: "x".to_string(),
-                value: Expression::Literal(Literal::Int(4)),
+            Inner {
+                variable_declaration: VariableDeclaration {
+                    trivial: None,
+                    mutable: None,
+                    var_type: Type::I64,
+                    name: "x".to_string(),
+                    value: Expression::Literal(Literal::Int(4)),
+                },
+                immut_count: 0,
+                mut_active: false,
             },
         );
 

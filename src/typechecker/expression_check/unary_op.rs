@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_unary_op(&self, unary_operation: &UnaryOperation) -> Result<Type> {
+    pub fn check_unary_op(&mut self, unary_operation: &UnaryOperation) -> Result<Type> {
         let operand_type = self.check_expression(&unary_operation.operand)?;
         match unary_operation.operator {
             UnaryOperator::Negate => match operand_type {
@@ -47,7 +47,7 @@ pub mod tests {
         });
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let result = typechecker.check_expression(&expression).unwrap();
         assert_eq!(result, Type::I64);
@@ -61,7 +61,7 @@ pub mod tests {
         });
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         typechecker.check_expression(&expression).unwrap_err();
     }
@@ -74,7 +74,7 @@ pub mod tests {
         });
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
         let result = typechecker.check_expression(&expression).unwrap();
         assert_eq!(result, Type::Bool);
     }
@@ -87,7 +87,7 @@ pub mod tests {
         });
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         typechecker.check_expression(&expression).unwrap_err();
     }

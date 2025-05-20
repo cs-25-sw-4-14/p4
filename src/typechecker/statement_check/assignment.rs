@@ -4,7 +4,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_assignment(&self, assignment: &Assignment, l: usize) -> Result<()> {
+    pub fn check_assignment(&mut self, assignment: &Assignment, l: usize) -> Result<()> {
         let expression_value_type = self.check_expression(&assignment.value)?;
         let expression_target_type = self.check_expression(&assignment.target)?;
 
@@ -20,15 +20,15 @@ impl Typechecker<'_> {
         if let Expression::Variable(ref var_name) = assignment.target {
             // Already handled
             if let Some(var_type) = self.v_table.get(var_name) {
-                if var_type.var_type != expression_value_type {
+                if var_type.variable_declaration.var_type != expression_value_type {
                     return Err(anyhow::anyhow!(
                         "{}: Type mismatch: expected {:?}, found {:?}",
                         self.debugger.display(l),
-                        var_type.var_type,
+                        var_type.variable_declaration.var_type,
                         expression_value_type
                     ));
                 }
-                if var_type.mutable.is_none() {
+                if var_type.variable_declaration.mutable.is_none() {
                     return Err(anyhow::anyhow!(
                         "{}: Variable {} is immutable",
                         self.debugger.display(l),
@@ -81,7 +81,8 @@ impl Typechecker<'_> {
         } else if let Expression::ArrayAccess(ref access) = assignment.target {
             // Look up the array variable
             if let Some(var_type) = self.v_table.get(&access.array_name) {
-                if let Type::Array(boxed_element_type, _) = &var_type.var_type {
+                if let Type::Array(boxed_element_type, _) = &var_type.variable_declaration.var_type
+                {
                     if **boxed_element_type != expression_value_type {
                         return Err(anyhow::anyhow!(
                             "{}: Type mismatch: expected {:?}, found {:?}",

@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_vector_remove(&self, vector_insert: &VectorRemove, _l: usize) -> Result<()> {
+    pub fn check_vector_remove(&mut self, vector_insert: &VectorRemove, _l: usize) -> Result<()> {
         let vector_name = vector_insert.vector_name.clone();
         let index = vector_insert.index.clone();
 
@@ -15,7 +15,7 @@ impl Typechecker<'_> {
 
         // check if vector is defined and has type vector
         if let Some(var) = self.v_table.get(&vector_name) {
-            if let Type::Vector(_, _) = &var.var_type {
+            if let Type::Vector(_, _) = &var.variable_declaration.var_type {
                 // return the type of the vector
                 Ok(())
             } else {
@@ -36,6 +36,7 @@ mod tests {
     use crate::{
         ast::{Expression, Literal, VariableDeclaration, VectorLiteral},
         debugger::Debugger,
+        typechecker::variable_table::Inner,
     };
 
     #[test]
@@ -45,12 +46,16 @@ mod tests {
 
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
-            VariableDeclaration {
-                var_type: Type::Vector(Box::new(Type::I64), 1),
-                name: "my_vector".to_string(),
-                value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
-                trivial: None,
-                mutable: None,
+            Inner {
+                variable_declaration: VariableDeclaration {
+                    var_type: Type::Vector(Box::new(Type::I64), 1),
+                    name: "my_vector".to_string(),
+                    value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
+                    trivial: None,
+                    mutable: None,
+                },
+                immut_count: 0,
+                mut_active: false,
             },
         );
 
