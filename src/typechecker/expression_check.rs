@@ -19,7 +19,7 @@ mod vector_literal;
 mod write_file;
 
 impl Typechecker<'_> {
-    pub fn check_expression(&self, expression: &Expression) -> Result<Type> {
+    pub fn check_expression(&mut self, expression: &Expression) -> Result<Type> {
         match expression {
             Expression::Literal(literal) => Self::check_literal(literal),
             Expression::Variable(name) => self.check_variable(name),
@@ -37,6 +37,14 @@ impl Typechecker<'_> {
             Expression::TypeCast(type_cast) => self.check_type_cast(type_cast),
             // TODO: Move into seperate module
             Expression::Reference(expr, is_mutable) => {
+                if let Expression::Variable(var_name) = &**expr {
+                    if *is_mutable {
+                        self.v_table.borrow_mut(var_name)?;
+                    } else {
+                        self.v_table.borrow_immut(var_name)?;
+                    }
+                }
+
                 let inner_type = self.check_expression(expr)?;
                 Ok(Type::Reference(Box::new(inner_type), *is_mutable))
             }
