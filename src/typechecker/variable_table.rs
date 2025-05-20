@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 
 use crate::ast::{Statement, VariableDeclaration};
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Inner {
     pub variable_declaration: VariableDeclaration,
     pub immut_count: usize,
     pub mut_active: bool,
+    pub moved: bool,
 }
 
 #[derive(Debug)]
@@ -17,6 +19,17 @@ pub struct VTable {
 impl Default for VTable {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Inner {
+    pub fn new(variable_declaration: VariableDeclaration) -> Self {
+        Self {
+            variable_declaration,
+            immut_count: 0,
+            mut_active: false,
+            moved: false,
+        }
     }
 }
 
@@ -41,6 +54,7 @@ impl VTable {
                     variable_declaration: var_decl.clone(),
                     immut_count: 0,
                     mut_active: false,
+                    moved: false,
                 };
 
                 self.variables.insert(var_decl.name.clone(), inner);
@@ -93,10 +107,28 @@ impl VTable {
         Ok(())
     }
 
-    pub fn release_all_borrows(&mut self) {
-        for var in self.variables.values_mut() {
-            var.immut_count = 0;
-            var.mut_active = false;
+    pub fn move_var(&mut self, name: &str) -> Result<()> {
+        let var = self
+            .variables
+            .get_mut(name)
+            .ok_or_else(|| anyhow::anyhow!("Variable '{}' not found", name))?;
+
+        if var.moved {
+            return Err(anyhow::anyhow!(
+                "Variable '{}' was already moved and cannot be used again",
+                name
+            ));
         }
+
+        if var.mut_active {
+            return Err(anyhow::anyhow!(
+                "Cannot move variable '{}' because it is mutably borrowed",
+                name
+            ));
+        }
+
+        var.moved = true;
+
+        Ok(())
     }
 }
