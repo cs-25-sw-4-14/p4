@@ -23,17 +23,13 @@ impl Typechecker<'_> {
         for param in &function.params {
             self.v_table.variables.insert(
                 param.name.clone(),
-                Inner {
-                    variable_declaration: VariableDeclaration {
-                        trivial: None,
-                        mutable: None,
-                        var_type: param.param_type.clone(),
-                        name: param.name.clone(),
-                        value: crate::ast::Expression::Literal(crate::ast::Literal::Int(0)), // bare noget 🤷‍♂️ ligegyldigt!
-                    },
-                    immut_count: 0,
-                    mut_active: false,
-                },
+                Inner::new(VariableDeclaration {
+                    trivial: None,
+                    mutable: None,
+                    var_type: param.param_type.clone(),
+                    name: param.name.clone(),
+                    value: crate::ast::Expression::Literal(crate::ast::Literal::Int(0)), // bare noget 🤷‍♂️ ligegyldigt!
+                }),
             );
         }
 
@@ -46,8 +42,6 @@ impl Typechecker<'_> {
         for stmt in &function.body {
             self.check_breaks_continues(stmt, false)?;
         }
-
-        self.v_table.release_all_borrows();
 
         Ok(())
     }

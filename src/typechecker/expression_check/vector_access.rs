@@ -41,19 +41,15 @@ pub mod vector_access_tests {
 
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
-            Inner {
-                variable_declaration: VariableDeclaration {
-                    trivial: None,
-                    mutable: None,
-                    var_type: Type::Vector(Box::new(Type::I64), 1),
-                    name: "my_vector".to_string(),
-                    value: Expression::VectorLiteral(Box::new(VectorLiteral {
-                        elements: vec![Expression::Literal(Literal::Int(0))],
-                    })),
-                },
-                immut_count: 0,
-                mut_active: false,
-            },
+            Inner::new(VariableDeclaration {
+                trivial: None,
+                mutable: None,
+                var_type: Type::Vector(Box::new(Type::I64), 1),
+                name: "my_vector".to_string(),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral {
+                    elements: vec![Expression::Literal(Literal::Int(0))],
+                })),
+            }),
         );
         let expression = Expression::VectorAccess(Box::new(VectorAccess {
             vector_name: "my_vector".to_string(),

@@ -85,23 +85,19 @@ pub mod tests {
 
         typechecker.v_table.variables.insert(
             "test".to_string(),
-            Inner {
-                variable_declaration: VariableDeclaration {
-                    trivial: None,
-                    mutable: None,
-                    var_type: Type::Custom("Test".to_string()),
-                    name: "test".to_string(),
-                    value: Expression::StructInit(StructInit {
-                        name: "Test".to_string(),
-                        fields: vec![StructFieldInit {
-                            name: String::from("ey"),
-                            value: Expression::Literal(Literal::Int(4)),
-                        }],
-                    }),
-                },
-                immut_count: 0,
-                mut_active: false,
-            },
+            Inner::new(VariableDeclaration {
+                trivial: None,
+                mutable: None,
+                var_type: Type::Custom("Test".to_string()),
+                name: "test".to_string(),
+                value: Expression::StructInit(StructInit {
+                    name: "Test".to_string(),
+                    fields: vec![StructFieldInit {
+                        name: String::from("ey"),
+                        value: Expression::Literal(Literal::Int(4)),
+                    }],
+                }),
+            }),
         );
 
         typechecker.s_table.structs.insert(

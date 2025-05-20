@@ -46,17 +46,13 @@ mod tests {
 
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
-            Inner {
-                variable_declaration: VariableDeclaration {
-                    var_type: Type::Vector(Box::new(Type::I64), 1),
-                    name: "my_vector".to_string(),
-                    value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
-                    trivial: None,
-                    mutable: None,
-                },
-                immut_count: 0,
-                mut_active: false,
-            },
+            Inner::new(VariableDeclaration {
+                var_type: Type::Vector(Box::new(Type::I64), 1),
+                name: "my_vector".to_string(),
+                value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
+                trivial: None,
+                mutable: None,
+            }),
         );
 
         let vector_remove = VectorRemove {

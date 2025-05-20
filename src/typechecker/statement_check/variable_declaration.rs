@@ -28,11 +28,7 @@ impl Typechecker<'_> {
 
                     self.v_table.variables.insert(
                         declaration.name.clone(),
-                        Inner {
-                            variable_declaration: new_declaration.clone(),
-                            immut_count: 0,
-                            mut_active: false,
-                        },
+                        Inner::new(new_declaration.clone()),
                     );
 
                     Ok(())
@@ -55,14 +51,9 @@ impl Typechecker<'_> {
                 }
                 self.semantic_check_variable_already_declared_variable_declaration(declaration)?;
 
-                self.v_table.variables.insert(
-                    declaration.name.clone(),
-                    Inner {
-                        variable_declaration: declaration.clone(),
-                        immut_count: 0,
-                        mut_active: false,
-                    },
-                );
+                self.v_table
+                    .variables
+                    .insert(declaration.name.clone(), Inner::new(declaration.clone()));
                 Ok(())
             }
         }
