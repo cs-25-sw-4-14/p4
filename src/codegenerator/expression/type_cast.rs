@@ -4,7 +4,7 @@ use crate::ast::{Expression, Type, TypeCast};
 use anyhow::{Result, anyhow};
 use inkwell::AddressSpace;
 use inkwell::types::BasicTypeEnum;
-use inkwell::values::{BasicValue, BasicValueEnum};
+use inkwell::values::BasicValueEnum;
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_float_bit_width(&self, float_type: inkwell::types::FloatType<'ctx>) -> Result<u32> {
@@ -117,17 +117,11 @@ impl<'ctx> CodeGenerator<'ctx> {
 
             // String to vec
             (BasicValueEnum::PointerValue(ptr_val), BasicTypeEnum::ArrayType(_array_ty)) => {
-                let len = 6;
-
                 let ptr = self.builder.build_pointer_cast(
                     ptr_val,
                     self.context.ptr_type(AddressSpace::default()),
                     "str_to_ptr",
                 )?;
-
-                let len_val = self.context.i64_type().const_int((len - 1) as u64, false);
-
-                self.heap_sizes.insert(ptr.as_basic_value_enum(), len_val);
 
                 return Ok(ptr.into());
             }

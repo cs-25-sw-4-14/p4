@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::Read;
 use anyhow::{Result, anyhow};
-use inkwell::values::{BasicMetadataValueEnum, BasicValue, BasicValueEnum};
+use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub(super) fn compile_read_file(&mut self, read_node: &Read) -> Result<BasicValueEnum<'ctx>> {
@@ -109,7 +109,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         // 6. Read content: fread(buffer, 1, file_size, file_handle)
         let size_one_i64 = i64_type.const_int(1, false);
-        let read_count = self
+        let _read_count = self
             .builder
             .build_call(
                 fread_func,
@@ -139,9 +139,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         let _fclose_ret =
             self.builder
                 .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
-
-        //Insert into heap_sizes
-        self.heap_sizes.insert(buffer_ptr.into(), read_count);
 
         // 9. Return the pointer to the buffer (Type::String -> i8*)
         Ok(buffer_ptr.into())

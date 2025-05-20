@@ -86,6 +86,10 @@ impl<'ctx> CodeGenerator<'ctx> {
         let free_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
         module.add_function("free", free_type, Some(Linkage::External));
 
+        // strlen: size_t strlen(const char* str);
+        let strlen_type = i64_type.fn_type(&[i8_ptr_type.into()], false);
+        module.add_function("strlen", strlen_type, Some(Linkage::External));
+
         CodeGenerator {
             context,
             module,
