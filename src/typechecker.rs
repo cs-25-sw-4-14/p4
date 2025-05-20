@@ -15,7 +15,6 @@ pub struct Typechecker<'a> {
     pub s_table: struct_table::STable,
     pub e_table: enum_table::ETable,
     pub v_table: variable_table::VTable,
-    pub borrow_checker: borrow_checker::BorrowChecker,
     pub debugger: &'a Debugger,
 }
 
@@ -26,7 +25,6 @@ impl<'a> Typechecker<'a> {
             s_table: struct_table::STable::new(),
             e_table: enum_table::ETable::new(),
             v_table: variable_table::VTable::new(),
-            borrow_checker: borrow_checker::BorrowChecker::new(),
             debugger,
         }
     }
