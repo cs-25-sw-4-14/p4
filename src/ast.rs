@@ -13,7 +13,6 @@ pub struct Program {
 pub enum TopLevelDefinition {
     Function(FunctionDef),
     Struct(StructDef),
-    Enum(EnumDef),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -42,26 +41,6 @@ pub struct StructField {
     pub field_type: Type,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct EnumDef {
-    pub name: String,
-    pub generics: Vec<Type>,
-    pub variants: Vec<EnumVariant>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct EnumVariant {
-    pub name: String,
-    pub inner_type: Option<Type>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct EnumLiteral {
-    pub name: String,
-    pub variant: String,
-    pub inner_value: Option<Box<Expression>>,
-}
-
 // NOTE: STATEMENTS
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
@@ -79,19 +58,6 @@ pub enum Statement {
     Return(ReturnStatement, usize),
     FunctionCall(FunctionCall, usize),
     Debug(Debug, usize),
-    Match(Match, usize),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Match {
-    pub expression: Expression,
-    pub cases: Vec<MatchCase>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct MatchCase {
-    pub enum_variant: EnumVariant,
-    pub body: Vec<Statement>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -204,7 +170,6 @@ pub enum Expression {
     TypeCast(TypeCast),
     Reference(String, bool), // (expression, is_mutable)
     Dereference(Box<Expression>),
-    EnumLiteral(EnumLiteral),
     Write(Box<Write>),
     Read(Box<Read>),
     Null,

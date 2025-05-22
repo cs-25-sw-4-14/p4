@@ -170,14 +170,6 @@ pub enum Token {
     KeywordBreak,
     #[token("continue")]
     KeywordContinue,
-    #[token("enum")]
-    KeywordEnum,
-    #[token("::")]
-    Access,
-    #[token("match")]
-    KeywordMatch,
-    #[token("=>")]
-    FatArrow,
 
     // special underscore pattern (higher priority)
     #[token("_", priority = 0)]

@@ -5,7 +5,6 @@ use anyhow::Result;
 mod array_access;
 mod array_literal;
 mod binary_op;
-mod enum_literal;
 mod function_call;
 mod literal;
 mod read_file;
@@ -69,8 +68,6 @@ impl Typechecker<'_> {
             }
             Expression::Read(read_expr) => self.check_read_file(read_expr),
             Expression::Write(write_expr) => self.check_write_file(write_expr),
-            // TODO: Handle enum literal
-            Expression::EnumLiteral(_) => todo!(),
             Expression::Null => Ok(Type::Null),
         }
     }

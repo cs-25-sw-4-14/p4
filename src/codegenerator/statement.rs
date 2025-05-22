@@ -59,8 +59,6 @@ impl CodeGenerator<'_> {
             Statement::VectorRemove(vector_remove, _) => {
                 self.compile_vector_remove(vector_remove)?
             }
-            // TODO: Handle Match
-            Statement::Match(_, _) => todo!(),
         };
         Ok(())
     }
