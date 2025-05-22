@@ -10,6 +10,7 @@ pub mod function_call;
 pub mod literal;
 pub mod null;
 pub mod read_file;
+pub mod reference;
 pub mod struct_field_access;
 pub mod struct_init;
 pub mod type_cast;
@@ -22,8 +23,7 @@ pub mod write_file;
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
         match expr {
-            Expression::Dereference(_) => todo!(),
-            Expression::Reference(_, _) => todo!(),
+            Expression::Reference(name, _) => self.compile_reference(name),
             Expression::Literal(literal) => self.compile_literal(literal),
             Expression::Variable(variable) => self.compile_variable(variable),
             Expression::BinaryOp(binary_operation) => self.compile_binary_op(binary_operation),

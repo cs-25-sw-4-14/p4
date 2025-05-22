@@ -203,7 +203,6 @@ pub enum Expression {
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
     Reference(String, bool), // (expression, is_mutable)
-    Dereference(Box<Expression>),
     EnumLiteral(EnumLiteral),
     Write(Box<Write>),
     Read(Box<Read>),
@@ -229,6 +228,7 @@ pub struct BinaryOperation {
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnaryOperation {
     pub operator: UnaryOperator,
+
     pub operand: Box<Expression>,
 }
 

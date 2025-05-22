@@ -56,17 +56,6 @@ impl Typechecker<'_> {
 
                 Ok(Type::Reference(Box::new(var_type), *is_mutable))
             }
-            // TODO: Move into seperate module
-            Expression::Dereference(expr) => {
-                let expr_type = self.check_expression(expr)?;
-                match expr_type {
-                    Type::Reference(inner_type, _) => Ok(*inner_type),
-                    _ => Err(anyhow::anyhow!(
-                        "Cannot dereference non-reference type: {:?}",
-                        expr_type
-                    )),
-                }
-            }
             Expression::Read(read_expr) => self.check_read_file(read_expr),
             Expression::Write(write_expr) => self.check_write_file(write_expr),
             // TODO: Handle enum literal
