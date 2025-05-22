@@ -1,5 +1,5 @@
 use super::CodeGenerator;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_break(&mut self) -> Result<()> {
