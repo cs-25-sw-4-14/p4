@@ -1,5 +1,5 @@
 use super::CodeGenerator;
-use crate::ast::{Expression, StructFieldAccess};
+use crate::ast::StructFieldAccess;
 use anyhow::{Result, anyhow};
 use inkwell::types::BasicTypeEnum;
 use inkwell::values::BasicValueEnum;
@@ -9,12 +9,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         &mut self,
         struct_field_access: &StructFieldAccess,
     ) -> Result<BasicValueEnum<'ctx>> {
-        let struct_name = if let Expression::Variable(var_name) = &*struct_field_access.struct_expr
-        {
-            var_name
-        } else {
-            return Err(anyhow!("Struct field access must be on a variable"));
-        };
+        let struct_name = &*struct_field_access.struct_name;
 
         let (struct_type, struct_ptr) = self
             .variables
