@@ -2,7 +2,6 @@ use crate::ast::Program;
 use crate::debugger::Debugger;
 use anyhow::Result;
 
-pub mod borrow_checker;
 pub mod enum_table;
 pub mod expression_check;
 pub mod function_check;
@@ -16,7 +15,6 @@ pub struct Typechecker<'a> {
     pub s_table: struct_table::STable,
     pub e_table: enum_table::ETable,
     pub v_table: variable_table::VTable,
-    pub borrow_checker: borrow_checker::BorrowChecker,
     pub debugger: &'a Debugger,
 }
 
@@ -27,7 +25,6 @@ impl<'a> Typechecker<'a> {
             s_table: struct_table::STable::new(),
             e_table: enum_table::ETable::new(),
             v_table: variable_table::VTable::new(),
-            borrow_checker: borrow_checker::BorrowChecker::new(),
             debugger,
         }
     }
@@ -41,9 +38,6 @@ impl<'a> Typechecker<'a> {
                 self.check_function(func_def)?;
             }
         }
-
-        // borrow checker!!!...
-        self.borrow_checker.check_program(&program)?;
 
         println!("Function Table: {:#?}", self.f_table.functions);
         println!("Struct Table: {:#?}", self.s_table.structs);

@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_vector_literal(&self, vector_literal: &VectorLiteral) -> Result<Type> {
+    pub fn check_vector_literal(&mut self, vector_literal: &VectorLiteral) -> Result<Type> {
         let vector_type =
             self.semantic_check_all_elements_same_type_vector_literal(vector_literal)?;
 
@@ -11,7 +11,7 @@ impl Typechecker<'_> {
     }
 
     pub fn semantic_check_all_elements_same_type_vector_literal(
-        &self,
+        &mut self,
         vector_literal: &VectorLiteral,
     ) -> Result<Type> {
         // Allow empty vectors
@@ -54,7 +54,7 @@ pub mod vector_literal_tests {
         }));
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let result = typechecker.check_expression(&expression);
         assert!(result.is_ok());

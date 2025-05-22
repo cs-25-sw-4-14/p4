@@ -1,72 +1,56 @@
 use crate::{
-    ast::{FunctionCall, FunctionDef, Type},
+    ast::{FunctionCall, Type},
     typechecker::Typechecker,
 };
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_function_call(&self, function_call: &FunctionCall) -> Result<Type> {
-        let func = self.semantic_check_function_is_defined(function_call)?;
-
-        let return_type = Self::semantic_check_function_has_return_type(func)?;
-
-        Self::semantic_check_argument_length_are_equal(func, function_call)?;
-        self.semantic_check_arguments_are_same_type(func, function_call)?;
-
-        Ok(return_type)
-    }
-
-    pub fn semantic_check_function_is_defined(
-        &self,
-        function_call: &FunctionCall,
-    ) -> Result<&FunctionDef> {
+    pub fn check_function_call(&mut self, function_call: &FunctionCall) -> Result<Type> {
+        // Extract and clone everything needed from f_table before any mutable borrow of `self`
         let function_def = self
             .f_table
             .get(&function_call.name)
-            .ok_or_else(|| anyhow::anyhow!("function: {}, not defined", function_call.name))?;
-        Ok(function_def)
-    }
+            .ok_or_else(|| anyhow::anyhow!("Function {} is not defined", function_call.name))?;
 
-    pub fn semantic_check_function_has_return_type(function: &FunctionDef) -> Result<Type> {
-        let return_type = function.return_type.clone().ok_or_else(|| {
+        let return_type = function_def.return_type.clone().ok_or_else(|| {
             anyhow::anyhow!(
                 "Function {} has no return type and is therefore not an expression",
-                function.name
+                function_def.name
             )
         })?;
-        Ok(return_type)
-    }
 
-    pub fn semantic_check_argument_length_are_equal(
-        function: &FunctionDef,
-        function_call: &FunctionCall,
-    ) -> Result<()> {
-        if function.params.len() != function_call.args.len() {
+        let param_types = function_def
+            .params
+            .iter()
+            .map(|param| param.param_type.clone())
+            .collect::<Vec<_>>();
+
+        // Drop borrow of function_def here
+
+        if param_types.len() != function_call.args.len() {
             return Err(anyhow::anyhow!(
-                "Function {} called with incorrect number of arguments",
-                function_call.name
+                "Function {} called with incorrect number of arguments (expected {}, got {})",
+                function_call.name,
+                param_types.len(),
+                function_call.args.len()
             ));
         }
-        Ok(())
-    }
 
-    pub fn semantic_check_arguments_are_same_type(
-        &self,
-        function: &FunctionDef,
-        function_call: &FunctionCall,
-    ) -> Result<()> {
-        for i in 0..function.params.len() {
-            let expected_type = function.params[i].param_type.clone();
-            let actual_type = self.check_expression(&function_call.args[i])?;
-            if expected_type != actual_type {
+        for (i, arg) in function_call.args.iter().enumerate() {
+            let expected_type = &param_types[i];
+            let actual_type = self.check_expression(arg)?;
+            if expected_type != &actual_type {
                 return Err(anyhow::anyhow!(
-                    "Function {} called with incorrect argument types",
-                    function_call.name
+                    "Function {} argument {} has incorrect type (expected {:?}, got {:?})",
+                    function_call.name,
+                    i + 1,
+                    expected_type,
+                    actual_type
                 ));
             }
         }
 
-        Ok(())
+        Ok(return_type)
     }
 }
 
@@ -84,7 +68,7 @@ pub mod tests {
         });
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
         typechecker.check_expression(&expression).unwrap_err();
     }
 

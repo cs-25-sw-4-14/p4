@@ -82,7 +82,7 @@ impl CodeGenerator<'_> {
                     .get_zero_extended_constant()
                     .ok_or_else(|| anyhow::anyhow!("Failed to get zero extended constant"))?;
 
-                let ptr_type = self.context.ptr_type(inkwell::AddressSpace::default());
+                let _ptr_type = self.context.ptr_type(inkwell::AddressSpace::default());
                 let size_type = self.context.i64_type();
                 let llvm_element_type = self.get_llvm_type(element_type)?;
                 let vector_struct_type = self

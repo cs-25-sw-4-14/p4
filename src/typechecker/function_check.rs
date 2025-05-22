@@ -1,5 +1,5 @@
-use super::Typechecker;
-use crate::ast::{FunctionDef, ReturnStatement, Statement, Type};
+use super::{Typechecker, variable_table::Inner};
+use crate::ast::{FunctionDef, ReturnStatement, Statement, Type, VariableDeclaration};
 use anyhow::{Result, anyhow};
 use std::collections::HashSet;
 
@@ -23,13 +23,13 @@ impl Typechecker<'_> {
         for param in &function.params {
             self.v_table.variables.insert(
                 param.name.clone(),
-                crate::ast::VariableDeclaration {
+                Inner::new(VariableDeclaration {
                     trivial: None,
                     mutable: None,
                     var_type: param.param_type.clone(),
                     name: param.name.clone(),
                     value: crate::ast::Expression::Literal(crate::ast::Literal::Int(0)), // bare noget 🤷‍♂️ ligegyldigt!
-                },
+                }),
             );
         }
 
@@ -78,7 +78,11 @@ impl Typechecker<'_> {
         Ok(())
     }
 
-    fn check_return_type(&self, ret: &ReturnStatement, expected_type: &Option<Type>) -> Result<()> {
+    fn check_return_type(
+        &mut self,
+        ret: &ReturnStatement,
+        expected_type: &Option<Type>,
+    ) -> Result<()> {
         match (expected_type, &ret.value) {
             // Case 1: Function returns void, return statement should be empty
             (None, Some(_)) => Err(anyhow!("Function has void return type but returns a value")),

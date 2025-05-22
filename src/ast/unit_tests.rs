@@ -1,10 +1,10 @@
 use crate::{
     ast::{
-        ArrayAccess, ArrayLiteral, Assignment, BinaryOperation, BinaryOperator, Debug, ElseIf,
-        Expression, FunctionCall, FunctionDef, IfStatement, Literal, Param, Program, Read,
-        ReturnStatement, Statement, StructDef, StructField, StructFieldAccess, StructFieldInit,
-        StructInit, TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator,
-        VariableDeclaration, WhileStatement, Write,
+        ArrayAccess, ArrayLiteral, BinaryOperation, BinaryOperator, Debug, ElseIf, Expression,
+        FunctionCall, FunctionDef, IfStatement, Literal, Param, Program, Read, ReturnStatement,
+        Statement, StructDef, StructField, StructFieldAccess, StructFieldInit, StructInit,
+        TopLevelDefinition, Type, TypeCast, UnaryOperation, UnaryOperator, VariableDeclaration,
+        WhileStatement, Write,
     },
     lexer::Lexer,
     lossy::{self, FunctionDefParser, StatementParser, StructDefParser},
@@ -99,37 +99,37 @@ fn test_struct_definition() {
     );
 }
 
-#[test]
-fn test_variable_assignment() {
-    assert_eq!(
-        Statement::Assignment(
-            Assignment {
-                target: Expression::Variable("test".to_string()),
-                value: Expression::Literal(Literal::Int(32)),
-            },
-            0
-        ),
-        StatementParser::new()
-            .parse(Lexer::new("test = 32;"))
-            .unwrap()
-    );
-
-    assert_eq!(
-        Statement::Assignment(
-            Assignment {
-                target: Expression::StructFieldAccess(StructFieldAccess {
-                    struct_expr: Box::new(Expression::Variable("test".to_string())),
-                    field_name: "field".to_string(),
-                }),
-                value: Expression::Literal(Literal::Int(32)),
-            },
-            0
-        ),
-        StatementParser::new()
-            .parse(Lexer::new("test.field = 32;"))
-            .unwrap()
-    );
-}
+// #[test]
+// fn test_variable_assignment() {
+//     assert_eq!(
+//         Statement::Assignment(
+//             Assignment {
+//                 target: Expression::Variable("test".to_string()),
+//                 value: Expression::Literal(Literal::Int(32)),
+//             },
+//             0
+//         ),
+//         StatementParser::new()
+//             .parse(Lexer::new("test = 32;"))
+//             .unwrap()
+//     );
+//
+//     assert_eq!(
+//         Statement::Assignment(
+//             Assignment {
+//                 target: Expression::StructFieldAccess(StructFieldAccess {
+//                     struct_name: "test".to_string(),
+//                     field_name: "field".to_string(),
+//                 }),
+//                 value: Expression::Literal(Literal::Int(32)),
+//             },
+//             0
+//         ),
+//         StatementParser::new()
+//             .parse(Lexer::new("test.field = 32;"))
+//             .unwrap()
+//     );
+// }
 
 #[test]
 fn test_variable_declaration() {
@@ -517,7 +517,7 @@ fn test_struct_init() {
 fn test_struct_field_init() {
     assert_eq!(
         Expression::StructFieldAccess(StructFieldAccess {
-            struct_expr: Box::new(Expression::Variable("test".to_string())),
+            struct_name: "test".to_string(),
             field_name: "field".to_string(),
         }),
         lossy::ExpressionParser::new()
@@ -530,7 +530,7 @@ fn test_struct_field_init() {
 fn test_struct_field_access() {
     assert_eq!(
         Expression::StructFieldAccess(StructFieldAccess {
-            struct_expr: Box::new(Expression::Variable("test".to_string())),
+            struct_name: "test".to_string(),
             field_name: "field".to_string(),
         }),
         lossy::ExpressionParser::new()

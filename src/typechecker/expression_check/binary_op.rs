@@ -4,12 +4,12 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_binary_op(&self, binary_operation: &BinaryOperation) -> Result<Type> {
+    pub fn check_binary_op(&mut self, binary_operation: &BinaryOperation) -> Result<Type> {
         let result = self.semantic_check_binary_op(binary_operation)?;
         Ok(result.clone())
     }
 
-    pub fn semantic_check_binary_op(&self, binary_operation: &BinaryOperation) -> Result<Type> {
+    pub fn semantic_check_binary_op(&mut self, binary_operation: &BinaryOperation) -> Result<Type> {
         let left_type = self.check_expression(&binary_operation.left)?;
         let right_type = self.check_expression(&binary_operation.right)?;
 
@@ -60,7 +60,7 @@ pub mod tests {
     #[test]
     fn check_binary_op_types_match() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::BinaryOp(BinaryOperation {
             left: Box::new(Expression::Literal(Literal::Int(4))),
@@ -74,7 +74,7 @@ pub mod tests {
     #[test]
     fn check_binary_op_types_not_match() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::BinaryOp(BinaryOperation {
             left: Box::new(Expression::Literal(Literal::Int(4))),

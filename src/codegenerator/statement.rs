@@ -2,13 +2,15 @@ use super::CodeGenerator;
 use crate::ast::Statement;
 use anyhow::Result;
 
-pub mod assignment;
+pub mod array_field_assignment;
 pub mod break_statement;
 pub mod continue_statement;
 pub mod function_call;
 pub mod if_else;
 pub mod print;
 pub mod return_statement;
+pub mod struct_field_assignment;
+pub mod variable_assignment;
 pub mod variable_declaration;
 pub mod vector_insert;
 pub mod vector_remove;
@@ -17,8 +19,14 @@ pub mod while_statement;
 impl CodeGenerator<'_> {
     pub fn compile_statement(&mut self, stmt: &Statement) -> Result<()> {
         match stmt {
-            Statement::Assignment(assign, _) => {
+            Statement::VariableAssignment(assign, _) => {
                 self.compile_variable_assignment(assign)?;
+            }
+            Statement::StructFieldAssignment(assign, _) => {
+                self.compile_struct_field_assignment(assign)?;
+            }
+            Statement::ArrayFieldAssignment(assign, _) => {
+                self.compile_array_field_assignment(assign)?;
             }
             Statement::Throwaway(throwaway, _) => {
                 self.compile_expression(&throwaway.expression)?;

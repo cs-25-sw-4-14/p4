@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::{Result, anyhow};
 
 impl Typechecker<'_> {
-    pub fn check_read_file(&self, read_expr: &Read) -> Result<Type> {
+    pub fn check_read_file(&mut self, read_expr: &Read) -> Result<Type> {
         let filename_type = self.check_expression(&read_expr.value)?;
 
         if filename_type != Type::String {

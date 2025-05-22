@@ -1,72 +1,30 @@
 use crate::{
-    ast::{ArrayAccess, Expression, Literal, Type, VariableDeclaration},
+    ast::{ArrayAccess, Expression, Literal, Type},
     typechecker::Typechecker,
 };
-use anyhow::Result;
+use anyhow::{Result, bail};
 
 impl Typechecker<'_> {
-    pub fn check_array_access(&self, array_access: &ArrayAccess) -> Result<Type> {
-        let array = self.semantic_check_array_definition(array_access)?;
-        let array_type = Self::semantic_check_array_type(array)?;
-        let array_length = Self::semantic_check_array_length(array)?;
-        self.semantic_check_array_index(&array_access.index, *array_length)?;
+    pub fn check_array_access(&mut self, array_access: &ArrayAccess) -> Result<Type> {
+        // Scope to end immutable borrow before calling `self.check_expression`
+        let (array_type, array_length) = {
+            let array = self.v_table.get(&array_access.array_name).ok_or_else(|| {
+                anyhow::anyhow!("array: {}, not defined", array_access.array_name)
+            })?;
 
-        Ok(array_type.clone())
-    }
-
-    pub fn semantic_check_array_definition(
-        &self,
-        array_access: &ArrayAccess,
-    ) -> Result<&VariableDeclaration> {
-        let array = self
-            .v_table
-            .get(&array_access.array_name)
-            .ok_or_else(|| anyhow::anyhow!("array: {}, not defined", array_access.array_name))?;
-
-        match &array.var_type {
-            Type::Array(_, _) => Ok(array),
-            _ => Err(anyhow::anyhow!(
-                "Array access on non-array type: {:?}",
-                array.var_type
-            )),
-        }
-    }
-
-    pub fn semantic_check_array_type(array: &VariableDeclaration) -> Result<&Type> {
-        let array_type = match &array.var_type {
-            Type::Array(ty, _) => ty,
-            _ => {
-                return Err(anyhow::anyhow!(
-                    "Array access on non-array type: {:?}",
-                    array.var_type
-                ));
+            match &array.variable_declaration.var_type {
+                Type::Array(inner_type, length) => (inner_type.as_ref().clone(), *length),
+                other => {
+                    bail!("Array access on non-array type: {:?}", other);
+                }
             }
         };
-        Ok(array_type)
-    }
 
-    pub fn semantic_check_array_length(array: &VariableDeclaration) -> Result<&u64> {
-        let array_length = match &array.var_type {
-            Type::Array(_, length) => length,
-            _ => {
-                return Err(anyhow::anyhow!(
-                    "Array access on non-array type: {:?}",
-                    array.var_type
-                ));
-            }
-        };
-        Ok(array_length)
-    }
-
-    pub fn semantic_check_array_index(
-        &self,
-        array_index: &Expression,
-        array_length: u64,
-    ) -> Result<()> {
-        match self.check_expression(array_index)? {
+        // Immutable borrow has ended — now we can call `self.check_expression`
+        match self.check_expression(&array_access.index)? {
             Type::I64 => {
-                if let Expression::Literal(Literal::Int(index)) = array_index {
-                    if *index >= array_length {
+                if let Expression::Literal(Literal::Int(index)) = array_access.index {
+                    if index >= array_length {
                         return Err(anyhow::anyhow!(
                             "Array access index out of bounds: {}",
                             index
@@ -74,14 +32,15 @@ impl Typechecker<'_> {
                     }
                 }
             }
-            _ => {
+            other => {
                 return Err(anyhow::anyhow!(
                     "Array access by non-integer expression: {:?}",
-                    array_index
+                    other
                 ));
             }
         }
-        Ok(())
+
+        Ok(array_type)
     }
 }
 
@@ -105,7 +64,7 @@ pub mod tests {
         ];
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         for (expression, expected_type) in tests {
             let result = typechecker.check_expression(&expression).unwrap();

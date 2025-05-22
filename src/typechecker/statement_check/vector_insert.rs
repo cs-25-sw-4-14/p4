@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_vector_insert(&self, vector_insert: &VectorInsert, _l: usize) -> Result<()> {
+    pub fn check_vector_insert(&mut self, vector_insert: &VectorInsert, _l: usize) -> Result<()> {
         let _vector_name = vector_insert.vector_name.clone();
         let index = vector_insert.index.clone();
         let value = vector_insert.value.clone();
@@ -48,6 +48,7 @@ mod tests {
     use crate::ast::{Expression, Literal, Type, VariableDeclaration, VectorLiteral};
 
     use crate::debugger::Debugger;
+    use crate::typechecker::variable_table::Inner;
 
     #[test]
     fn test_vector_insert() {
@@ -56,13 +57,13 @@ mod tests {
 
         typechecker.v_table.variables.insert(
             "my_vector".to_string(),
-            VariableDeclaration {
+            Inner::new(VariableDeclaration {
                 var_type: Type::Vector(Box::new(Type::I64), 1),
                 name: "my_vector".to_string(),
                 value: Expression::VectorLiteral(Box::new(VectorLiteral { elements: vec![] })),
                 trivial: None,
                 mutable: None,
-            },
+            }),
         );
 
         let vector_insert = VectorInsert {

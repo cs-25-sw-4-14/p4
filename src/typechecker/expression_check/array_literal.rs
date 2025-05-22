@@ -3,7 +3,7 @@ use crate::typechecker::Typechecker;
 use anyhow::Result;
 
 impl Typechecker<'_> {
-    pub fn check_array_literal(&self, array_literal: &ArrayLiteral) -> Result<Type> {
+    pub fn check_array_literal(&mut self, array_literal: &ArrayLiteral) -> Result<Type> {
         self.semantic_check_literal_not_empty(array_literal)?;
 
         let array_type = self.semantic_check_all_elements_same_type(array_literal)?;
@@ -22,7 +22,7 @@ impl Typechecker<'_> {
     }
 
     pub fn semantic_check_all_elements_same_type(
-        &self,
+        &mut self,
         array_literal: &ArrayLiteral,
     ) -> Result<Type> {
         let first_type = self.check_expression(&array_literal.elements[0])?;
@@ -50,7 +50,7 @@ pub mod tests {
     #[test]
     fn check_array_literal_should_return_type() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::ArrayLiteral(Box::new(ArrayLiteral {
             elements: vec![
@@ -67,7 +67,7 @@ pub mod tests {
     #[test]
     fn check_array_literal_should_return_type_mixed() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::ArrayLiteral(Box::new(ArrayLiteral {
             elements: vec![
@@ -83,7 +83,7 @@ pub mod tests {
     #[test]
     fn check_array_literal_empty() {
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         let expression = Expression::ArrayLiteral(Box::new(ArrayLiteral { elements: vec![] }));
 

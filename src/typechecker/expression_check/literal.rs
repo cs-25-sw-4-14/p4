@@ -30,7 +30,7 @@ pub mod tests {
         ];
 
         let debugger = Debugger::new(String::from(""));
-        let typechecker = Typechecker::new(&debugger);
+        let mut typechecker = Typechecker::new(&debugger);
 
         for (expression, expected_type) in tests {
             let result = typechecker.check_expression(&expression).unwrap();

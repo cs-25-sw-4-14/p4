@@ -1,6 +1,7 @@
 use crate::ast::Type;
 use crate::ast::VariableDeclaration;
 use crate::typechecker::Typechecker;
+use crate::typechecker::variable_table::Inner;
 use anyhow::Result;
 
 impl Typechecker<'_> {
@@ -25,9 +26,10 @@ impl Typechecker<'_> {
                         declaration,
                     )?;
 
-                    self.v_table
-                        .variables
-                        .insert(declaration.name.clone(), new_declaration);
+                    self.v_table.variables.insert(
+                        declaration.name.clone(),
+                        Inner::new(new_declaration.clone()),
+                    );
 
                     Ok(())
                 } else {
@@ -51,8 +53,7 @@ impl Typechecker<'_> {
 
                 self.v_table
                     .variables
-                    .insert(declaration.name.clone(), declaration.clone());
-
+                    .insert(declaration.name.clone(), Inner::new(declaration.clone()));
                 Ok(())
             }
         }
