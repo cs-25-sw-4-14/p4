@@ -3,13 +3,24 @@ use anyhow::Result;
 
 impl Typechecker<'_> {
     pub fn check_variable(&mut self, name: &str) -> Result<Type> {
-        self.v_table.move_var(name)?;
+        let var_type = {
+            let inner = self
+                .v_table
+                .get(name)
+                .ok_or_else(|| anyhow::anyhow!("Variable '{}' not found in vtable", name))?;
+            // Clone the Type out so we no longer need `inner` afterwards
+            inner.variable_declaration.var_type.clone()
+        };
 
-        let var = self
-            .v_table
-            .get(name)
-            .ok_or_else(|| anyhow::anyhow!("Variable '{}' not found in vtable", name))?;
-        Ok(var.variable_declaration.var_type.clone())
+        if matches!(
+            var_type,
+            Type::String | Type::Custom(_) | Type::Array(_, _) | Type::Vector(_, _)
+        ) {
+            self.v_table.move_var(name)?;
+        }
+
+        // 3) Return the cloned type
+        Ok(var_type)
     }
 }
 
