@@ -1,3 +1,11 @@
+void borrow_1(&String in) {
+
+}
+
+void borrow_2(String in) {
+
+}
+
 i64 main() {
     String a = "abc";
 
@@ -8,10 +16,3 @@ i64 main() {
     return 0;
 }
 
-void borrow_1(&String in) {
-
-}
-
-void borrow_2(String in) {
-
-}
