@@ -139,8 +139,6 @@ impl<'ctx> CodeGenerator<'ctx> {
                     self.struct_definitions
                         .insert(struct_def.name.clone(), struct_def.clone());
                 }
-                // TODO: Handle enums
-                TopLevelDefinition::Enum(_) => todo!(),
             }
         }
         Ok(())
@@ -205,7 +203,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             Type::F32 => Ok(self.context.f32_type().as_basic_type_enum()),
             Type::F64 => Ok(self.context.f64_type().as_basic_type_enum()),
             Type::Bool => Ok(self.context.bool_type().as_basic_type_enum()),
-            Type::Reference(_, _) => todo!(),
+            Type::Reference(box_type, _) => self.get_llvm_type(&box_type),
             Type::String => Ok(self
                 .context
                 .ptr_type(AddressSpace::default())

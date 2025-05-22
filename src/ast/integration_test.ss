@@ -162,6 +162,11 @@ void main() {
 
     bool is_same_x = location.x == circle_center.x;
 
+    Point location = person.location;
+    Point circle_center = circle.center;
+
+    bool is_same_x = location.x == circle_center.x;
+
     // String lol = read_file("lol");
 
     debug("a");

@@ -5,7 +5,6 @@ use anyhow::Result;
 mod array_access;
 mod array_literal;
 mod binary_op;
-mod enum_literal;
 mod function_call;
 mod literal;
 mod read_file;
@@ -56,21 +55,27 @@ impl Typechecker<'_> {
 
                 Ok(Type::Reference(Box::new(var_type), *is_mutable))
             }
-            // TODO: Move into seperate module
-            Expression::Dereference(expr) => {
-                let expr_type = self.check_expression(expr)?;
-                match expr_type {
-                    Type::Reference(inner_type, _) => Ok(*inner_type),
-                    _ => Err(anyhow::anyhow!(
-                        "Cannot dereference non-reference type: {:?}",
-                        expr_type
-                    )),
+            Expression::Dereference(name) => {
+                let var_type = self
+                    .v_table
+                    .get(name)
+                    .ok_or(anyhow::anyhow!("Variable '{}' not found", name))?
+                    .variable_declaration
+                    .var_type
+                    .clone();
+
+                if let Type::Reference(var_type, _) = var_type {
+                    Ok(*var_type)
+                } else {
+                    return Err(anyhow::anyhow!(
+                        "Cannot dereference variable '{}' of type '{:?}'",
+                        name,
+                        var_type
+                    ));
                 }
             }
             Expression::Read(read_expr) => self.check_read_file(read_expr),
             Expression::Write(write_expr) => self.check_write_file(write_expr),
-            // TODO: Handle enum literal
-            Expression::EnumLiteral(_) => todo!(),
             Expression::Null => Ok(Type::Null),
         }
     }

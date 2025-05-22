@@ -2,7 +2,6 @@ use crate::ast::Program;
 use crate::debugger::Debugger;
 use anyhow::Result;
 
-pub mod enum_table;
 pub mod expression_check;
 pub mod function_check;
 pub mod function_table;
@@ -13,7 +12,6 @@ pub mod variable_table;
 pub struct Typechecker<'a> {
     pub f_table: function_table::FTable,
     pub s_table: struct_table::STable,
-    pub e_table: enum_table::ETable,
     pub v_table: variable_table::VTable,
     pub debugger: &'a Debugger,
 }
@@ -23,7 +21,6 @@ impl<'a> Typechecker<'a> {
         Typechecker {
             f_table: function_table::FTable::new(),
             s_table: struct_table::STable::new(),
-            e_table: enum_table::ETable::new(),
             v_table: variable_table::VTable::new(),
             debugger,
         }
