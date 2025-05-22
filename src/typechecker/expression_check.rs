@@ -56,6 +56,14 @@ impl Typechecker<'_> {
 
                 Ok(Type::Reference(Box::new(var_type), *is_mutable))
             }
+            Expression::Dereference(name) => {
+                let var = self
+                    .v_table
+                    .get(name)
+                    .ok_or(anyhow::anyhow!("Variable '{}' not found", name))?;
+
+                Ok(var.variable_declaration.var_type.clone())
+            }
             Expression::Read(read_expr) => self.check_read_file(read_expr),
             Expression::Write(write_expr) => self.check_write_file(write_expr),
             // TODO: Handle enum literal

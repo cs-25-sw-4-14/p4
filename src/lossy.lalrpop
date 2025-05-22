@@ -340,6 +340,8 @@ pub Term: Expression = {
      <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
     "&" <e:Identifier> => Expression::Reference(e, false),
     "&mut" <e:Identifier> => Expression::Reference(e, true),
+    "*" <e:Identifier> => Expression::Dereference(e),
+
     <e:Null> => Expression::Null,
 };
 

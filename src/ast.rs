@@ -202,7 +202,8 @@ pub enum Expression {
     VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
-    Reference(String, bool), // (expression, is_mutable)
+    Reference(String, bool),
+    Dereference(String),
     EnumLiteral(EnumLiteral),
     Write(Box<Write>),
     Read(Box<Read>),

@@ -1,6 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::Expression;
 use anyhow::Result;
+use anyhow::anyhow;
 use inkwell::values::BasicValueEnum;
 
 pub mod array_access;
@@ -24,6 +25,14 @@ impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_expression(&mut self, expr: &Expression) -> Result<BasicValueEnum<'ctx>> {
         match expr {
             Expression::Reference(name, _) => self.compile_reference(name),
+            Expression::Dereference(name) => {
+                let var = self
+                    .variables
+                    .get(name)
+                    .ok_or_else(|| anyhow!("Undefined variable: {}", name))?;
+                let loaded = self.builder.build_load(var.0, var.1, name);
+                Ok(loaded?)
+            }
             Expression::Literal(literal) => self.compile_literal(literal),
             Expression::Variable(variable) => self.compile_variable(variable),
             Expression::BinaryOp(binary_operation) => self.compile_binary_op(binary_operation),
