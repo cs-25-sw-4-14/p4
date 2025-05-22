@@ -139,8 +139,6 @@ impl<'ctx> CodeGenerator<'ctx> {
                     self.struct_definitions
                         .insert(struct_def.name.clone(), struct_def.clone());
                 }
-                // TODO: Handle enums
-                TopLevelDefinition::Enum(_) => todo!(),
             }
         }
         Ok(())

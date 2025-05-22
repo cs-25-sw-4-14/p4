@@ -47,8 +47,6 @@ impl Typechecker<'_> {
             Statement::Debug(print, _) => {
                 self.check_expression(&print.expression)?;
             }
-            // TODO: Handle match
-            Statement::Match(_, _) => todo!(),
         }
 
         Ok(())
