@@ -67,7 +67,9 @@ pub struct EnumLiteral {
 pub enum Statement {
     Throwaway(Throwaway, usize),
     VariableDeclaration(VariableDeclaration, usize),
-    Assignment(Assignment, usize),
+    VariableAssignment(VariableAssignment, usize),
+    StructFieldAssignment(StructFieldAssignment, usize),
+    ArrayFieldAssignment(ArrayFieldAssignment, usize),
     VectorInsert(VectorInsert, usize),
     VectorRemove(VectorRemove, usize),
     If(IfStatement, usize),
@@ -119,8 +121,22 @@ pub struct VectorRemove {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Assignment {
-    pub target: Expression,
+pub struct VariableAssignment {
+    pub target: String,
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructFieldAssignment {
+    pub target: String,
+    pub field_name: String,
+    pub value: Expression,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArrayFieldAssignment {
+    pub target: String,
+    pub field_index: Expression,
     pub value: Expression,
 }
 
@@ -186,7 +202,7 @@ pub enum Expression {
     VectorLiteral(Box<VectorLiteral>),
     ArrayLiteral(Box<ArrayLiteral>),
     TypeCast(TypeCast),
-    Reference(Box<Expression>, bool), // (expression, is_mutable)
+    Reference(String, bool), // (expression, is_mutable)
     Dereference(Box<Expression>),
     EnumLiteral(EnumLiteral),
     Write(Box<Write>),
@@ -253,7 +269,7 @@ pub struct StructFieldInit {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructFieldAccess {
-    pub struct_expr: Box<Expression>,
+    pub struct_name: String,
     pub field_name: String,
 }
 

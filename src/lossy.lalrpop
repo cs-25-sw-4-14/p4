@@ -178,7 +178,9 @@ pub EnumLiteral: EnumLiteral = {
 pub Statement: Statement = {
     <l:@L> <t:Throwaway> ";"=> Statement::Throwaway(t, l),
     <l:@L> <t:VariableDeclaration> ";" => Statement::VariableDeclaration(t, l),
-    <l:@L> <t:Assignment> ";" => Statement::Assignment(t, l),
+    <l:@L> <t:VariableAssignment> ";" => Statement::VariableAssignment(t, l),
+    <l:@L> <t:StructFieldAssignment> ";" => Statement::StructFieldAssignment(t, l),
+    <l:@L> <t:ArrayFieldAssignment> ";" => Statement::ArrayFieldAssignment(t, l),
     <l:@L> <t:VectorInsert> ";" => Statement::VectorInsert(t, l),
     <l:@L> <t:VectorRemove> ";" => Statement::VectorRemove(t, l),
     <l:@L> <t:If> => Statement::If(t, l),
@@ -229,12 +231,29 @@ pub Mutable: () = {
     "mut" => (),
 };
 
-pub Assignment: Assignment = {
-    <t:Expression> "=" <v:Expression> => Assignment {
+pub VariableAssignment: VariableAssignment = {
+    <t:Identifier> "=" <v:Expression> => VariableAssignment {
         target: t,
         value: v,
     }
 };
+
+pub StructFieldAssignment: StructFieldAssignment = {
+    <t:Identifier> "." <n:Identifier> "=" <v:Expression> => StructFieldAssignment {
+        target: t,
+        field_name: n,
+        value: v,
+    }
+};
+
+pub ArrayFieldAssignment: ArrayFieldAssignment = {
+    <t:Identifier> "[" <i:Expression> "]" "=" <v:Expression> => ArrayFieldAssignment {
+        target: t,
+        field_index: i,
+        value: v,
+    }
+};
+
 pub VectorInsert: VectorInsert = {
     <n:Identifier> ".insert" "(" <i:Expression> "," <v:Expression> ")" => VectorInsert {
         vector_name: n,
@@ -319,8 +338,8 @@ pub Term: Expression = {
     <e:VectorAccess> => Expression::VectorAccess(Box::new(e)),
     <e:ArrayLiteral> => Expression::ArrayLiteral(Box::new(e)),
      <e:VectorLiteral> => Expression::VectorLiteral(Box::new(e)),
-    "&" <e:Term> => Expression::Reference(Box::new(e), false),
-    "&mut" <e:Term> => Expression::Reference(Box::new(e), true),
+    "&" <e:Identifier> => Expression::Reference(e, false),
+    "&mut" <e:Identifier> => Expression::Reference(e, true),
     "*" <e:Term> => Expression::Dereference(Box::new(e)),
     <e:Null> => Expression::Null,
 };
@@ -344,8 +363,8 @@ pub Expression: Expression = {
         operand: Box::new(o),
     }),
     #[precedence(level="4")] #[assoc(side="left")]
-    <e:Expression> "." <f:Identifier> => Expression::StructFieldAccess(StructFieldAccess {
-        struct_expr: Box::new(e),
+    <e:Identifier> "." <f:Identifier> => Expression::StructFieldAccess(StructFieldAccess {
+        struct_name: e,
         field_name: f,
     }),
     #[precedence(level="5")] #[assoc(side="left")]
