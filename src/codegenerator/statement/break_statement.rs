@@ -1,14 +1,15 @@
 use super::CodeGenerator;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
-impl CodeGenerator<'_> {
+impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_break(&mut self) -> Result<()> {
-        todo!();
-        // if let Some(end_block) = self.loop_end_block {
-        //     self.builder.build_unconditional_branch(end_block);
-        //     Ok(())
-        // } else {
-        //     Err(anyhow::anyhow!("Break outside of loop"))
-        // }
+        // Look at the top of the break‐target stack
+        if let Some(&end_block) = self.break_target_stack.last() {
+            // Unconditionally branch to the loop’s end block
+            self.builder.build_unconditional_branch(end_block);
+            Ok(())
+        } else {
+            Err(anyhow!("`break` outside of loop"))
+        }
     }
 }
