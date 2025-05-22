@@ -162,7 +162,8 @@ void main() {
 
     bool is_same_x = location.x == circle_center.x;
 
-    String lol = read_file("lol");
+    // String lol = read_file("lol");
+
     debug("a");
 
 }
