@@ -2,10 +2,12 @@ use super::Typechecker;
 use crate::ast::Statement;
 use anyhow::Result;
 
-mod assignment;
+mod array_field_assignment;
 mod function_call;
 mod if_else;
+mod struct_field_assignment;
 mod throwaway;
+mod variable_assignment;
 mod variable_declaration;
 mod vector_insert;
 mod vector_remove;
@@ -18,8 +20,14 @@ impl Typechecker<'_> {
             Statement::VariableDeclaration(variable_declaration, l) => {
                 self.check_variable_declaration(variable_declaration, *l)?
             }
-            Statement::Assignment(variable_assignment, l) => {
-                self.check_assignment(variable_assignment, *l)?
+            Statement::VariableAssignment(variable_assignment, l) => {
+                self.check_variable_assignment(variable_assignment, *l)?
+            }
+            Statement::StructFieldAssignment(struct_field_assignment, l) => {
+                self.check_struct_field_assignment(struct_field_assignment, *l)?
+            }
+            Statement::ArrayFieldAssignment(array_field_assignment, l) => {
+                self.check_array_field_assignment(array_field_assignment, *l)?
             }
             Statement::VectorInsert(_vector_insert, l) => {
                 self.check_vector_insert(_vector_insert, *l)?

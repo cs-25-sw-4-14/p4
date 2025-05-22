@@ -36,17 +36,25 @@ impl Typechecker<'_> {
             Expression::VectorAccess(vector_access) => self.check_vector_access(vector_access),
             Expression::TypeCast(type_cast) => self.check_type_cast(type_cast),
             // TODO: Move into seperate module
-            Expression::Reference(expr, is_mutable) => {
-                if let Expression::Variable(var_name) = &**expr {
-                    if *is_mutable {
-                        self.v_table.borrow_mut(var_name)?;
-                    } else {
-                        self.v_table.borrow_immut(var_name)?;
-                    }
+            Expression::Reference(name, is_mutable) => {
+                if *is_mutable {
+                    self.v_table.borrow_mut(name)?;
+                } else {
+                    self.v_table.borrow_immut(name)?;
                 }
 
-                let inner_type = self.check_expression(expr)?;
-                Ok(Type::Reference(Box::new(inner_type), *is_mutable))
+                let var_type = self
+                    .v_table
+                    .get(name)
+                    .ok_or(anyhow::anyhow!(
+                        "Variable '{}' not found when attempting to borrow",
+                        name
+                    ))?
+                    .variable_declaration
+                    .var_type
+                    .clone();
+
+                Ok(Type::Reference(Box::new(var_type), *is_mutable))
             }
             // TODO: Move into seperate module
             Expression::Dereference(expr) => {
