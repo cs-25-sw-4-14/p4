@@ -20,15 +20,6 @@ impl Typechecker<'_> {
 
         let expression_target_type = var.variable_declaration.var_type.clone();
 
-        if expression_value_type != expression_target_type {
-            return Err(anyhow::anyhow!(
-                "{}: Type mismatch: expected {:?}, found {:?}",
-                self.debugger.display(l),
-                expression_target_type,
-                expression_value_type
-            ));
-        }
-
         if let Type::Array(boxed_element_type, _) = &expression_target_type {
             if **boxed_element_type != expression_value_type {
                 return Err(anyhow::anyhow!(
