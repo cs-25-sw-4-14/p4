@@ -54,4 +54,21 @@ fn test_parser() {
     typechecker
         .walk(ast.clone())
         .expect("Failed to walk the AST");
+
+    let ctx = inkwell::context::Context::create();
+    let module = ctx.create_module("program");
+    let mut codegen = crate::codegenerator::CodeGenerator::new(&ctx, module);
+    codegen
+        .compile_program(&ast)
+        .expect("Failed to compile program");
+
+    let ir_string = codegen.module.print_to_string().to_string();
+
+    // TODO: Make sure this matches the expected output
+    assert_eq!(
+        ir_string.as_str(),
+        r#"
+        lol
+        "#
+    );
 }

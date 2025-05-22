@@ -138,8 +138,6 @@ void main() {
     };   
 
     person.age = 21;
-
-    String full_name = person.first_name + " " + person.last_name;
     
     bool and_result = is_true && !is_false;
     bool or_result = is_true || is_false;
