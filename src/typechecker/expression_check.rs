@@ -57,12 +57,23 @@ impl Typechecker<'_> {
                 Ok(Type::Reference(Box::new(var_type), *is_mutable))
             }
             Expression::Dereference(name) => {
-                let var = self
+                let var_type = self
                     .v_table
                     .get(name)
-                    .ok_or(anyhow::anyhow!("Variable '{}' not found", name))?;
+                    .ok_or(anyhow::anyhow!("Variable '{}' not found", name))?
+                    .variable_declaration
+                    .var_type
+                    .clone();
 
-                Ok(var.variable_declaration.var_type.clone())
+                if let Type::Reference(var_type, _) = var_type {
+                    Ok(*var_type)
+                } else {
+                    return Err(anyhow::anyhow!(
+                        "Cannot dereference variable '{}' of type '{:?}'",
+                        name,
+                        var_type
+                    ));
+                }
             }
             Expression::Read(read_expr) => self.check_read_file(read_expr),
             Expression::Write(write_expr) => self.check_write_file(write_expr),
