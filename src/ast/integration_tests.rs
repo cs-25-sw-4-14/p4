@@ -178,17 +178,6 @@ fn comprehensive_integration_test() {
         .output()
         .expect("Comprehensive Integration Test: Failed to execute compiled program.");
 
-    // if !program_output.status.success() {
-    //     eprintln!("--- Program STDOUT ---");
-    //     io::stderr().write_all(&program_output.stdout).unwrap();
-    //     eprintln!("--- Program STDERR ---");
-    //     io::stderr().write_all(&program_output.stderr).unwrap();
-    //     panic!(
-    //         "Comprehensive Integration Test: Compiled program exited with an error: {:?}",
-    //         program_output.status
-    //     );
-    // }
-
     // --- Assertion ---
     let actual_output = String::from_utf8_lossy(&program_output.stdout);
     assert_eq!(
