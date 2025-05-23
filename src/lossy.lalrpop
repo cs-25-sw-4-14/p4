@@ -278,7 +278,7 @@ pub Term: Expression = {
     "&mut" <e:Identifier> => Expression::Reference(e, true),
     "*" <e:Identifier> => Expression::Dereference(e),
 
-    <e:Null> => Expression::Null,
+    Null => Expression::Null,
 };
 
 pub Expression: Expression = {
