@@ -13,6 +13,10 @@ impl CodeGenerator<'_> {
 
         let call_args = match value {
             BasicValueEnum::IntValue(int_val) => match int_val.get_type().get_bit_width() {
+                1 => {
+                    let fmt_str = self.builder.build_global_string_ptr("%d", "fmt_bool")?;
+                    vec![fmt_str.as_pointer_value().into(), int_val.into()]
+                }
                 8 => {
                     let fmt_str = self.builder.build_global_string_ptr("%hhi", "fmt_i8")?;
                     vec![fmt_str.as_pointer_value().into(), int_val.into()]
