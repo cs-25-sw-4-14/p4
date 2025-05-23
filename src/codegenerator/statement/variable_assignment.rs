@@ -3,6 +3,10 @@ use anyhow::{Result, anyhow};
 
 impl CodeGenerator<'_> {
     pub fn compile_variable_assignment(&mut self, assign: &VariableAssignment) -> Result<()> {
+        if assign.target == "_" {
+            return Ok(());
+        }
+
         let new_value = self.compile_expression(&assign.value)?;
         let ptr = self.variables.get(&assign.target)
                                 .ok_or_else(|| {
