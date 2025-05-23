@@ -42,7 +42,7 @@ impl CodeGenerator<'_> {
                     Ok(16) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("16: %0.40f", "fmt_f16")?;
+                            .build_global_string_ptr("16: %.2f", "fmt_f16")?;
                         let extended = self.builder.build_float_ext(
                             float_val,
                             self.context.f32_type(),
@@ -53,13 +53,13 @@ impl CodeGenerator<'_> {
                     Ok(32) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("32: %0.40f", "fmt_f32")?;
+                            .build_global_string_ptr("32: %.2f", "fmt_f32")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Ok(64) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("64: %.040lf", "fmt_f64")?;
+                            .build_global_string_ptr("64: %.2lf", "fmt_f64")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Err(e) => {
