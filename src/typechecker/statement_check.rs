@@ -6,7 +6,6 @@ mod array_field_assignment;
 mod function_call;
 mod if_else;
 mod struct_field_assignment;
-mod throwaway;
 mod variable_assignment;
 mod variable_declaration;
 mod vector_insert;
@@ -16,7 +15,6 @@ mod while_statement;
 impl Typechecker<'_> {
     pub fn check_statement(&mut self, expression: &Statement) -> Result<()> {
         match expression {
-            Statement::Throwaway(expression, l) => self.check_throwaway(expression, *l)?,
             Statement::VariableDeclaration(variable_declaration, l) => {
                 self.check_variable_declaration(variable_declaration, *l)?
             }
