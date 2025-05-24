@@ -25,7 +25,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         // Compile the expression to a value
         let expr_value = self.compile_expression(&type_cast.expression)?;
         // Get the target type for the cast
-        let target_type = self.get_basic_type(&type_cast.target_type);
+        let target_type = self.get_llvm_type(&type_cast.target_type)?;
 
         // Match on the types of expression and target type
         let casted_value = match (expr_value, target_type) {
@@ -111,6 +111,19 @@ impl<'ctx> CodeGenerator<'ctx> {
                     self.builder
                         .build_float_to_unsigned_int(value, int_type, "fptoui_tmp")?
                         .into()
+                }
+            }
+
+            // String to char array casting
+            (BasicValueEnum::PointerValue(ptr), BasicTypeEnum::ArrayType(array_type)) => {
+                if let BasicTypeEnum::IntType(int_type) = array_type.get_element_type() {
+                    if int_type.get_bit_width() == 8 {
+                        ptr.into()
+                    } else {
+                        return Err(anyhow::anyhow!("Cannot cast to non-char array type"));
+                    }
+                } else {
+                    return Err(anyhow::anyhow!("Cannot cast to non-array type"));
                 }
             }
 

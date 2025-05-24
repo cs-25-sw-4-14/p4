@@ -187,7 +187,6 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         self.builder.build_store(data_ptr_ptr, new_heap_ptr)?;
         self.builder.build_store(size_ptr, new_size)?;
-        self.heap_sizes.insert(*vector_struct_ptr, new_size);
 
         Ok(())
     }

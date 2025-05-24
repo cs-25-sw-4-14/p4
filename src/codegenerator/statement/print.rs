@@ -42,7 +42,7 @@ impl CodeGenerator<'_> {
                     Ok(16) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("16: %.2f", "fmt_f16")?;
+                            .build_global_string_ptr("%.10f", "fmt_f16")?;
                         let extended = self.builder.build_float_ext(
                             float_val,
                             self.context.f32_type(),
@@ -53,13 +53,13 @@ impl CodeGenerator<'_> {
                     Ok(32) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("32: %.2f", "fmt_f32")?;
+                            .build_global_string_ptr("%.10f", "fmt_f32")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Ok(64) => {
                         let fmt_str = self
                             .builder
-                            .build_global_string_ptr("64: %.2lf", "fmt_f64")?;
+                            .build_global_string_ptr("%.10lf", "fmt_f64")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Err(e) => {
@@ -75,8 +75,9 @@ impl CodeGenerator<'_> {
                     let fmt_str = self.builder.build_global_string_ptr("\n", "fmt")?;
                     vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
                 } else {
+                    let data_ptr = self.get_string_data_ptr(ptr_val)?;
                     let fmt_str = self.builder.build_global_string_ptr("%s", "fmt")?;
-                    vec![fmt_str.as_pointer_value().into(), ptr_val.into()]
+                    vec![fmt_str.as_pointer_value().into(), data_ptr.into()]
                 }
             }
             _ => return Err(anyhow!("not a valid type for debug statement")),
