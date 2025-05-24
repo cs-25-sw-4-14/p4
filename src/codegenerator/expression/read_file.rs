@@ -1,148 +1,130 @@
 use super::CodeGenerator;
 use crate::ast::Read;
 use anyhow::{Result, anyhow};
-use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum};
+use inkwell::{AddressSpace, values::BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub(super) fn compile_read_file(&mut self, read_node: &Read) -> Result<BasicValueEnum<'ctx>> {
-        // 1. Compile filename expression - Expecting i8* (string)
-        let filename_val = self.compile_expression(&read_node.value)?;
+        // 1. Compile filename
+        let filename_struct = self.compile_expression(&read_node.value)?;
+        let filename_val = self
+            .get_string_data_ptr(filename_struct.into_pointer_value())?
+            .into();
+
         let filename_ptr = match filename_val {
             BasicValueEnum::PointerValue(pv) => pv,
-            _ => {
-                return Err(anyhow!(
-                    "Read 'value' (filename) must compile to a string pointer (i8*)"
-                ));
-            }
+            _ => return Err(anyhow!("Read filename must compile to i8*")),
         };
-        let fopen_func = self
-            .module
-            .get_function("fopen")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
-        let fread_func = self
-            .module
-            .get_function("fread")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
-        let fseek_func = self
-            .module
-            .get_function("fseek")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
-        let ftell_func = self
-            .module
-            .get_function("ftell")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
-        let malloc_func = self
-            .module
-            .get_function("malloc")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
-        let fclose_func = self
-            .module
-            .get_function("fclose")
-            .ok_or_else(|| anyhow!("'printf' function not declared in module"))?;
 
-        // 2. Get C string "r" for read mode and necessary types/constants
+        // grab libc fns:
+        let fopen = self.module.get_function("fopen").unwrap();
+        let fread = self.module.get_function("fread").unwrap();
+        let fseek = self.module.get_function("fseek").unwrap();
+        let ftell = self.module.get_function("ftell").unwrap();
+        let malloc = self.module.get_function("malloc").unwrap();
+        let fclose = self.module.get_function("fclose").unwrap();
 
-        let read_mode_ptr = self.get_global_string_ptr("r", "r_mode")?;
-        let i64_type = self.context.i64_type();
-        let i32_type = self.context.i32_type();
-        let i8_type = self.context.i8_type();
+        let ctx = &self.context;
+        let i64_t = ctx.i64_type();
+        let i32_t = ctx.i32_type();
+        let i8_t = ctx.i8_type();
 
-        // 3. Call fopen(filename, "r") -> returns FILE* (i8*)
-        let file_handle = self
+        // --- 2. Open file ---
+        let read_mode = self.get_global_string_ptr("r", "r_mode")?;
+        let file = self
             .builder
             .build_call(
-                fopen_func,
-                &[filename_ptr.into(), read_mode_ptr.into()],
+                fopen,
+                &[filename_ptr.into(), read_mode.into()],
                 "fopen_call",
             )?
             .try_as_basic_value()
             .left()
-            .ok_or_else(|| anyhow!("fopen call failed to return a basic value"))?
+            .unwrap()
             .into_pointer_value();
 
-        // 4. Get file size
-        let seek_end_const = i32_type.const_int(2, false);
-        let seek_set_const = i32_type.const_int(0, false);
-        let offset_zero_i64 = i64_type.const_int(0, false);
+        // --- 3. Determine size (ftell) ---
+        let zero_i64 = i64_t.const_zero();
+        let seek_end = i32_t.const_int(2, false); // SEEK_END
+        let seek_set = i32_t.const_zero(); // SEEK_SET
 
         self.builder.build_call(
-            fseek_func,
-            &[
-                file_handle.into(),
-                offset_zero_i64.into(),
-                seek_end_const.into(),
-            ],
+            fseek,
+            &[file.into(), zero_i64.into(), seek_end.into()],
             "fseek_end",
         )?;
 
-        let file_size_i64 = self
+        let size_val = self
             .builder
-            .build_call(ftell_func, &[file_handle.into()], "ftell")?
+            .build_call(ftell, &[file.into()], "ftell")?
             .try_as_basic_value()
             .left()
-            .ok_or_else(|| anyhow!("ftell call failed to return a value"))?
+            .unwrap()
             .into_int_value();
 
         self.builder.build_call(
-            fseek_func,
-            &[
-                file_handle.into(),
-                offset_zero_i64.into(),
-                seek_set_const.into(),
-            ],
+            fseek,
+            &[file.into(), zero_i64.into(), seek_set.into()],
             "fseek_set",
         )?;
 
-        // 5. Allocate buffer: malloc(file_size + 1)
-        let buffer_size_result =
+        // --- 4. Compute total allocation size: 8 bytes for length + file size + 1 for null terminator ---
+        let header_size = i64_t.const_int(8, false); // sizeof(i64) for length
+        let null_term_size = i64_t.const_int(1, false); // null terminator
+        let total_size = self.builder.build_int_add(
             self.builder
-                .build_int_add(file_size_i64, i64_type.const_int(1, false), "buffer_size");
-        let buffer_size = buffer_size_result?;
-        let buffer_size_arg: BasicMetadataValueEnum = buffer_size.into();
-        let buffer_ptr = self
+                .build_int_add(header_size, size_val, "size_plus_header")?,
+            null_term_size,
+            "total_size",
+        )?;
+
+        // --- 5. malloc that many bytes ---
+        let raw_ptr = self
             .builder
-            .build_call(malloc_func, &[buffer_size_arg], "malloc_call")?
+            .build_call(malloc, &[total_size.into()], "malloc_read")?
             .try_as_basic_value()
             .left()
-            .ok_or_else(|| anyhow!("malloc call failed to return a basic value"))?
+            .unwrap()
             .into_pointer_value();
 
-        // 6. Read content: fread(buffer, 1, file_size, file_handle)
-        let size_one_i64 = i64_type.const_int(1, false);
-        let _read_count = self
-            .builder
-            .build_call(
-                fread_func,
-                &[
-                    buffer_ptr.into(),
-                    size_one_i64.into(),
-                    file_size_i64.into(),
-                    file_handle.into(),
-                ],
-                "fread_call",
-            )?
-            .try_as_basic_value()
-            .left()
-            .ok_or_else(|| anyhow!("fread call failed to return a basic value"))?
-            .into_int_value();
+        // --- 6. Store length at the beginning (first 8 bytes) ---
+        let length_ptr = self.builder.build_pointer_cast(
+            raw_ptr,
+            self.context.ptr_type(AddressSpace::default()),
+            "length_ptr",
+        )?;
+        self.builder.build_store(length_ptr, size_val)?;
 
-        // 7. Add null terminator
-        let null_terminator_ptr = unsafe {
+        // --- 7. Calculate data pointer (skip the 8-byte length header) ---
+        let data_ptr = unsafe {
             self.builder
-                .build_gep(i8_type, buffer_ptr, &[file_size_i64], "null_term_ptr")
+                .build_gep(i8_t, raw_ptr, &[header_size], "data_ptr")
         }?;
-        // build_store returns Result<InstructionValue>, add ? if propagating error
-        self.builder
-            .build_store(null_terminator_ptr, i8_type.const_int(0, false))?;
 
-        // 8. Close file
-        let _fclose_ret =
+        // --- 8. Read file content directly into data section ---
+        _ = self.builder.build_call(
+            fread,
+            &[
+                data_ptr.into(),
+                i64_t.const_int(1, false).into(), // size of each element
+                size_val.into(),                  // number of elements
+                file.into(),
+            ],
+            "fread_call",
+        )?;
+
+        // --- 9. Null-terminate the string ---
+        let null_ptr = unsafe {
             self.builder
-                .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
+                .build_gep(i8_t, data_ptr, &[size_val], "null_ptr")
+        }?;
+        self.builder.build_store(null_ptr, i8_t.const_zero())?;
 
-        self.heap_sizes.insert(buffer_ptr, buffer_size);
+        // --- 10. Close file ---
+        self.builder
+            .build_call(fclose, &[file.into()], "fclose_call")?;
 
-        // 9. Return the pointer to the buffer (Type::String -> i8*)
-        Ok(buffer_ptr.into())
+        // --- 11. Return the raw pointer (which points to the struct) ---
+        Ok(raw_ptr.into())
     }
 }
