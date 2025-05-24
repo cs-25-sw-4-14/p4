@@ -1,6 +1,7 @@
 use logos::Logos;
 use std::fmt;
 use std::num::{ParseFloatError, ParseIntError};
+use unescape::unescape;
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -196,11 +197,9 @@ pub enum Token {
     })]
     CharLiteral(char),
 
-    // string literals with escapes, e.g. "hello\n"
-    #[regex(r#"\"([^"\\\\\r\n]|\\\\.)*\""#, |lex| {
-        // strip the surrounding quotes
-        let s = lex.slice();
-        s[1..s.len()-1].to_string()
+    #[regex(r#""(?:[^"\\]|\\.)*""#, |lex| {
+    let s = &lex.slice()[1..lex.slice().len() - 1]; // Strip quotes
+    unescape(s).unwrap_or_else(|| s.to_string())   // Unescape (e.g., \n -> newline)
     })]
     StringLiteral(String),
 
