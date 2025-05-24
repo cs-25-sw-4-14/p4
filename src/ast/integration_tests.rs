@@ -69,7 +69,83 @@ fn comprehensive_integration_test() {
 
     // 2. Define the *expected combined output* for all debug statements
     // Make sure to match exact newlines and spacing produced by your 'debug' function.
-    let expected_output = "--- Running test_literals ---12312364: 123.451097Hello, world!--- Running test_variables ---1020301RustLossy--- Running test_arithmetic ---15131251-579--- Running test_comparisons ---111111010--- Running test_if_else ---x is 10y is 5z is not greater than 5--- Running test_while_loop ---013Breaking loop--- Running test_functions ---12Hello, Lossy User--- Running test_structs ---10201002550--- Running test_arrays ---129911--- Running test_vectors ---102010150150--- Running test_references ---100100300--- Running test_type_casting ---64: 10.0015-1--- All integration tests complete ---";
+    let expected_output = r#"--- Running test_literals ---
+123
+123
+64: 123.45
+1
+0
+97
+Hello, world!
+--- Running test_variables ---
+10
+20
+30
+1
+Rust
+Lossy
+--- Running test_arithmetic ---
+15
+13
+12
+5
+1
+-5
+7
+9
+--- Running test_comparisons ---
+1
+1
+1
+1
+1
+1
+0
+1
+0
+--- Running test_if_else ---
+x is 10
+y is 5
+z is not greater than 5
+--- Running test_while_loop ---
+0
+1
+3
+Breaking loop
+--- Running test_functions ---
+12
+Hello, Lossy User
+
+--- Running test_structs ---
+10
+20
+100
+25
+50
+--- Running test_arrays ---
+1
+2
+99
+1
+1
+--- Running test_vectors ---
+10
+20
+10
+15
+0
+15
+0
+--- Running test_references ---
+100
+100
+300
+--- Running test_type_casting ---
+64: 10.00
+15
+-1
+--- All integration tests complete ---
+"#;
 
     // --- Compiler Front-End (Lexing, Parsing, Type-Checking) ---
     let debugger = Debugger::new(source_code.to_string());
