@@ -11,6 +11,10 @@ impl Typechecker<'_> {
     ) -> Result<()> {
         let expression_value_type = self.check_expression(&assignment.value)?;
 
+        if assignment.target == "_" {
+            return Ok(());
+        }
+
         let var = self.v_table.get(&assignment.target).ok_or(anyhow!(
             "{}: Variable {} not declared",
             self.debugger.display(l),

@@ -28,9 +28,6 @@ impl CodeGenerator<'_> {
             Statement::ArrayFieldAssignment(assign, _) => {
                 self.compile_array_field_assignment(assign)?;
             }
-            Statement::Throwaway(throwaway, _) => {
-                self.compile_expression(&throwaway.expression)?;
-            }
             Statement::Debug(expr, _) => {
                 self.compile_print_stmt(expr)?;
             }
