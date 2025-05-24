@@ -140,6 +140,8 @@ impl<'ctx> CodeGenerator<'ctx> {
             self.builder
                 .build_call(fclose_func, &[file_handle.into()], "fclose_call")?;
 
+        self.heap_sizes.insert(buffer_ptr, buffer_size);
+
         // 9. Return the pointer to the buffer (Type::String -> i8*)
         Ok(buffer_ptr.into())
     }
