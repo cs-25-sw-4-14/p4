@@ -15,7 +15,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             _ => return Err(anyhow!("Vector index must be an integer")),
         };
 
-        // Get the vector variable (which is now a pointer to the heap-allocated vector)
         let (vector_type, vector_var_ptr) = self
             .variables
             .get(vector_name)
@@ -39,6 +38,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             .get_field_type_at_index(0)
             .ok_or_else(|| anyhow!("Invalid vector struct type for '{}'", vector_name))?;
 
+        
         // Get the specific element
         let element_ptr = unsafe {
             self.builder.build_gep(

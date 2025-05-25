@@ -130,7 +130,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             (BasicValueEnum::StructValue(struct_value), BasicTypeEnum::PointerType(_)) => {
                 struct_value.into()
             }
-
             // If no supported type cast matches, return an error
             _ => {
                 return Err(anyhow::anyhow!(

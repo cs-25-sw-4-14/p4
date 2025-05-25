@@ -102,6 +102,23 @@ impl<'ctx> CodeGenerator<'ctx> {
             Some(Linkage::External),
         );
 
+        let abort_type = context.void_type().fn_type(&[], false);
+        module.add_function("abort", abort_type, Some(Linkage::External));
+
+        let void_ptr_type = context.ptr_type(AddressSpace::default());
+
+        module.add_function(
+            "custom_malloc",
+            malloc_type,
+            None,
+        );
+
+        module.add_function(
+            "truncate_vector_data",
+            void_ptr_type.fn_type(&[void_ptr_type.into()], false),
+            None,
+        );
+
         CodeGenerator {
             context,
             module,

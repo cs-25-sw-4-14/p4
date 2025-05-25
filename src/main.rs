@@ -113,6 +113,8 @@ fn main() -> Result<()> {
         .unwrap();
 
     Command::new("clang")
+        .arg("truncate_vector_data.o")
+        .arg("custom_malloc.o")
         .arg(&object_file)
         .arg("-o")
         .arg(&output_file)
