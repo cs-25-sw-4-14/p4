@@ -40,9 +40,7 @@ impl CodeGenerator<'_> {
             BasicValueEnum::FloatValue(float_val) => {
                 match self.get_float_bit_width(float_val.get_type()) {
                     Ok(16) => {
-                        let fmt_str = self
-                            .builder
-                            .build_global_string_ptr("%.10f", "fmt_f16")?;
+                        let fmt_str = self.builder.build_global_string_ptr("%.10f", "fmt_f16")?;
                         let extended = self.builder.build_float_ext(
                             float_val,
                             self.context.f32_type(),
@@ -51,15 +49,11 @@ impl CodeGenerator<'_> {
                         vec![fmt_str.as_pointer_value().into(), extended.unwrap().into()]
                     }
                     Ok(32) => {
-                        let fmt_str = self
-                            .builder
-                            .build_global_string_ptr("%.10f", "fmt_f32")?;
+                        let fmt_str = self.builder.build_global_string_ptr("%.10f", "fmt_f32")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Ok(64) => {
-                        let fmt_str = self
-                            .builder
-                            .build_global_string_ptr("%.10lf", "fmt_f64")?;
+                        let fmt_str = self.builder.build_global_string_ptr("%.10lf", "fmt_f64")?;
                         vec![fmt_str.as_pointer_value().into(), float_val.into()]
                     }
                     Err(e) => {

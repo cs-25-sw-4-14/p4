@@ -170,17 +170,19 @@ impl<'ctx> CodeGenerator<'ctx> {
             "should_shift",
         )?;
 
-        let dest_idx = self.builder.build_select(
-            should_shift,
-            self.builder.build_int_sub(
+        let dest_idx = self
+            .builder
+            .build_select(
+                should_shift,
+                self.builder.build_int_sub(
+                    counter_val,
+                    self.context.i64_type().const_int(1, false),
+                    "shifted_idx",
+                )?,
                 counter_val,
-                self.context.i64_type().const_int(1, false),
-                "shifted_idx",
-            )?,
-            counter_val,
-            "dest_idx",
-        )?
-        .into_int_value();
+                "dest_idx",
+            )?
+            .into_int_value();
 
         let dest_ptr = unsafe {
             self.builder
