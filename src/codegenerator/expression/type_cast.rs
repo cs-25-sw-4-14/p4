@@ -126,6 +126,10 @@ impl<'ctx> CodeGenerator<'ctx> {
                     return Err(anyhow::anyhow!("Cannot cast to non-array type"));
                 }
             }
+            // Char array to string casting
+            (BasicValueEnum::StructValue(struct_value), BasicTypeEnum::PointerType(_)) => {
+                struct_value.into()
+            }
 
             // If no supported type cast matches, return an error
             _ => {

@@ -26,7 +26,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                 let total_size = 8 + string_len + 1; // length field + string data + null terminator
 
                 // Allocate memory
-                let raw_ptr = self
+                let string_ptr = self
                     .builder
                     .build_call(
                         self.module.get_function("malloc").unwrap(),
@@ -38,39 +38,20 @@ impl<'ctx> CodeGenerator<'ctx> {
                     .unwrap()
                     .into_pointer_value();
 
-                // Define the string struct type
-                let string_struct_type = self.context.struct_type(
-                    &[
-                        self.context.i64_type().into(),              // length
-                        self.context.i8_type().array_type(0).into(), // flexible array for data
-                    ],
-                    false,
-                );
-
-                // Cast raw pointer to struct pointer
-                let string_struct_ptr = self.builder.build_pointer_cast(
-                    raw_ptr,
-                    self.context.ptr_type(AddressSpace::default()),
-                    "string_struct_ptr",
-                )?;
-
                 // Store the length in the first field
-                let length_ptr = self.builder.build_struct_gep(
-                    string_struct_type,
-                    string_struct_ptr,
-                    0,
-                    "length_ptr",
-                )?;
                 let length_value = self.context.i64_type().const_int(string_len, false);
-                self.builder.build_store(length_ptr, length_value)?;
+
+                self.builder.build_store(string_ptr, length_value)?;
 
                 // Get pointer to the data field (flexible array)
-                let data_ptr = self.builder.build_struct_gep(
-                    string_struct_type,
-                    string_struct_ptr,
-                    1,
-                    "data_ptr",
-                )?;
+                let data_ptr = unsafe {
+                    self.builder.build_gep(
+                        self.context.i8_type(),
+                        string_ptr,
+                        &[self.context.i64_type().const_int(8, false)],
+                        "data_ptr",
+                    )?
+                };
 
                 // Copy the string data
                 let string_global = self.builder.build_global_string_ptr(value, "temp_string")?;
@@ -90,7 +71,7 @@ impl<'ctx> CodeGenerator<'ctx> {
                     "memcpy_string",
                 )?;
 
-                string_struct_ptr.into()
+                string_ptr.into()
             }
             Literal::Char(value) => {
                 let char_type = self.context.i32_type();

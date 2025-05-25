@@ -1,7 +1,7 @@
 use super::CodeGenerator;
 use crate::ast::VectorLiteral;
 use anyhow::{Result, anyhow};
-use inkwell::{AddressSpace, types::BasicTypeEnum, values::BasicValueEnum};
+use inkwell::{types::BasicTypeEnum, values::BasicValueEnum};
 
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn compile_vector_literal(
