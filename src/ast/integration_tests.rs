@@ -71,7 +71,7 @@ fn comprehensive_integration_test() {
     // Make sure to match exact newlines and spacing produced by your 'debug' function.
     let expected_output = r#"--- Running test_literals ---
 123
-64: 123.45
+123.4500000000
 1
 0
 97
@@ -140,7 +140,7 @@ Hello, Lossy User
 100
 300
 --- Running test_type_casting ---
-64: 10.00
+10.0000000000
 15
 -1
 --- All integration tests complete ---

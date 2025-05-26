@@ -3,7 +3,7 @@ use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::{Linkage, Module};
 use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{BasicValueEnum, IntValue, PointerValue};
+use inkwell::values::{BasicValueEnum, PointerValue};
 
 use anyhow::{Result, anyhow};
 use std::collections::HashMap;
@@ -13,6 +13,7 @@ use crate::ast::{Program, StructDef, TopLevelDefinition, Type};
 pub mod controlflow;
 pub mod expression;
 pub mod function;
+pub mod heaptypes;
 pub mod statement;
 pub mod structs;
 
@@ -26,7 +27,6 @@ pub struct CodeGenerator<'ctx> {
     pub break_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub continue_target_stack: Vec<inkwell::basic_block::BasicBlock<'ctx>>,
     pub struct_definitions: HashMap<String, StructDef>,
-    pub heap_sizes: HashMap<PointerValue<'ctx>, IntValue<'ctx>>,
 }
 
 impl<'ctx> CodeGenerator<'ctx> {
@@ -35,6 +35,7 @@ impl<'ctx> CodeGenerator<'ctx> {
 
         let i32_type = context.i32_type();
         let i64_type = context.i64_type();
+        let bool_type = context.bool_type();
         let i8_ptr_type = context.ptr_type(AddressSpace::default());
         let file_ptr_type = i8_ptr_type;
 
@@ -86,6 +87,21 @@ impl<'ctx> CodeGenerator<'ctx> {
         let free_type = context.void_type().fn_type(&[i8_ptr_type.into()], false);
         module.add_function("free", free_type, Some(Linkage::External));
 
+        let memcpy_type = context.void_type().fn_type(
+            &[
+                i8_ptr_type.into(), // destination
+                i8_ptr_type.into(), // source
+                i64_type.into(),    // size
+                bool_type.into(),
+            ],
+            false,
+        );
+        module.add_function(
+            "llvm.memcpy.p0.p0.i64",
+            memcpy_type,
+            Some(Linkage::External),
+        );
+
         CodeGenerator {
             context,
             module,
@@ -96,7 +112,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             break_target_stack: Vec::new(),
             continue_target_stack: Vec::new(),
             struct_definitions: HashMap::new(),
-            heap_sizes: HashMap::new(),
         }
     }
 
@@ -144,50 +159,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         Ok(())
     }
 
-    // Helper function to get an LLVM basic type from your AST Type (simple version, doesn't handle all types)
-    pub fn get_basic_type(&self, ast_type: &Type) -> BasicTypeEnum<'ctx> {
-        match ast_type {
-            Type::Bool => self.context.bool_type().into(),
-            Type::U8 => self.context.i8_type().into(),
-            Type::U16 => self.context.i16_type().into(),
-            Type::U32 => self.context.i32_type().into(),
-            Type::U64 => self.context.i64_type().into(),
-            Type::I8 => self.context.i8_type().into(),
-            Type::I16 => self.context.i16_type().into(),
-            Type::I32 => self.context.i32_type().into(),
-            Type::I64 => self.context.i64_type().into(),
-            Type::F16 => self.context.f16_type().into(),
-            Type::F32 => self.context.f32_type().into(),
-            Type::F64 => self.context.f64_type().into(),
-            Type::Char => self.context.i8_type().into(),
-            // Type::String => self
-            //     .context
-            //     .i8_type()
-            //     .ptr_type(AddressSpace::Generic)
-            //     .into(), // Pointer to i8 (C-style string)
-            // Type::Struct(name) => {
-            //     // Ensure struct type exists
-            //     let struct_type = self
-            //         .module
-            //         .get_struct_type(name)
-            //         .expect(&format!("Struct type '{}' not found", name));
-            //     struct_type.into()
-            // }
-            Type::Array(element_type, size) => {
-                let llvm_element_type = self.get_basic_type(element_type);
-                // Handle array size overflow
-                if *size > u32::MAX as u64 {
-                    panic!(
-                        "Array size {} exceeds maximum supported size {}",
-                        size,
-                        u32::MAX
-                    );
-                }
-                llvm_element_type.array_type(*size as u32).into()
-            }
-            _ => panic!("Unsupported type: {:?}", ast_type), // Catch-all for unsupported types
-        }
-    }
     // Comprehensive helper method to get an LLVM type from an AST type, with error handling
     pub fn get_llvm_type(&self, ast_type: &Type) -> Result<BasicTypeEnum<'ctx>> {
         match ast_type {
