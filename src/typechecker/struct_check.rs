@@ -21,3 +21,12 @@ impl Typechecker<'_> {
                     struct_def.name
                 ));
             }
+
+            match field.field_type {
+                Type::Reference(_, _) => bail!("Struct fields cannot be references"),
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+}
