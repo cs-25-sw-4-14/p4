@@ -18,20 +18,6 @@ impl Typechecker<'_> {
         match &declaration.var_type {
             Type::Vector(var_type, _) => {
                 if let Type::Vector(expr_type, len) = value_type {
-                    if let Type::Reference(_, _) = **var_type {
-                        bail!(
-                            "{}: Cannot declare a vector with a reference type",
-                            self.debugger.display(l)
-                        );
-                    }
-
-                    if let Type::Reference(_, _) = *expr_type {
-                        bail!(
-                            "{}: Cannot declare a vector with a reference type",
-                            self.debugger.display(l)
-                        );
-                    }
-
                     let mut new_declaration = declaration.clone();
                     new_declaration.var_type = match new_declaration.var_type {
                         Type::Vector(inner_type, _) => Type::Vector(inner_type, len),
