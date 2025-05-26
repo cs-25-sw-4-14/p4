@@ -6,6 +6,7 @@ pub mod expression_check;
 pub mod function_check;
 pub mod function_table;
 pub mod statement_check;
+pub mod struct_check;
 pub mod struct_table;
 pub mod variable_table;
 
@@ -33,6 +34,8 @@ impl<'a> Typechecker<'a> {
         for def in program.definitions.iter() {
             if let crate::ast::TopLevelDefinition::Function(func_def) = def {
                 self.check_function(func_def)?;
+            } else if let crate::ast::TopLevelDefinition::Struct(struct_def) = def {
+                self.check_struct(struct_def)?;
             }
         }
 

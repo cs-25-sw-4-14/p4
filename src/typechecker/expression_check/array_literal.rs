@@ -8,6 +8,13 @@ impl Typechecker<'_> {
 
         let array_type = self.semantic_check_all_elements_same_type(array_literal)?;
 
+        if let Type::Reference(_, _) = &array_type {
+            return Err(anyhow::anyhow!(
+                "Array elements cannot be references: {:?}",
+                array_type
+            ));
+        }
+
         Ok(Type::Array(
             Box::new(array_type.clone()),
             array_literal.elements.len() as u64,

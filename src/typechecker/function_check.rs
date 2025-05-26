@@ -84,11 +84,14 @@ impl Typechecker<'_> {
         expected_type: &Option<Type>,
     ) -> Result<()> {
         match (expected_type, &ret.value) {
-            // Case 1: Function returns void, return statement should be empty
             (None, Some(_)) => Err(anyhow!("Function has void return type but returns a value")),
-
-            // Case 2: Function returns non-void, return statement should have matching type
             (Some(expected), Some(expr)) => {
+                if matches!(expr, crate::ast::Expression::Reference(_, _)) {
+                    return Err(anyhow!(
+                        "Returning a reference is not allowed from functions"
+                    ));
+                }
+
                 let actual_type = self.check_expression(expr)?;
                 if *expected != actual_type {
                     Err(anyhow!(
@@ -100,14 +103,10 @@ impl Typechecker<'_> {
                     Ok(())
                 }
             }
-
-            // Case 3: Function returns non-void, but return statement is empty
             (Some(expected), None) => Err(anyhow!(
                 "Function has return type {:?} but return statement is empty",
                 expected
             )),
-
-            // Case 4: Function returns void, and return statement is empty (valid)
             (None, None) => Ok(()),
         }
     }
