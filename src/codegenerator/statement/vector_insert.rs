@@ -19,56 +19,46 @@ impl<'ctx> CodeGenerator<'ctx> {
             _ => return Err(anyhow!("Vector index must be an integer")),
         };
 
-        let (vector_type, vector_struct_ptr) = self
+        // Get the vector variable (which stores a pointer to heap-allocated vector)
+        let (vector_type, vector_var_ptr) = self
             .variables
             .get(vector_name)
             .ok_or_else(|| anyhow!("Vector variable '{}' not found", vector_name))?;
 
-        let data_ptr_ptr = self.builder.build_struct_gep(
-            *vector_type,
-            *vector_struct_ptr,
-            0,
-            &format!("{}_data_ptr", vector_name),
-        )?;
-
-        let old_heap_ptr = self
+        // Load the current vector pointer (points to [size][data...])
+        let old_vector_ptr = self
             .builder
             .build_load(
                 self.context.ptr_type(AddressSpace::default()),
-                data_ptr_ptr,
-                &format!("{}_old_heap_ptr", vector_name),
+                *vector_var_ptr,
+                &format!("{}_old_vector_ptr", vector_name),
             )?
             .into_pointer_value();
 
-        let size_ptr = self.builder.build_struct_gep(
-            *vector_type,
-            *vector_struct_ptr,
-            1,
-            &format!("{}_size_ptr", vector_name),
-        )?;
-
+        // Get current size from the header
         let current_size = self
             .builder
             .build_load(
                 self.context.i64_type(),
-                size_ptr,
+                old_vector_ptr,
                 &format!("{}_current_size", vector_name),
             )?
             .into_int_value();
 
-        // new size = +1
+        // New size = current + 1
         let new_size = self.builder.build_int_add(
             current_size,
             self.context.i64_type().const_int(1, false),
             "new_size",
         )?;
 
+        // Extract element type from stored struct type info
         let element_type = vector_type
             .into_struct_type()
             .get_field_type_at_index(0)
-            .unwrap();
+            .ok_or_else(|| anyhow!("Invalid vector struct type for '{}'", vector_name))?;
 
-        // Calculate the element size
+        // Calculate element size in bytes
         let element_size_bytes = (match element_type {
             BasicTypeEnum::FloatType(ft) => self.get_float_bit_width(ft)?,
             BasicTypeEnum::IntType(it) => it.get_bit_width(),
@@ -76,28 +66,43 @@ impl<'ctx> CodeGenerator<'ctx> {
         } + 7)
             / 8;
 
-        // multiply new_size by element_size
-        let total_size = self.builder.build_int_mul(
+        // Calculate total size: 8 bytes for header + (new_size * element_size)
+        let data_size = self.builder.build_int_mul(
             self.context
                 .i64_type()
                 .const_int(element_size_bytes as u64, false),
             new_size,
+            "data_size",
+        )?;
+
+        let total_size = self.builder.build_int_add(
+            data_size,
+            self.context.i64_type().const_int(8, false), // header size
             "total_size",
         )?;
 
+        // Allocate new vector with header
         let malloc_fn = self
             .module
             .get_function("malloc")
             .ok_or_else(|| anyhow!("'malloc' function not declared in module"))?;
 
-        let new_heap_ptr = self
+        let new_vector_ptr = self
             .builder
-            .build_call(malloc_fn, &[total_size.into()], "malloc")?
+            .build_call(malloc_fn, &[total_size.into()], "malloc_new_vector")?
             .try_as_basic_value()
             .left()
             .unwrap()
             .into_pointer_value();
 
+        // Store new size in header
+        self.builder.build_store(new_vector_ptr, new_size)?;
+
+        // Get pointers to old and new data sections
+        let old_data_ptr = self.get_vector_data_ptr_from_vector(&old_vector_ptr)?;
+        let new_data_ptr = self.get_vector_data_ptr_from_vector(&new_vector_ptr)?;
+
+        // Copy elements with insertion logic
         let current_fn = match self.current_function {
             Some(function) => function,
             None => return Err(anyhow!("No active function context for vector insert")),
@@ -116,7 +121,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         self.builder.build_unconditional_branch(copy_start_block)?;
         self.builder.position_at_end(copy_start_block);
 
-        // loop condition
+        // Loop condition: while counter < current_size
         let counter_val = self
             .builder
             .build_load(self.context.i64_type(), counter_ptr, "i")?
@@ -132,7 +137,7 @@ impl<'ctx> CodeGenerator<'ctx> {
             .build_conditional_branch(continue_copy, copy_body_block, copy_end_block)?;
         self.builder.position_at_end(copy_body_block);
 
-        // handle shifting of elements based on the insertion index
+        // Determine if we need to shift this element
         let should_shift = self.builder.build_int_compare(
             inkwell::IntPredicate::UGE,
             counter_val,
@@ -147,12 +152,11 @@ impl<'ctx> CodeGenerator<'ctx> {
         self.builder
             .build_conditional_branch(should_shift, shift_then_block, shift_else_block)?;
 
-        // For elements at or after the insertion point, shift them one position forward
-        // This might not be the best way to do this
+        // Elements at or after insertion point: shift forward by 1
         self.builder.position_at_end(shift_then_block);
         let src_ptr = unsafe {
             self.builder
-                .build_gep(element_type, old_heap_ptr, &[counter_val], "shift_src")?
+                .build_gep(element_type, old_data_ptr, &[counter_val], "shift_src")?
         };
         let val = self
             .builder
@@ -165,26 +169,27 @@ impl<'ctx> CodeGenerator<'ctx> {
         )?;
         let dest_ptr = unsafe {
             self.builder
-                .build_gep(element_type, new_heap_ptr, &[dest_idx], "shift_dest")?
+                .build_gep(element_type, new_data_ptr, &[dest_idx], "shift_dest")?
         };
         self.builder.build_store(dest_ptr, val)?;
         self.builder.build_unconditional_branch(shift_cont_block)?;
 
-        // for elements before the insertion point
+        // Elements before insertion point: copy directly
         self.builder.position_at_end(shift_else_block);
         let src_ptr = unsafe {
             self.builder
-                .build_gep(element_type, old_heap_ptr, &[counter_val], "copy_src")?
+                .build_gep(element_type, old_data_ptr, &[counter_val], "copy_src")?
         };
         let val = self.builder.build_load(element_type, src_ptr, "copy_val")?;
 
         let dest_ptr = unsafe {
             self.builder
-                .build_gep(element_type, new_heap_ptr, &[counter_val], "copy_dest")?
+                .build_gep(element_type, new_data_ptr, &[counter_val], "copy_dest")?
         };
         self.builder.build_store(dest_ptr, val)?;
         self.builder.build_unconditional_branch(shift_cont_block)?;
 
+        // Continue loop
         self.builder.position_at_end(shift_cont_block);
         let next_counter = self.builder.build_int_add(
             counter_val,
@@ -194,30 +199,25 @@ impl<'ctx> CodeGenerator<'ctx> {
         self.builder.build_store(counter_ptr, next_counter)?;
         self.builder.build_unconditional_branch(copy_start_block)?;
 
+        // After loop: insert the new value
         self.builder.position_at_end(copy_end_block);
         let insert_ptr = unsafe {
             self.builder
-                .build_gep(element_type, new_heap_ptr, &[index_value], "insert_ptr")?
+                .build_gep(element_type, new_data_ptr, &[index_value], "insert_ptr")?
         };
         self.builder.build_store(insert_ptr, value_expr)?;
 
-        // free the old heap pointer
+        // Free the old vector
         let free_fn = self
             .module
             .get_function("free")
             .ok_or_else(|| anyhow!("'free' function not declared in module"))?;
 
         self.builder
-            .build_call(free_fn, &[old_heap_ptr.into()], "free_old_heap")?;
+            .build_call(free_fn, &[old_vector_ptr.into()], "free_old_vector")?;
 
-        // Update the vector data pointer
-        self.builder.build_store(data_ptr_ptr, new_heap_ptr)?;
-
-        // Update the size
-        self.builder.build_store(size_ptr, new_size)?;
-
-        // Update the size in our tracking map as well
-        self.heap_sizes.insert(*vector_struct_ptr, new_size);
+        // Update the variable to point to the new vector
+        self.builder.build_store(*vector_var_ptr, new_vector_ptr)?;
 
         Ok(())
     }
