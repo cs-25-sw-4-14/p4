@@ -7,6 +7,13 @@ impl Typechecker<'_> {
         let vector_type =
             self.semantic_check_all_elements_same_type_vector_literal(vector_literal)?;
 
+        if let Type::Reference(_, _) = &vector_type {
+            return Err(anyhow::anyhow!(
+                "Array elements cannot be references: {:?}",
+                vector_type
+            ));
+        }
+
         Ok(vector_type)
     }
 

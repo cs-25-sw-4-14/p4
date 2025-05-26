@@ -3,6 +3,7 @@ use crate::ast::VariableDeclaration;
 use crate::typechecker::Typechecker;
 use crate::typechecker::variable_table::Inner;
 use anyhow::Result;
+use anyhow::bail;
 
 impl Typechecker<'_> {
     pub fn check_variable_declaration(
@@ -15,8 +16,22 @@ impl Typechecker<'_> {
         let value_type = self.check_expression(&declaration.value)?;
 
         match &declaration.var_type {
-            Type::Vector(_, _) => {
-                if let Type::Vector(_, len) = value_type {
+            Type::Vector(var_type, _) => {
+                if let Type::Vector(expr_type, len) = value_type {
+                    if let Type::Reference(_, _) = **var_type {
+                        bail!(
+                            "{}: Cannot declare a vector with a reference type",
+                            self.debugger.display(l)
+                        );
+                    }
+
+                    if let Type::Reference(_, _) = *expr_type {
+                        bail!(
+                            "{}: Cannot declare a vector with a reference type",
+                            self.debugger.display(l)
+                        );
+                    }
+
                     let mut new_declaration = declaration.clone();
                     new_declaration.var_type = match new_declaration.var_type {
                         Type::Vector(inner_type, _) => Type::Vector(inner_type, len),
