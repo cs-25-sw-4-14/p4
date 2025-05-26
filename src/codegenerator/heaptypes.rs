@@ -3,32 +3,6 @@ use inkwell::{AddressSpace, values::PointerValue};
 
 use super::CodeGenerator;
 
-pub struct HeapString {
-    pub length: i64,
-    pub string: String,
-}
-
-pub struct HeapVector<T> {
-    pub size: i64,
-    pub data: [T; 0],
-}
-
-impl HeapString {
-    pub fn new(string: &String) -> Self {
-        let length = string.len() as i64;
-        HeapString {
-            length,
-            string: string.clone(),
-        }
-    }
-}
-
-impl HeapVector<i64> {
-    pub fn new(size: i64) -> Self {
-        HeapVector { size, data: [] }
-    }
-}
-
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_string_length(
         &self,
@@ -110,7 +84,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             )?
         };
 
-        // Cast back to the appropriate element type pointer
         Ok(data_ptr)
     }
 }
