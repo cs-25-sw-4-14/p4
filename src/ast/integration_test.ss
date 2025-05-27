@@ -182,7 +182,7 @@ void test_arrays() {
     debug(my_array[0]);
     debug("\n");
 
-    arr bool [5] default_bool_array = [5;
+    arr bool [5] default_bool_array = [5; true];
     debug(default_bool_array[0]);
     debug("\n");
     debug(default_bool_array[4]);
