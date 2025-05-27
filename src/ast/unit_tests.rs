@@ -99,38 +99,6 @@ fn test_struct_definition() {
     );
 }
 
-// #[test]
-// fn test_variable_assignment() {
-//     assert_eq!(
-//         Statement::Assignment(
-//             Assignment {
-//                 target: Expression::Variable("test".to_string()),
-//                 value: Expression::Literal(Literal::Int(32)),
-//             },
-//             0
-//         ),
-//         StatementParser::new()
-//             .parse(Lexer::new("test = 32;"))
-//             .unwrap()
-//     );
-//
-//     assert_eq!(
-//         Statement::Assignment(
-//             Assignment {
-//                 target: Expression::StructFieldAccess(StructFieldAccess {
-//                     struct_name: "test".to_string(),
-//                     field_name: "field".to_string(),
-//                 }),
-//                 value: Expression::Literal(Literal::Int(32)),
-//             },
-//             0
-//         ),
-//         StatementParser::new()
-//             .parse(Lexer::new("test.field = 32;"))
-//             .unwrap()
-//     );
-// }
-
 #[test]
 fn test_variable_declaration() {
     assert_eq!(
