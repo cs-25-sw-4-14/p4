@@ -2,8 +2,6 @@
 void test_literals() {
     debug(123); // IntLiteral
     debug("\n");
-    debug(123); // IntLiteral
-    debug("\n");
     debug(123.45); // FloatLiteral
     debug("\n");
     debug(true); // BoolLiteral
