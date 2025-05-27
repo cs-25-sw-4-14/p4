@@ -59,15 +59,15 @@ Here's an example of a simple Lossy program:
 
 ```lossy
 void main() {
-    debug("Hello, world!");
+    debug("Hello, world!\n");
 }
 ```
 
 To compile and run it:
 
 ```bash
-lossy hello.ss
-./hello.out
+./target/release/lossy hello.ss
+./lossy_test.out
 ```
 
 ---
