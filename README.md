@@ -66,7 +66,6 @@ void main() {
 To compile and run it:
 
 ```bash
-# Example compilation steps
 lossy hello.ss
 ./hello.out
 ```
