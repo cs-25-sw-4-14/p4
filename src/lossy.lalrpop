@@ -68,7 +68,6 @@ extern {
     "void" => Token::KeywordVoid,
     "break" => Token::KeywordBreak,
     "continue" => Token::KeywordContinue,
-    "_" => Token::Throwaway,
     "NULL" => Token::KeywordNull,
     Identifier => Token::Identifier(<String>),
     IntLiteral => Token::IntLiteral(<u64>),
@@ -443,7 +442,6 @@ pub VectorAccess: VectorAccess = {
     }
 };
 
-// Type - all possible data types in the language
 pub Type: Type = {
     "u8" => Type::U8,
     "u16" => Type::U16,

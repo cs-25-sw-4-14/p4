@@ -7,7 +7,7 @@ use inkwell::targets::{FileType, InitializationConfig, Target, TargetMachine};
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
-use tempfile::Builder; // For creating temporary directories and files
+use tempfile::Builder;
 
 lalrpop_mod!(
     #[allow(clippy::ptr_arg)]
@@ -15,7 +15,6 @@ lalrpop_mod!(
     pub lossy
 );
 
-// Your existing test_parser function (no changes needed for this part)
 #[test]
 fn test_parser() {
     let file = include_str!("integration_test.ss");
@@ -64,11 +63,8 @@ fn test_parser() {
 
 #[test]
 fn comprehensive_integration_test() {
-    // 1. Load the comprehensive source code
     let source_code = include_str!("integration_test.ss");
 
-    // 2. Define the *expected combined output* for all debug statements
-    // Make sure to match exact newlines and spacing produced by your 'debug' function.
     let expected_output = r#"--- Running test_literals ---
 123
 123.4500000000
@@ -146,7 +142,6 @@ Hello, Lossy User
 --- All integration tests complete ---
 "#;
 
-    // --- Compiler Front-End (Lexing, Parsing, Type-Checking) ---
     let debugger = Debugger::new(source_code.to_string());
     let lexer = Lexer::new(source_code);
     let parser = lossy::ProgramParser::new();
@@ -188,7 +183,6 @@ Hello, Lossy User
         .walk(ast.clone())
         .expect("Comprehensive Integration Test: Failed type-checking for source code.");
 
-    // --- Compilation to Executable ---
     let temp_dir = Builder::new()
         .prefix("lossy_test_comprehensive_")
         .tempdir()
@@ -248,12 +242,10 @@ Hello, Lossy User
         );
     }
 
-    // --- Execution ---
     let program_output = Command::new(&executable_file_path)
         .output()
         .expect("Comprehensive Integration Test: Failed to execute compiled program.");
 
-    // --- Assertion ---
     let actual_output = String::from_utf8_lossy(&program_output.stdout);
     assert_eq!(
         actual_output, expected_output,

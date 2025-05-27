@@ -3,32 +3,6 @@ use inkwell::{AddressSpace, values::PointerValue};
 
 use super::CodeGenerator;
 
-pub struct HeapString {
-    pub length: i64,
-    pub string: String,
-}
-
-pub struct HeapVector<T> {
-    pub size: i64,
-    pub data: [T; 0],
-}
-
-impl HeapString {
-    pub fn new(string: &String) -> Self {
-        let length = string.len() as i64;
-        HeapString {
-            length,
-            string: string.clone(),
-        }
-    }
-}
-
-impl HeapVector<i64> {
-    pub fn new(size: i64) -> Self {
-        HeapVector { size, data: [] }
-    }
-}
-
 impl<'ctx> CodeGenerator<'ctx> {
     pub fn get_string_length(
         &self,
@@ -65,13 +39,7 @@ impl<'ctx> CodeGenerator<'ctx> {
         &self,
         string_ptr: inkwell::values::PointerValue<'ctx>,
     ) -> Result<inkwell::values::PointerValue<'ctx>, Error> {
-        let string_struct_type = self.context.struct_type(
-            &[
-                self.context.i64_type().into(),              // length
-                self.context.i8_type().array_type(0).into(), // data
-            ],
-            false,
-        );
+        let string_struct_type = self.get_string_struct_type();
 
         let string_struct_ptr = self.builder.build_pointer_cast(
             string_ptr,
@@ -100,7 +68,6 @@ impl<'ctx> CodeGenerator<'ctx> {
         &self,
         vector_ptr: &PointerValue<'ctx>,
     ) -> Result<inkwell::values::PointerValue<'ctx>, Error> {
-        // Cast to i8* for pointer arithmetic
         let data_ptr = unsafe {
             self.builder.build_gep(
                 self.context.i8_type(),
@@ -110,7 +77,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             )?
         };
 
-        // Cast back to the appropriate element type pointer
         Ok(data_ptr)
     }
 }

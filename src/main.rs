@@ -30,7 +30,7 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    let huttel = include_str!("huttel.txt");
+    let huttel = include_str!("unknown.txt");
     let args = Args::parse();
     let file = std::fs::read_to_string(&args.input).unwrap_or_else(|_| {
         panic!("Failed to read file: {}", &args.input);

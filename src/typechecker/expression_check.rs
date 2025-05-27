@@ -34,7 +34,6 @@ impl Typechecker<'_> {
             Expression::VectorLiteral(vector_literal) => self.check_vector_literal(vector_literal),
             Expression::VectorAccess(vector_access) => self.check_vector_access(vector_access),
             Expression::TypeCast(type_cast) => self.check_type_cast(type_cast),
-            // TODO: Move into seperate module
             Expression::Reference(name, is_mutable) => {
                 if *is_mutable {
                     self.v_table.borrow_mut(name)?;

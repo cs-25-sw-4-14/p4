@@ -41,7 +41,6 @@ impl fmt::Display for LexicalError {
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\n\f]+", skip r"//[^\n\r]*", skip r"/\*([^*]|\*+([^*/]|\*+))*\*+\*/", error = LexicalError)]
 pub enum Token {
-    // variable modifiers
     #[token("mut")]
     KeywordMut,
     #[token("triv")]
@@ -50,7 +49,6 @@ pub enum Token {
     KeywordRefMut,
     #[token("&")]
     KeywordRef,
-    // types
     #[token("arr")]
     TypeArray,
     #[token("Vec")]
@@ -83,12 +81,8 @@ pub enum Token {
     TypeU16,
     #[token("u8")]
     TypeU8,
-
-    // Great big null pointer
     #[token("null")]
     KeywordNull,
-
-    // delimiters and operators
     #[token("(")]
     LParen,
     #[token(")")]
@@ -139,8 +133,6 @@ pub enum Token {
     OperatorNeg,
     #[token("as")]
     OperatorAs,
-
-    // keywords
     #[token("read_file")]
     KeywordRead,
     #[token("write_file")]
@@ -172,10 +164,6 @@ pub enum Token {
     #[token("continue")]
     KeywordContinue,
 
-    // special underscore pattern (higher priority)
-    #[token("_", priority = 0)]
-    Throwaway,
-
     // identifiers
     #[regex("[_a-zA-Z][_0-9a-zA-Z]*", |lex| lex.slice().to_string())]
     Identifier(String),
@@ -199,7 +187,7 @@ pub enum Token {
 
     #[regex(r#""(?:[^"\\]|\\.)*""#, |lex| {
     let s = &lex.slice()[1..lex.slice().len() - 1]; // Strip quotes
-    unescape(s).unwrap_or_else(|| s.to_string())   // Unescape (e.g., \n -> newline)
+    unescape(s).unwrap_or_else(|| s.to_string())   // Unescape \n -> newline
     })]
     StringLiteral(String),
 
