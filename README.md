@@ -58,7 +58,6 @@ cargo build --release
 Here's an example of a simple Lossy program:
 
 ```lossy
-# Your language syntax example
 void main() {
     debug("Hello, world!");
 }
