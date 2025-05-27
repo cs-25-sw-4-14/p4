@@ -59,7 +59,9 @@ Here's an example of a simple Lossy program:
 
 ```lossy
 # Your language syntax example
-debug("Hello, world!")
+void main() {
+    debug("Hello, world!");
+}
 ```
 
 To compile and run it:
