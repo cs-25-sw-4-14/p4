@@ -13,15 +13,6 @@ impl Typechecker<'_> {
         }
 
         for field in &struct_def.fields {
-            // check for identical field names in the same struct
-            if struct_def.fields.iter().any(|f| f.name == field.name) {
-                return Err(anyhow!(
-                    "Duplicate field name '{}' in struct '{}'",
-                    field.name,
-                    struct_def.name
-                ));
-            }
-
             match field.field_type {
                 Type::Reference(_, _) => bail!("Struct fields cannot be references"),
                 _ => {}
