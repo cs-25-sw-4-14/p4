@@ -104,11 +104,6 @@ impl<'ctx> CodeGenerator<'ctx> {
             self.builder.build_store(element_ptr, value)?;
         }
 
-        println!(
-            "Vector literal pointer: {:?}, elements: {}, total size: {}",
-            vector_ptr, nr_elements, total_size
-        );
-
         // Return the pointer to the entire structure (header + data)
         Ok(vector_ptr.into())
     }
