@@ -67,7 +67,7 @@ To compile and run it:
 
 ```bash
 ./target/release/lossy hello.ss
-./lossy_test.out
+./hello.out
 ```
 
 ---
