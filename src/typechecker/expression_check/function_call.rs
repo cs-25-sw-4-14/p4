@@ -5,13 +5,18 @@ use crate::{
 use anyhow::Result;
 
 impl Typechecker<'_> {
+    /// Typechecks a function call expression.
+    /// Ensures the function exists, the argument count matches, and each argument type matches the function parameter type.
+    /// Returns the function's return type if successful.
     pub fn check_function_call(&mut self, function_call: &FunctionCall) -> Result<Type> {
-        // Extract and clone everything needed from f_table before any mutable borrow of `self`
+        // Look up the function definition by name in the function table (f_table).
+        // Clone the function definition to avoid borrow conflicts when checking arguments later.
         let function_def = self
             .f_table
             .get(&function_call.name)
             .ok_or_else(|| anyhow::anyhow!("Function {} is not defined", function_call.name))?;
 
+        // Extract the return type of the function. If the function has no return type, it cannot be used as an expression.
         let return_type = function_def.return_type.clone().ok_or_else(|| {
             anyhow::anyhow!(
                 "Function {} has no return type and is therefore not an expression",
@@ -19,14 +24,16 @@ impl Typechecker<'_> {
             )
         })?;
 
+        // Collect all parameter types in order to compare them with the types of arguments passed in the call.
         let param_types = function_def
             .params
             .iter()
             .map(|param| param.param_type.clone())
             .collect::<Vec<_>>();
 
-        // Drop borrow of function_def here
+        // At this point, the borrow on function_def ends so we can freely use `self` again.
 
+        // Check that the number of arguments matches the number of parameters.
         if param_types.len() != function_call.args.len() {
             return Err(anyhow::anyhow!(
                 "Function {} called with incorrect number of arguments (expected {}, got {})",
@@ -36,20 +43,25 @@ impl Typechecker<'_> {
             ));
         }
 
+        // Check each argument's type against the expected parameter type.
         for (i, arg) in function_call.args.iter().enumerate() {
             let expected_type = &param_types[i];
+            // Recursively check the argument expression to get its type.
             let actual_type = self.check_expression(arg)?;
+
+            // If types don't match, return a descriptive error.
             if expected_type != &actual_type {
                 return Err(anyhow::anyhow!(
                     "Function {} argument {} has incorrect type (expected {:?}, got {:?})",
                     function_call.name,
-                    i + 1,
+                    i + 1, // 1-based argument index for better readability
                     expected_type,
                     actual_type
                 ));
             }
         }
 
+        // If all checks pass, return the function's return type.
         Ok(return_type)
     }
 }
